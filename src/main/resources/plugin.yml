@@ -1,0 +1,4 @@
+name: Wells
+version: '${project.version}'
+main: me.emmetion.wells.Wells
+api-version: 1.19
