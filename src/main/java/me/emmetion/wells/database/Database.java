@@ -1,146 +1,119 @@
 package me.emmetion.wells.database;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.logging.Level;
 
 import me.emmetion.wells.Wells;
-import org.bukkit.entity.Player;
+import me.emmetion.wells.model.Well;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 
+import java.sql.*;
 
-public abstract class Database {
+public class Database {
 
-    Wells plugin;
-    Connection connection;
-    // The name of the table we created back in SQLite class.
-    public String table = "table_name";
-    public int tokens = 0;
-    public Database(Wells instance){
-        plugin = instance;
+    private Connection connection;
+
+    public Connection getConnection() throws SQLException {
+
+        if(connection != null){
+            return connection;
+        }
+
+        //Try to connect to my MySQL database running locally
+        String url = "jdbc:mysql://u33061_WQm36YtTvQ:Ri1lKnBTcXFYVz6w0SBNYEfA@mario.bloom.host:3306/s33061_Wells";
+        String user = "u33061_WQm36YtTvQ";
+        String password = "Ri1lKnBTcXFYVz6w0SBNYEfA";
+
+        Connection connection = DriverManager.getConnection(url, user, password);
+
+        this.connection = connection;
+
+        System.out.println("Connected to database.");
+
+        return connection;
     }
 
-    public abstract Connection getSQLConnection();
+    public void initializeDatabase() throws SQLException {
 
-    public abstract void load();
+        Statement statement = getConnection().createStatement();
 
-    public void initialize(){
-        connection = getSQLConnection();
-        try{
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM " + table + " WHERE player = ?");
-            ResultSet rs = ps.executeQuery();
-            close(ps,rs);
+        //Create the player_stats table
+        String sql = "CREATE TABLE IF NOT EXISTS wells (townname varchar(36) primary key, level int, xcor int, ycor int, zcor int, worldname varchar(36))";
 
-        } catch (SQLException ex) {
-            plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection", ex);
-        }
+        statement.execute(sql);
+        statement.close();
     }
 
-    // These are the methods you can use to get things out of your database. You of course can make new ones to return different things in the database.
-    // This returns the number of people the player killed.
-    public Integer getTokens(String string) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getSQLConnection();
-            ps = conn.prepareStatement("SELECT * FROM " + table + " WHERE player = '"+string+"';");
+    public Well findWellByTownName(String townname) throws SQLException {
 
-            rs = ps.executeQuery();
-            while(rs.next()){
-                if(rs.getString("player").equalsIgnoreCase(string.toLowerCase())){ // Tell database to search for the player you sent into the method. e.g getTokens(sam) It will look for sam.
-                    return rs.getInt("kills"); // Return the players ammount of kills. If you wanted to get total (just a random number for an example for you guys) You would change this to total!
-                }
-            }
-        } catch (SQLException ex) {
-            plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), ex);
-        } finally {
-            try {
-                if (ps != null)
-                    ps.close();
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException ex) {
-                plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionClose(), ex);
-            }
-        }
-        return 0;
-    }
-    // Exact same method here, Except as mentioned above i am looking for total!
-    public Integer getTotal(String string) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getSQLConnection();
-            ps = conn.prepareStatement("SELECT * FROM " + table + " WHERE player = '"+string+"';");
+        PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM wells WHERE townname = ?");
+        statement.setString(1, townname);
 
-            rs = ps.executeQuery();
-            while(rs.next()){
-                if(rs.getString("player").equalsIgnoreCase(string.toLowerCase())){
-                    return rs.getInt("total");
-                }
-            }
-        } catch (SQLException ex) {
-            plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), ex);
-        } finally {
-            try {
-                if (ps != null)
-                    ps.close();
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException ex) {
-                plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionClose(), ex);
-            }
+        ResultSet resultSet = statement.executeQuery();
+
+
+
+        if(resultSet.next()){
+
+            Well well = new Well(
+                    resultSet.getString("townname"),
+                    new Location(
+                            Bukkit.getWorld("world"),
+                            resultSet.getInt("xcor"),
+                            resultSet.getInt("ycor"),
+                            resultSet.getInt("zcor")
+                    ),
+                    resultSet.getInt("level")
+            );
+
+            statement.close();
+            return well;
         }
-        return 0;
+        statement.close();
+        return null;
     }
 
-    // Now we need methods to save things to the database
-    public void setTokens(Player player, Integer tokens, Integer total) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getSQLConnection();
-            ps = conn.prepareStatement("REPLACE INTO " + table + " (player,kills,total) VALUES(?,?,?)"); // IMPORTANT. In SQLite class, We made 3 colums. player, Kills, Total.
-            ps.setString(1, player.getName().toLowerCase());                                             // YOU MUST put these into this line!! And depending on how many
-            // colums you put (say you made 5) All 5 need to be in the brackets
-            // Seperated with comma's (,) AND there needs to be the same amount of
-            // question marks in the VALUES brackets. Right now i only have 3 colums
-            // So VALUES (?,?,?) If you had 5 colums VALUES(?,?,?,?,?)
+    public void createWell(Well well) throws SQLException {
 
-            ps.setInt(2, tokens); // This sets the value in the database. The colums go in order. Player is ID 1, kills is ID 2, Total would be 3 and so on. you can use
-            // setInt, setString and so on. tokens and total are just variables sent in, You can manually send values in as well. p.setInt(2, 10) <-
-            // This would set the players kills instantly to 10. Sorry about the variable names, It sets their kills to 10 i just have the variable called
-            // Tokens from another plugin :/
-            ps.setInt(3, total);
-            ps.executeUpdate();
-            return;
-        } catch (SQLException ex) {
-            plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), ex);
-        } finally {
-            try {
-                if (ps != null)
-                    ps.close();
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException ex) {
-                plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionClose(), ex);
-            }
-        }
-        return;
+        PreparedStatement statement = getConnection()
+                .prepareStatement("INSERT INTO wells(townname, levels, xcor, ycor, zcor, worldname) VALUES (?, ?, ?, ?, ?, ?)");
+        statement.setString(1, well.getTownName());
+        statement.setInt(2, well.getLevel());
+        statement.setInt(3, well.getPosition().getBlockX());
+        statement.setInt(4, well.getPosition().getBlockY());
+        statement.setInt(5, well.getPosition().getBlockZ());
+        statement.setString(6, well.getPosition().getWorld().getName());
+
+        statement.executeUpdate();
+
+        statement.close();
+
     }
 
+    public void updateWell(Well well) throws SQLException {
 
-    public void close(PreparedStatement ps,ResultSet rs){
-        try {
-            if (ps != null)
-                ps.close();
-            if (rs != null)
-                rs.close();
-        } catch (SQLException ex) {
-            Error.close(plugin, ex);
-        }
+        PreparedStatement statement = getConnection().prepareStatement("UPDATE wells SET townname = ?, level = ?, xcor = ?, ycor = ?, zcor = ?, worldname = ? WHERE townname = ?");
+
+        statement.setString(1, well.getTownName());
+        statement.setInt(2, well.getLevel());
+        statement.setInt(3, well.getPosition().getBlockX());
+        statement.setInt(4, well.getPosition().getBlockY());
+        statement.setInt(5, well.getPosition().getBlockZ());
+        statement.setString(6, well.getPosition().getWorld().getName());
+
+        statement.executeUpdate();
+
+        statement.close();
+
+    }
+
+    public void deleteWell(Well well) throws SQLException {
+
+        PreparedStatement statement = getConnection().prepareStatement("DELETE FROM wells WHERE townname = ?");
+        statement.setString(1, well.getTownName());
+
+        statement.executeUpdate();
+
+        statement.close();
+
     }
 
 }
