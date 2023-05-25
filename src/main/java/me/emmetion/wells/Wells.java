@@ -1,5 +1,6 @@
 package me.emmetion.wells;
 
+import com.palmergames.bukkit.towny.TownyAPI;
 import me.emmetion.wells.database.Database;
 import me.emmetion.wells.model.Well;
 import org.bukkit.Bukkit;
@@ -23,6 +24,13 @@ public final class Wells extends JavaPlugin {
         Logger logger = Logger.getLogger("Wells");
         logger.log(Level.INFO, "Plugin starting...");
 
+
+        TownyAPI instance = TownyAPI.getInstance();
+        if (instance == null) {
+            System.out.println("Disabling because townyapi was not found.");
+            this.setEnabled(false);
+        }
+        System.out.println("townyapi was found... continuing...");
 
         this.database = new Database();
 

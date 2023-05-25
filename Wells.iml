@@ -65,5 +65,6 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.ow2.asm:asm-commons:9.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.ow2.asm:asm-tree:9.4" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.h2database:h2:2.1.214" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.palmergames.bukkit.towny:towny:0.99.0.0" level="project" />
   </component>
 </module>
