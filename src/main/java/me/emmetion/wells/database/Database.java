@@ -74,7 +74,7 @@ public class Database {
     public void createWell(Well well) throws SQLException {
 
         PreparedStatement statement = getConnection()
-                .prepareStatement("INSERT INTO wells(townname, levels, xcor, ycor, zcor, worldname) VALUES (?, ?, ?, ?, ?, ?)");
+                .prepareStatement("INSERT INTO wells(townname, level, xcor, ycor, zcor, worldname) VALUES (?, ?, ?, ?, ?, ?)");
         statement.setString(1, well.getTownName());
         statement.setInt(2, well.getLevel());
         statement.setInt(3, well.getPosition().getBlockX());
@@ -82,7 +82,11 @@ public class Database {
         statement.setInt(5, well.getPosition().getBlockZ());
         statement.setString(6, well.getPosition().getWorld().getName());
 
-        statement.executeUpdate();
+        try {
+            statement.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException e) {
+            System.out.println("Duplicate entry for well! Ignored.");
+        }
 
         statement.close();
 

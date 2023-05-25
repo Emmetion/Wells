@@ -42,4 +42,12 @@ public class Well {
         return this.level;
     }
 
+    @Override
+    public String toString() {
+        return "Well{" +
+                "townName='" + townName + '\'' +
+                ", position=" + position +
+                ", level=" + level +
+                '}';
+    }
 }
