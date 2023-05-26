@@ -26,7 +26,7 @@ public class WellCommand implements CommandExecutor {
             sender.sendMessage("You must be a Player to use this command!");
             return true;
         }
-        if (args.length < 2) {
+        if (args.length < 1) {
             sender.sendMessage("Too few arguments! Syntax: /wells <option>");
             return true;
         }
@@ -34,14 +34,19 @@ public class WellCommand implements CommandExecutor {
         Player player = (Player) sender;
         Town town = TownyAPI.getInstance().getTown(player);
 
-        String arg1 = args[1];
+        String arg1 = args[0];
         if (arg1.equals("delete")) {
             if (town == null) {
                 player.sendMessage(ChatColor.RED + "You are not part of a town!");
                 return true;
             }
             Well well = this.manager.getWellByTownName(town.getName());
+            if (well == null) {
+                player.sendMessage("No well was found in your town!");
+                return true;
+            }
             this.manager.deleteWell(well);
+            player.sendMessage(ChatColor.GREEN + "Deleted well!");
         } else if (arg1.equals("create")) {
             this.manager.createWell(player, player.getLocation().getBlock());
         } else if (arg1.equals("print")) {
@@ -51,6 +56,16 @@ public class WellCommand implements CommandExecutor {
             }
         } else if (arg1.equals("save")) {
             this.manager.saveAllWells();
+            player.sendMessage("Saved wells.");
+        } else if (arg1.equals("increment")) {
+            if (args.length < 2) {
+                player.sendMessage("Too few arguments!");
+                return true;
+            }
+            String townname = args[1];
+            Well wellByTownName = manager.getWellByTownName(townname);
+            wellByTownName.incrementLevel();
+            player.sendMessage("Incremented level of " + townname + " to " + wellByTownName.getLevel());
         }
 
 

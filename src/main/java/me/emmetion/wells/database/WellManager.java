@@ -2,8 +2,14 @@ package me.emmetion.wells.database;
 
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
+import com.palmergames.bukkit.towny.object.TownyPermission;
+import com.palmergames.bukkit.towny.object.WorldCoord;
+import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import me.emmetion.wells.model.Well;
+import me.emmetion.wells.util.Utilities;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -31,7 +37,7 @@ public class WellManager {
     private HashSet<Location> wellCache = new HashSet<>();
 
     /**
-     * Contains the trur
+     * Used in isConnected(), returns whether the SQL Server was successfully connected and parsed.
      */
     private boolean connected;
 
@@ -63,7 +69,55 @@ public class WellManager {
     }
 
     // TODO: Implement pseudocode
-    public void createWell(Player wellOwner, Block wellPosition) {
+    public boolean createWell(Player townMember, Block wellPosition) {
+        Town town = TownyAPI.getInstance().getTown(townMember.getLocation());
+        if (town != null && town.hasResident(townMember)) {
+            boolean bBuild = PlayerCacheUtil.getCachePermission(townMember, wellPosition.getLocation(), wellPosition.getType(), TownyPermission.ActionType.BUILD);
+            townMember.sendMessage(ChatColor.GREEN + "bBuild = " + bBuild);
+            if (!bBuild)
+                return false;
+            if (wellExistsByTownName(town.getName()))
+                return false;
+            // Check for water blocks.
+            final int radius = 1; // radius for blocks around. will use better function for finding well predicates down the line.
+            Collection<Block> blocks = Utilities.getBlocksAround(wellPosition.getLocation(), radius);
+            townMember.sendMessage("blocks in radius: " + blocks.size());
+            long count = blocks.stream().filter(block -> block.getType().equals(Material.WATER)).count();
+            townMember.sendMessage("WaterBlocks found in radius (" + radius + "): " + count);
+
+            if (count > 3) {
+                townMember.sendMessage("Count > 3");
+                // Create a new well object, then it will be saved in to database.
+                Well newWell = new Well(
+                        town.getName(),
+                        new Location(
+                            townMember.getWorld(),
+                            wellPosition.getX(),
+                            wellPosition.getY(),
+                            wellPosition.getZ()
+                        ),
+                        0
+                );
+                try {
+                    this.wellCache.add(newWell.getPosition());
+                    this.wellHashMap.put(newWell.getTownName(), newWell);
+
+                    this.database.createWell(newWell); // puts it into mysql server.
+                    this.saveAllWells(); // saves all wells.
+                } catch (SQLException e) {
+                    townMember.sendMessage("Failed to create new well because of SQLException, please check console.");
+                    e.printStackTrace();
+                }
+
+                this.wellHashMap.put(newWell.getTownName(), newWell);
+                townMember.sendMessage(ChatColor.GREEN + "Successfully created your town well!");
+            }
+            //Execute your code here
+        } else {
+            Player player = townMember;
+            player.sendMessage(ChatColor.RED + "You cannot place a well in a town you are not part of!");
+            return false;
+        }
         // pseudocode
         // First check whether the player is in their own town.
         // Then check if a well is placed in that players town
@@ -72,7 +126,7 @@ public class WellManager {
 
         //if (!wellExists())
 
-
+        return false;
     }
 
     /**
@@ -81,16 +135,20 @@ public class WellManager {
      *
      * @param well
      */
-    public void deleteWell(Well well) {
+    public boolean deleteWell(Well well) {
         if (!wellExists(well))
-            return;
+            return false;
 
-        this.wellHashMap.remove(well);
         try {
+            this.wellHashMap.remove(well.getTownName());
+            this.wellCache.remove(well.getPosition());
             this.database.deleteWell(well);
+
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
 

@@ -1,6 +1,8 @@
 package me.emmetion.wells.database;
 
+import com.palmergames.adventure.text.Component;
 import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.model.Well;
@@ -78,6 +80,12 @@ public class Database {
     }
 
     public void createWell(Well well) throws SQLException {
+        Town town = TownyAPI.getInstance().getTown(well.getTownName());
+        for (Resident r : town.getResidents()) {
+            r.sendMessage(Component.text("A well has been created in your town!"));
+            r.sendMessage(Component.text("Well '"+well.getTownName() + "' Level: " + well.getLevel()));
+            r.sendMessage(Component.text("x: " + well.getPosition().getBlockX() + " y: " + well.getPosition().getBlockY()+" z: " + well.getPosition().getBlockZ()));
+        }
 
         PreparedStatement statement = getConnection()
                 .prepareStatement("INSERT INTO wells(townname, level, xcor, ycor, zcor, worldname) VALUES (?, ?, ?, ?, ?, ?)");
@@ -171,9 +179,7 @@ public class Database {
 
         PreparedStatement statement = getConnection().prepareStatement("DELETE FROM wells WHERE townname = ?");
         statement.setString(1, well.getTownName());
-
         statement.executeUpdate();
-
         statement.close();
     }
 
