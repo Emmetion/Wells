@@ -1,22 +1,21 @@
 package me.emmetion.wells;
 
 import com.palmergames.bukkit.towny.TownyAPI;
+import me.emmetion.wells.commands.WellCommand;
 import me.emmetion.wells.database.Database;
+import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.model.Well;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class Wells extends JavaPlugin {
 
-    private Database database;
+    private WellManager wellManager;
 
     @Override
     public void onEnable() {
@@ -30,28 +29,29 @@ public final class Wells extends JavaPlugin {
             System.out.println("Disabling because townyapi was not found.");
             this.setEnabled(false);
         }
-        System.out.println("townyapi was found... continuing...");
+        System.out.println(ChatColor.RED + "DEBUG: townyapi was found... continuing...");
 
-        this.database = new Database();
-
-        try {
-            database.initializeDatabase();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("Failed to initialize database...");
+        this.wellManager = new WellManager();
+        if (!wellManager.isConnected()) {
+            System.out.println("Failed connection to the wellmanager.");
+            this.setEnabled(false);
         }
-
 
         Well fakeWell = new Well("Emmet's Town", new Location(Bukkit.getWorld("world"), 0,0,0), 0);
 
-        try {
-            this.database.createWell(fakeWell);
-            Well wellByTownName = this.database.findWellByTownName("Emmet's Town");
-            System.out.println("wellByTownName = " + wellByTownName);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        boolean b = this.wellManager.wellExistsByTownName("Emmet's Town");
+        System.out.println("FakeWell present: " + b);
 
+        boolean connected = this.wellManager.isConnected();
+        System.out.println("isConnected(): " + connected);
+
+        initCommands();
+
+    }
+
+    private void initCommands() {
+        this.getCommand("wells").setExecutor(new WellCommand(wellManager));
+        System.out.println("Commands have been successfully enabled.");
     }
 
 }

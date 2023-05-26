@@ -1,11 +1,17 @@
 package me.emmetion.wells.database;
 
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.model.Well;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import java.sql.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Database {
 
@@ -92,6 +98,44 @@ public class Database {
 
     }
 
+    public HashMap<String, Well> getWellsFromTable() throws SQLException {
+
+        PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM wells");
+
+        List<Town> towns = TownyAPI.getInstance().getTowns();
+        List<String> townList = towns.stream().map(town -> town.getName()).collect(Collectors.toList());
+
+        ResultSet set = statement.executeQuery();
+
+        HashMap<String, Well> wells = new HashMap<>();
+
+
+        while (set.next()) {
+            // add to hashmap.
+            wells.put(
+                    set.getString("townname"),
+                    new Well(
+                            set.getString("townname"),
+                            new Location(
+                                    Bukkit.getWorld(set.getString("worldname")),
+                                    set.getInt("xcor"),
+                                    set.getInt("ycor"),
+                                    set.getInt("zcor")
+                        ),
+                        set.getInt("level"))
+            );
+        }
+
+        return wells;
+    }
+
+    /**
+     * Updates an individial well in the MySQL server.
+     * Use updateWells() to update a list of wells.
+     *
+     * @param well
+     * @throws SQLException
+     */
     public void updateWell(Well well) throws SQLException {
 
         PreparedStatement statement = getConnection().prepareStatement("UPDATE wells SET townname = ?, level = ?, xcor = ?, ycor = ?, zcor = ?, worldname = ? WHERE townname = ?");
@@ -104,9 +148,23 @@ public class Database {
         statement.setString(6, well.getPosition().getWorld().getName());
 
         statement.executeUpdate();
-
         statement.close();
+    }
 
+    /**
+     * Iterate saving a list of wells into a MySQL Server.
+     * Uses updateWell(Well well) on each
+     * @param wells
+     */
+    public void updateWells(Collection<Well> wells) {
+        wells.iterator().forEachRemaining(well -> {
+            try {
+                this.updateWell(well);
+            } catch (SQLException e) {
+                System.out.println("Failed to save well " + well.getTownName() + ".");
+                e.printStackTrace();
+            }
+        });
     }
 
     public void deleteWell(Well well) throws SQLException {
@@ -117,7 +175,8 @@ public class Database {
         statement.executeUpdate();
 
         statement.close();
-
     }
+
+
 
 }

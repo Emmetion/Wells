@@ -1,6 +1,8 @@
 package me.emmetion.wells.listeners;
 
 import me.emmetion.wells.database.Database;
+import me.emmetion.wells.database.WellManager;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -11,8 +13,10 @@ import org.bukkit.event.block.BlockPlaceEvent;
 
 public class WellListener implements Listener {
 
-    public WellListener(Database database) {
+    private WellManager manager;
 
+    public WellListener(WellManager manager) {
+        this.manager = manager;
     }
 
     @EventHandler
@@ -21,6 +25,7 @@ public class WellListener implements Listener {
         Block blockPlaced = event.getBlockPlaced();
         Block blockAgainst = event.getBlockAgainst();
         if (blockPlaced.getType().equals(Material.BARREL)) {
+            player.sendMessage(ChatColor.RED + "Well place event");
             Location location = blockAgainst.getLocation();
 
         }
