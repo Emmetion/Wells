@@ -5,6 +5,7 @@ import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.database.Database;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.model.Well;
+import me.emmetion.wells.util.Utilities;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -63,9 +64,25 @@ public class WellCommand implements CommandExecutor {
                 return true;
             }
             String townname = args[1];
-            Well wellByTownName = manager.getWellByTownName(townname);
-            wellByTownName.incrementLevel();
-            player.sendMessage("Incremented level of " + townname + " to " + wellByTownName.getLevel());
+            Well well = manager.getWellByTownName(townname);
+            if (well == null) {
+                player.sendMessage(ChatColor.RED + "No town color was found from your input!");
+                return true;
+            }
+            well.incrementLevel();
+            player.sendMessage("Incremented level of " + townname + " to " + well.getLevel());
+        } else if (arg1.equals("give")) {
+            if (args.length < 2) {
+                player.sendMessage("Too few arguments!");
+                return true;
+            }
+            String block_id = args[1];
+            if (block_id.equals("WELL_BLOCK")) {
+                player.getInventory().addItem(Utilities.createWellBlockItem(1));
+                player.sendMessage("Gave you a WELL_BLOCK");
+            } else {
+                player.sendMessage("Your item '" + block_id + "' wasn't found. " + ChatColor.RED + ":(");
+            }
         }
 
 

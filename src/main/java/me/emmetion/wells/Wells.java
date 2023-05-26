@@ -49,6 +49,13 @@ public final class Wells extends JavaPlugin {
 
     }
 
+    @Override
+    public void onDisable() {
+
+        this.wellManager.saveAllWells();
+    }
+
+
     private void initCommands() {
         this.getCommand("wells").setExecutor(new WellCommand(wellManager));
         System.out.println("Commands have been successfully enabled.");

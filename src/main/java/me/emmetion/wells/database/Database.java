@@ -154,6 +154,7 @@ public class Database {
         statement.setInt(4, well.getPosition().getBlockY());
         statement.setInt(5, well.getPosition().getBlockZ());
         statement.setString(6, well.getPosition().getWorld().getName());
+        statement.setString(7, well.getTownName());
 
         statement.executeUpdate();
         statement.close();
@@ -165,14 +166,14 @@ public class Database {
      * @param wells
      */
     public void updateWells(Collection<Well> wells) {
-        wells.iterator().forEachRemaining(well -> {
+        for (Well well : wells) {
             try {
                 this.updateWell(well);
             } catch (SQLException e) {
                 System.out.println("Failed to save well " + well.getTownName() + ".");
                 e.printStackTrace();
             }
-        });
+        };
     }
 
     public void deleteWell(Well well) throws SQLException {

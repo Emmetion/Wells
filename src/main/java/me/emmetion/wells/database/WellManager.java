@@ -7,6 +7,8 @@ import com.palmergames.bukkit.towny.object.WorldCoord;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.util.Utilities;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -211,7 +213,12 @@ public class WellManager {
      */
     public void saveAllWells() {
         System.out.println("Saving wells...");
-        this.database.updateWells(this.wellHashMap.values());
+        Player emmetion = Bukkit.getPlayer("Emmetion");
+        Collection<Well> wells = this.wellHashMap.values();
+        int count = wells.size();
+        emmetion.sendMessage(Component.text("Wells Saved: " + count));
+
+        this.database.updateWells(wells);
         System.out.println("Saved!");
     }
 
