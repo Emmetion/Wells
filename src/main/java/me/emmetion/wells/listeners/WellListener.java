@@ -9,12 +9,17 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
+import java.util.HashMap;
 
 public class WellListener implements Listener {
 
@@ -36,7 +41,6 @@ public class WellListener implements Listener {
         if (!Utilities.isWellBlockItem(event.getItemInHand())) {
             return;
         }
-        Location location = blockAgainst.getLocation();
 
         if (manager.wellExistsForPlayer(player)) {
             player.sendMessage(ChatColor.RED + "You have a well, you cannot place another.");
@@ -62,4 +66,39 @@ public class WellListener implements Listener {
         manager.createWell(player, blockAgainst);
 
     }
+
+    /**
+     * BlockBreak event. Checks a block in a BlockBreakEvent for being a Well Block. Cancelled if true.
+     * @param event
+     */
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        Block block = event.getBlock();
+        Location block_location = block.getLocation();
+
+        player.sendMessage("BlockBreakEvent");
+        player.sendMessage("Cache Size: " + manager.getCache().size());
+
+        if (manager.isWell(block_location)) {
+            event.setCancelled(true); // prevents the well block from being modified
+            player.sendMessage("You cannot break a well like this!");
+        }
+
+    }
+
+
+    private HashMap<String, Integer> coinTossCooldown = new HashMap<>();
+
+    @EventHandler
+    public void onCoinToss(PlayerDropItemEvent event) {
+        Player player = event.getPlayer();
+        Item itemDrop = event.getItemDrop();
+        ItemStack itemInHand = player.getInventory().getItemInMainHand();
+        //if (Utilities.isCoin(itemInHand)) {
+            coinTossCooldown.put(player.getName(), 1);
+        // }
+    }
+
+
 }

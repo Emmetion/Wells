@@ -59,15 +59,25 @@ public class WellCommand implements CommandExecutor {
             this.manager.saveAllWells();
             player.sendMessage("Saved wells.");
         } else if (arg1.equals("increment")) {
-            if (args.length < 2) {
+            if (args.length < 3) {
                 player.sendMessage("Too few arguments!");
                 return true;
             }
             String townname = args[1];
             Well well = manager.getWellByTownName(townname);
             if (well == null) {
-                player.sendMessage(ChatColor.RED + "No town color was found from your input!");
+                player.sendMessage(ChatColor.RED + "No town was found from your input!");
                 return true;
+            }
+            String option = args[2];
+            if (option.equals("increase")) {
+                well.incrementLevel();
+                well.notifyObservers();
+            } else if (option.equals("decrease")) {
+                well.incrementLevel();
+                well.notifyObservers();
+            } else {
+                player.sendMessage("Syntax: /wells increment <townname> <increase/decrease>");
             }
             well.incrementLevel();
             player.sendMessage("Incremented level of " + townname + " to " + well.getLevel());
@@ -83,6 +93,9 @@ public class WellCommand implements CommandExecutor {
             } else {
                 player.sendMessage("Your item '" + block_id + "' wasn't found. " + ChatColor.RED + ":(");
             }
+        } else if (arg1.equals("well_req")) {
+            Utilities.getBlocksUnderneathLocation(player.getLocation());
+            player.sendMessage("Look under you.");
         }
 
 

@@ -4,7 +4,6 @@ import com.palmergames.adventure.text.Component;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
-import me.emmetion.wells.Wells;
 import me.emmetion.wells.model.Well;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -110,10 +109,10 @@ public class Database {
                 .prepareStatement("INSERT INTO wells(townname, level, xcor, ycor, zcor, worldname) VALUES (?, ?, ?, ?, ?, ?)");
         statement.setString(1, well.getTownName());
         statement.setInt(2, well.getLevel());
-        statement.setInt(3, well.getPosition().getBlockX());
-        statement.setInt(4, well.getPosition().getBlockY());
-        statement.setInt(5, well.getPosition().getBlockZ());
-        statement.setString(6, well.getPosition().getWorld().getName());
+        statement.setInt(3, well.getLocation().getBlockX());
+        statement.setInt(4, well.getLocation().getBlockY());
+        statement.setInt(5, well.getLocation().getBlockZ());
+        statement.setString(6, well.getLocation().getWorld().getName());
 
         try {
             statement.executeUpdate();
@@ -134,7 +133,7 @@ public class Database {
             r.sendMessage(Component.text(ChatColor.GREEN + "---- Town Announcement ----"));
             r.sendMessage(Component.text(ChatColor.YELLOW + "A well has been created in your town!"));
             r.sendMessage(Component.text("Well '" + well.getTownName() + "' Level: " + ChatColor.YELLOW + well.getLevel()));
-            r.sendMessage(Component.text(ChatColor.YELLOW + "x: " + well.getPosition().getBlockX() + " y: " + well.getPosition().getBlockY()+" z: " + well.getPosition().getBlockZ()));
+            r.sendMessage(Component.text(ChatColor.YELLOW + "x: " + well.getLocation().getBlockX() + " y: " + well.getLocation().getBlockY()+" z: " + well.getLocation().getBlockZ()));
         }
     }
 
@@ -188,10 +187,10 @@ public class Database {
 
         statement.setString(1, well.getTownName());
         statement.setInt(2, well.getLevel());
-        statement.setInt(3, well.getPosition().getBlockX());
-        statement.setInt(4, well.getPosition().getBlockY());
-        statement.setInt(5, well.getPosition().getBlockZ());
-        statement.setString(6, well.getPosition().getWorld().getName());
+        statement.setInt(3, well.getLocation().getBlockX());
+        statement.setInt(4, well.getLocation().getBlockY());
+        statement.setInt(5, well.getLocation().getBlockZ());
+        statement.setString(6, well.getLocation().getWorld().getName());
         statement.setString(7, well.getTownName());
 
         statement.executeUpdate();

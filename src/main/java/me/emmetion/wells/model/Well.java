@@ -4,7 +4,6 @@ import me.emmetion.wells.observer.Observer;
 import org.bukkit.Location;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class Well {
@@ -29,11 +28,11 @@ public class Well {
         this.townName = townName;
     }
 
-    public Location getPosition() {
+    public Location getLocation() {
         return position;
     }
 
-    public void setPosition(Location position) {
+    public void setLocation(Location position) {
         this.position = position;
     }
 

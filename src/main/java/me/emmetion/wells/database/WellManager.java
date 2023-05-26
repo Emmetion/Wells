@@ -3,7 +3,6 @@ package me.emmetion.wells.database;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownyPermission;
-import com.palmergames.bukkit.towny.object.WorldCoord;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.observer.IncrementObserver;
@@ -63,7 +62,7 @@ public class WellManager {
             this.wellHashMap = database.getWellsFromTable();
             // Now fill in cache
             for (Well well : wellHashMap.values()) {
-                Location position = well.getPosition();
+                Location position = well.getLocation();
                 this.wellCache.add(position);
                 IncrementObserver observer = new IncrementObserver(well);
                 levelupObserver.add(observer);
@@ -78,6 +77,7 @@ public class WellManager {
     // TODO: Implement pseudocode
     public boolean createWell(Player townMember, Block wellPosition) {
         Town town = TownyAPI.getInstance().getTown(townMember.getLocation());
+        // run various checks before writing it into database.
         if (town != null && town.hasResident(townMember)) {
             boolean can_place = PlayerCacheUtil.getCachePermission(townMember, wellPosition.getLocation(), wellPosition.getType(), TownyPermission.ActionType.BUILD);
             if (!can_place) {// if you cannot place, return.
@@ -91,7 +91,7 @@ public class WellManager {
             Collection<Block> blocks = Utilities.getBlocksUnderneathLocation(wellPosition.getLocation());
             townMember.sendMessage("blocks in radius: " + blocks.size());
             long count = blocks.stream().filter(block -> block.getType().equals(Material.WATER)).count();
-            townMember.sendMessage("WaterBlocks found in radius (1x3x1) y-1 @ cauldron pos: " + count);
+            // townMember.sendMessage("WaterBlocks found in radius (1x3x1) y-1 @ cauldron pos: " + count);
 
             if (count < 5) {
                 return false;
@@ -109,7 +109,7 @@ public class WellManager {
                     0
             );
             try {
-                this.wellCache.add(newWell.getPosition());
+                this.wellCache.add(newWell.getLocation());
                 this.wellHashMap.put(newWell.getTownName(), newWell);
 
                 this.database.createWell(newWell); // puts it into mysql server.
@@ -148,7 +148,7 @@ public class WellManager {
 
         try {
             this.wellHashMap.remove(well.getTownName());
-            this.wellCache.remove(well.getPosition());
+            this.wellCache.remove(well.getLocation());
             this.database.deleteWell(well);
 
             return true;
@@ -213,6 +213,13 @@ public class WellManager {
         return wellHashMap.containsKey(townName);
     }
 
+    public boolean isWell(Location location) {
+        if (wellCache.size() == 0)
+            return false;
+        else
+            return wellCache.contains(location);
+    }
+
     /**
      * Saves all wells to the database.
      * This should be executed every 5 minutes or when a well is deleted.
@@ -238,6 +245,10 @@ public class WellManager {
         }
 
         return wellHashMap.values();
+    }
+
+    public Collection<Location> getCache() {
+        return this.wellCache;
     }
 
     /**

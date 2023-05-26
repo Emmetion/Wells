@@ -38,6 +38,7 @@ public class Utilities {
             for (int y = y_o - 1; y >= y_o - 3; y--) {
                 for (int z = z_o - 1; z <= z_o + 1; z++) {
                     Block block = world.getBlockAt(x, y, z);
+                    block.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, block.getLocation().add(.5, .5, .5), 3, 0, 0, 0,0, null, true);
                     if (block.getType() != Material.AIR && !block.equals(location.getBlock())) {
                         // Use the block below the cauldron as needed
                         sphere.add(block);
