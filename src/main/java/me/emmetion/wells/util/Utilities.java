@@ -1,11 +1,12 @@
 package me.emmetion.wells.util;
 
+import de.tr7zw.nbtapi.NBTBlock;
+import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTItem;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -15,21 +16,42 @@ import java.util.Collection;
 
 public class Utilities {
 
-    public static Collection<Block> getBlocksAround(Location location, int radius) {
+    /**
+     * Returns a collection of blocks (with their locations) from a given position.
+     * It counts in a radius 1x3x1 underneath itself.
+     * This means 27 water blocks could be placed in a well location.
+     * Right now, it's implemented to check for 5 water blocks.
+     *
+     * @param location
+     * @return
+     */
+    public static Collection<Block> getBlocksUnderneathLocation(Location location) {
         ArrayList<Block> sphere = new ArrayList<>();
-        for (int y = -radius; y < radius; y++) {
-            for (int x = -radius; x < radius; x++) {
-                for (int z = -radius; z < radius; z++) {
-                    if (Math.sqrt((x*x) + (y*y) + (z*z)) <= radius) {
-                        final Block b = location.getWorld().getBlockAt(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ());
-                        sphere.add(b);
+        World world = location.getWorld();
+
+        // #_0 means original.
+        int x_o = location.getBlockX();
+        int y_o = location.getBlockY();
+        int z_o = location.getBlockZ();
+
+        for (int x = x_o - 1; x <= x_o + 1; x++) {
+            for (int y = y_o - 1; y >= y_o - 3; y--) {
+                for (int z = z_o - 1; z <= z_o + 1; z++) {
+                    Block block = world.getBlockAt(x, y, z);
+                    if (block.getType() != Material.AIR && !block.equals(location.getBlock())) {
+                        // Use the block below the cauldron as needed
+                        sphere.add(block);
+                        System.out.println("Block below cauldron: " + block.getType());
                     }
                 }
             }
         }
 
-
-        System.out.println("Sphere block size " + sphere.size() + " from radius " + radius + ".");
+        // DEBUG
+        Player emmetion = Bukkit.getPlayer("Emmetion");
+        if (emmetion != null) {
+            emmetion.sendMessage(Component.text("Sphere block size " + sphere.size() + " from radius 1x3x1."));
+        }
 
         return sphere;
     }
@@ -50,7 +72,13 @@ public class Utilities {
     }
 
 
-    public static boolean isWellBlock(ItemStack wellBlock) {
+    /**
+     * Helper method to determine whether an item in hand is a well block.
+     *
+     * @param wellBlock
+     * @return
+     */
+    public static boolean isWellBlockItem(ItemStack wellBlock) {
         if (wellBlock == null) {
             return false;
         }
@@ -69,12 +97,43 @@ public class Utilities {
         return false;
     }
 
+    /**
+     * Helper method to determine whether a block placed in the world is a well-block.
+     *
+     * @param block
+     * @return
+     */
+    public static boolean isWellBlock(Block block) {
+        if (block == null) {
+            return false;
+        }
+
+        NBTBlock nbt_block = new NBTBlock(block);
+        NBTCompound data = nbt_block.getData();
+        if (data.hasKey("wells_id"))
+            return false;
+
+        String wells_id = data.getString("wells_id");
+        if (wells_id.equals("WELL_BLOCK")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Helper method to create WELL_BLOCK items.
+     *
+     * @param count - stack size
+     * @return
+     */
+
     public static ItemStack createWellBlockItem(int count) {
         if (count < 1 && count > 64) {
             System.out.println("Attempted to create Well Block with invalid stack count.");
             return null;
         }
-        ItemStack well = new ItemStack(Material.BARREL);
+        ItemStack well = new ItemStack(Material.CAULDRON);
         well.setAmount(count);
         ItemMeta itemmeta = well.getItemMeta();
         itemmeta.displayName(Component.text(ChatColor.DARK_GREEN + "Well Block"));

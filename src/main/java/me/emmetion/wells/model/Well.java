@@ -1,8 +1,15 @@
 package me.emmetion.wells.model;
 
+import me.emmetion.wells.observer.Observer;
 import org.bukkit.Location;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 public class Well {
+
+    private List<Observer> observers = new ArrayList<>();
 
     public String townName;
     public Location position;
@@ -31,15 +38,35 @@ public class Well {
     }
 
     public void incrementLevel() {
+        notifyObservers();
         this.level += 1;
     }
 
     public void decrementLevel() {
+        notifyObservers();
         this.level -= 1;
     }
 
     public int getLevel() {
         return this.level;
+    }
+
+    public void attachObserver(Observer attached) {
+        observers.add(attached);
+    }
+
+    public void detachObserver(Observer detach) {
+        observers.remove(detach);
+    }
+
+    public void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update(this);
+        }
+    }
+
+    private void performStateChange() {
+        notifyObservers();
     }
 
     @Override

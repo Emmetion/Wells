@@ -6,6 +6,7 @@ import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.object.WorldCoord;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import me.emmetion.wells.model.Well;
+import me.emmetion.wells.observer.IncrementObserver;
 import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -19,7 +20,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * WellManager.java, operates as a wrapper for the database class, removing the use of SQL strings.
+ * WellManager.java, operates as a wrapper for the database class, removing a layer of SQL statements and creating handling operations more efficiently.
  */
 public class WellManager {
 
@@ -37,6 +38,8 @@ public class WellManager {
      * A set of locations well's currently inhabit, use this to quickly find well blocks.
      */
     private HashSet<Location> wellCache = new HashSet<>();
+
+    private List<IncrementObserver> levelupObserver = new ArrayList<>();
 
     /**
      * Used in isConnected(), returns whether the SQL Server was successfully connected and parsed.
@@ -62,6 +65,8 @@ public class WellManager {
             for (Well well : wellHashMap.values()) {
                 Location position = well.getPosition();
                 this.wellCache.add(position);
+                IncrementObserver observer = new IncrementObserver(well);
+                levelupObserver.add(observer);
             }
             this.connected = true;
         } catch (SQLException e) {
@@ -74,51 +79,51 @@ public class WellManager {
     public boolean createWell(Player townMember, Block wellPosition) {
         Town town = TownyAPI.getInstance().getTown(townMember.getLocation());
         if (town != null && town.hasResident(townMember)) {
-            boolean bBuild = PlayerCacheUtil.getCachePermission(townMember, wellPosition.getLocation(), wellPosition.getType(), TownyPermission.ActionType.BUILD);
-            townMember.sendMessage(ChatColor.GREEN + "bBuild = " + bBuild);
-            if (!bBuild)
+            boolean can_place = PlayerCacheUtil.getCachePermission(townMember, wellPosition.getLocation(), wellPosition.getType(), TownyPermission.ActionType.BUILD);
+            if (!can_place) {// if you cannot place, return.
+                Player player = townMember;
+                player.sendMessage(ChatColor.RED + "You cannot place a well in a town you are not part of!");
                 return false;
-            if (wellExistsByTownName(town.getName()))
+            }
+            if (wellExistsByTownName(town.getName())) // if well exists, return.
                 return false;
             // Check for water blocks.
-            final int radius = 1; // radius for blocks around. will use better function for finding well predicates down the line.
-            Collection<Block> blocks = Utilities.getBlocksAround(wellPosition.getLocation(), radius);
+            Collection<Block> blocks = Utilities.getBlocksUnderneathLocation(wellPosition.getLocation());
             townMember.sendMessage("blocks in radius: " + blocks.size());
             long count = blocks.stream().filter(block -> block.getType().equals(Material.WATER)).count();
-            townMember.sendMessage("WaterBlocks found in radius (" + radius + "): " + count);
+            townMember.sendMessage("WaterBlocks found in radius (1x3x1) y-1 @ cauldron pos: " + count);
 
-            if (count > 3) {
-                townMember.sendMessage("Count > 3");
-                // Create a new well object, then it will be saved in to database.
-                Well newWell = new Well(
-                        town.getName(),
-                        new Location(
+            if (count < 5) {
+                return false;
+            }
+
+            // Create a new well object, then it will be saved in to database.
+            Well newWell = new Well(
+                    town.getName(),
+                    new Location(
                             townMember.getWorld(),
                             wellPosition.getX(),
                             wellPosition.getY(),
                             wellPosition.getZ()
-                        ),
-                        0
-                );
-                try {
-                    this.wellCache.add(newWell.getPosition());
-                    this.wellHashMap.put(newWell.getTownName(), newWell);
-
-                    this.database.createWell(newWell); // puts it into mysql server.
-                    this.saveAllWells(); // saves all wells.
-                } catch (SQLException e) {
-                    townMember.sendMessage("Failed to create new well because of SQLException, please check console.");
-                    e.printStackTrace();
-                }
-
+                    ),
+                    0
+            );
+            try {
+                this.wellCache.add(newWell.getPosition());
                 this.wellHashMap.put(newWell.getTownName(), newWell);
-                townMember.sendMessage(ChatColor.GREEN + "Successfully created your town well!");
+
+                this.database.createWell(newWell); // puts it into mysql server.
+                this.saveAllWells(); // saves all wells.
+            } catch (SQLException e) {
+                townMember.sendMessage("Failed to create new well because of SQLException, please check console.");
+                e.printStackTrace();
             }
-            //Execute your code here
-        } else {
-            Player player = townMember;
-            player.sendMessage(ChatColor.RED + "You cannot place a well in a town you are not part of!");
-            return false;
+
+            this.wellHashMap.put(newWell.getTownName(), newWell);
+            townMember.sendMessage(ChatColor.GREEN + "Successfully created your town well!");
+
+            return true;
+
         }
         // pseudocode
         // First check whether the player is in their own town.
@@ -185,6 +190,7 @@ public class WellManager {
         }
         return wellHashMap.containsKey(townname);
     }
+
 
     public boolean wellExistsForPlayer(Player player) {
         Town town = TownyAPI.getInstance().getTown(player);

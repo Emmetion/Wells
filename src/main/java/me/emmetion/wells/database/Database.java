@@ -7,6 +7,7 @@ import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.model.Well;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 
 import java.sql.*;
@@ -19,13 +20,22 @@ public class Database {
 
     private Connection connection;
 
+    /**
+     * Returns the connection to the MySQL server.
+     * Use this to send statements and manipulate information in the table.
+     *
+     * @return
+     * @throws SQLException
+     */
     public Connection getConnection() throws SQLException {
 
         if(connection != null){
             return connection;
         }
 
-        //Try to connect to my MySQL database running locally
+        // Connect to mysql server.
+        // these credentials are only temporary.
+        // will change it to config in
         String url = "jdbc:mysql://u33061_WQm36YtTvQ:Ri1lKnBTcXFYVz6w0SBNYEfA@mario.bloom.host:3306/s33061_Wells";
         String user = "u33061_WQm36YtTvQ";
         String password = "Ri1lKnBTcXFYVz6w0SBNYEfA";
@@ -39,8 +49,11 @@ public class Database {
         return connection;
     }
 
+    /**
+     * Run this when you initialize a database connection.
+     * @throws SQLException
+     */
     public void initializeDatabase() throws SQLException {
-
         Statement statement = getConnection().createStatement();
 
         //Create the player_stats table
@@ -50,6 +63,12 @@ public class Database {
         statement.close();
     }
 
+    /**
+     * Returns well from townname from MySQL database.
+     * @param townname
+     * @return
+     * @throws SQLException
+     */
     public Well findWellByTownName(String townname) throws SQLException {
 
         PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM wells WHERE townname = ?");
@@ -79,13 +98,13 @@ public class Database {
         return null;
     }
 
+    /**
+     * Create well at a given location, writing it into the MySQL table.
+     * @param well
+     * @throws SQLException
+     */
     public void createWell(Well well) throws SQLException {
-        Town town = TownyAPI.getInstance().getTown(well.getTownName());
-        for (Resident r : town.getResidents()) {
-            r.sendMessage(Component.text("A well has been created in your town!"));
-            r.sendMessage(Component.text("Well '"+well.getTownName() + "' Level: " + well.getLevel()));
-            r.sendMessage(Component.text("x: " + well.getPosition().getBlockX() + " y: " + well.getPosition().getBlockY()+" z: " + well.getPosition().getBlockZ()));
-        }
+        announceWellPlacement(well);
 
         PreparedStatement statement = getConnection()
                 .prepareStatement("INSERT INTO wells(townname, level, xcor, ycor, zcor, worldname) VALUES (?, ?, ?, ?, ?, ?)");
@@ -103,9 +122,28 @@ public class Database {
         }
 
         statement.close();
-
     }
 
+    /**
+     * Sends well placement announcement to all residents in the town.
+     * @param well
+     */
+    private void announceWellPlacement(Well well) {
+        Town town = TownyAPI.getInstance().getTown(well.getTownName());
+        for (Resident r : town.getResidents()) {
+            r.sendMessage(Component.text(ChatColor.GREEN + "---- Town Announcement ----"));
+            r.sendMessage(Component.text(ChatColor.YELLOW + "A well has been created in your town!"));
+            r.sendMessage(Component.text("Well '" + well.getTownName() + "' Level: " + ChatColor.YELLOW + well.getLevel()));
+            r.sendMessage(Component.text(ChatColor.YELLOW + "x: " + well.getPosition().getBlockX() + " y: " + well.getPosition().getBlockY()+" z: " + well.getPosition().getBlockZ()));
+        }
+    }
+
+    /**
+     * Returns a hashmap of wells inside MySQL table at runtime.
+     *
+     * @return
+     * @throws SQLException
+     */
     public HashMap<String, Well> getWellsFromTable() throws SQLException {
 
         PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM wells");
@@ -138,7 +176,7 @@ public class Database {
     }
 
     /**
-     * Updates an individial well in the MySQL server.
+     * Updates an individial well in the MySQL Server.
      * Use updateWells() to update a list of wells.
      *
      * @param well
@@ -176,10 +214,15 @@ public class Database {
         };
     }
 
+    /**
+     * Remove a well from a town in the MySQL Server.
+     * @param well
+     * @throws SQLException
+     */
     public void deleteWell(Well well) throws SQLException {
-
         PreparedStatement statement = getConnection().prepareStatement("DELETE FROM wells WHERE townname = ?");
         statement.setString(1, well.getTownName());
+
         statement.executeUpdate();
         statement.close();
     }

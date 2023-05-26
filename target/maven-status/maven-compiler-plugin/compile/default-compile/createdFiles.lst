@@ -1,7 +1,9 @@
 me\emmetion\wells\database\Database.class
 me\emmetion\wells\Wells.class
+me\emmetion\wells\observer\Observer.class
 me\emmetion\wells\model\Well.class
 me\emmetion\wells\util\Utilities.class
 me\emmetion\wells\commands\WellCommand.class
 me\emmetion\wells\listeners\WellListener.class
 me\emmetion\wells\database\WellManager.class
+me\emmetion\wells\observer\IncrementObserver.class
