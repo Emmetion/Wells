@@ -9,6 +9,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,6 +56,31 @@ public class Utilities {
         }
 
         return sphere;
+    }
+
+
+    public static boolean blockRequirement(Block block, Material blockType, int min) {
+        World world = block.getWorld();
+        Location startPos = block.getLocation().subtract(0, 2, 0);
+
+        int total = 0;
+        int x_rad = 1;
+        int y_rad = 2;
+
+        for (int x = startPos.getBlockX() - x_rad; x <= startPos.getX() + x_rad; x++) {
+            for (int y = startPos.getBlockY() - y_rad; y <= startPos.getY() + y_rad; y++) {
+                for (int z = startPos.getBlockZ() - x_rad; z <= startPos.getZ() + x_rad; z++) {
+                    Block temp_block = startPos.getWorld().getBlockAt(x, y, z);
+                    if (temp_block.getType().equals(blockType))
+                        total++;
+                    if (true) { // spawn particle at block location
+                        world.spawnParticle(Particle.FLAME, temp_block.getLocation(), 1, 0, 0, 0,0);
+                    }
+                }
+            }
+        }
+
+        return total >= min;
     }
 
     /**

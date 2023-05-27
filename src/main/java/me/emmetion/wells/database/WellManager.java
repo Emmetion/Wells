@@ -8,12 +8,10 @@ import me.emmetion.wells.model.Well;
 import me.emmetion.wells.observer.IncrementObserver;
 import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -79,23 +77,18 @@ public class WellManager {
         Town town = TownyAPI.getInstance().getTown(townMember.getLocation());
         // run various checks before writing it into database.
         if (town != null && town.hasResident(townMember)) {
+            Player player = townMember;
+
             boolean can_place = PlayerCacheUtil.getCachePermission(townMember, wellPosition.getLocation(), wellPosition.getType(), TownyPermission.ActionType.BUILD);
             if (!can_place) {// if you cannot place, return.
-                Player player = townMember;
                 player.sendMessage(ChatColor.RED + "You cannot place a well in a town you are not part of!");
                 return false;
             }
             if (wellExistsByTownName(town.getName())) // if well exists, return.
                 return false;
             // Check for water blocks.
-            Collection<Block> blocks = Utilities.getBlocksUnderneathLocation(wellPosition.getLocation());
-            townMember.sendMessage("blocks in radius: " + blocks.size());
-            long count = blocks.stream().filter(block -> block.getType().equals(Material.WATER)).count();
-            // townMember.sendMessage("WaterBlocks found in radius (1x3x1) y-1 @ cauldron pos: " + count);
-
-            if (count < 5) {
+            if (!Utilities.blockRequirement(wellPosition, Material.WATER, 5)) // requires 5 waterblocks in the highlighted particle area
                 return false;
-            }
 
             // Create a new well object, then it will be saved in to database.
             Well newWell = new Well(
@@ -114,13 +107,12 @@ public class WellManager {
 
                 this.database.createWell(newWell); // puts it into mysql server.
                 this.saveAllWells(); // saves all wells.
+
+                townMember.sendMessage(ChatColor.GREEN + "Successfully created your town well!");
             } catch (SQLException e) {
                 townMember.sendMessage("Failed to create new well because of SQLException, please check console.");
                 e.printStackTrace();
             }
-
-            this.wellHashMap.put(newWell.getTownName(), newWell);
-            townMember.sendMessage(ChatColor.GREEN + "Successfully created your town well!");
 
             return true;
 
@@ -135,6 +127,7 @@ public class WellManager {
 
         return false;
     }
+
 
     /**
      * Delete a well from the known well manager.

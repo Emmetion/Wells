@@ -18,10 +18,14 @@ import java.util.logging.Logger;
 
 public final class Wells extends JavaPlugin {
 
+    public static Wells plugin;
+
     private WellManager wellManager;
 
     @Override
     public void onEnable() {
+
+        this.plugin = this;
 
         Logger logger = Logger.getLogger("Wells");
         logger.log(Level.INFO, "Plugin starting...");

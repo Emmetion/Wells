@@ -7,6 +7,8 @@ import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.util.Utilities;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -94,7 +96,8 @@ public class WellCommand implements CommandExecutor {
                 player.sendMessage("Your item '" + block_id + "' wasn't found. " + ChatColor.RED + ":(");
             }
         } else if (arg1.equals("well_req")) {
-            Utilities.getBlocksUnderneathLocation(player.getLocation());
+            Block block = player.getLocation().getBlock();
+            Utilities.blockRequirement(block, Material.WATER, 5);
             player.sendMessage("Look under you.");
         }
 

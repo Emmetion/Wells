@@ -2,9 +2,11 @@ package me.emmetion.wells.listeners;
 
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
+import me.emmetion.wells.Wells;
 import me.emmetion.wells.database.Database;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.util.Utilities;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,6 +19,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,6 +41,8 @@ public class WellListener implements Listener {
         Player player = event.getPlayer();
         Block blockAgainst = event.getBlockAgainst();
 
+        boolean water_count = Utilities.blockRequirement(blockAgainst, Material.WATER, 3);
+        player.sendMessage(ChatColor.BLUE + "WaterCount: " + water_count);
         if (!Utilities.isWellBlockItem(event.getItemInHand())) {
             return;
         }
@@ -96,7 +101,15 @@ public class WellListener implements Listener {
         Item itemDrop = event.getItemDrop();
         ItemStack itemInHand = player.getInventory().getItemInMainHand();
         //if (Utilities.isCoin(itemInHand)) {
-            coinTossCooldown.put(player.getName(), 1);
+        if (coinTossCooldown.containsKey(player.getName())) {
+            player.sendMessage(ChatColor.BLUE + "You are on cooldown. [WELLS]");
+            event.setCancelled(true);
+            return;
+        }
+
+        coinTossCooldown.put(player.getName(), 1);
+        Bukkit.getScheduler().runTaskLater(Wells.plugin, () -> coinTossCooldown.remove(player.getName()), 3 * 20);
+        // schedule 1 second cooldown with bukkit scheduler
         // }
     }
 
