@@ -24,6 +24,10 @@ public class Well {
         return townName;
     }
 
+    public String getWellName() {
+        return townName + "'s Well";
+    }
+
     public void setTownName(String townName) {
         this.townName = townName;
     }

@@ -1,20 +1,24 @@
 package me.emmetion.wells;
 
 import com.palmergames.bukkit.towny.TownyAPI;
+import eu.decentsoftware.holograms.api.DHAPI;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
 import me.emmetion.wells.commands.WellCommand;
-import me.emmetion.wells.database.Database;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.listeners.WellListener;
 import me.emmetion.wells.model.Well;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.sql.SQLException;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public final class Wells extends JavaPlugin {
 
@@ -55,6 +59,8 @@ public final class Wells extends JavaPlugin {
 
         initCommands();
         initListeners();
+        initSchedules();
+        initWellHolograms();
     }
 
     // leftover code snippets
@@ -81,6 +87,87 @@ public final class Wells extends JavaPlugin {
     private void initListeners() {
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new WellListener(wellManager), this);
+    }
+
+
+    private HashMap<Player, String> playersNearWell = new HashMap<>();
+    private HashMap<String, Hologram> hologramHashMap = new HashMap<>();
+
+    private void initSchedules() {
+        BukkitScheduler scheduler = Bukkit.getScheduler();
+
+        scheduler.runTaskTimer(this, () -> {
+
+            List<Player> currentWellPlayers = new ArrayList<>();
+
+            for (Well w : this.wellManager.getWells()) {
+                Location location = w.getLocation();
+                Collection<Player> nearbyPlayers = location.getNearbyPlayers(8);
+
+                for (Player p : nearbyPlayers) {
+
+                    if (playersNearWell.containsKey(p)) { // if player was already near a well
+                        if (!playersNearWell.get(p).equals(w.getWellName())) { // and the well the player is currently at is different. (maybe tp, other reasons idk)
+                            this.playersNearWell.remove(p); // remove from the list
+                        }
+                    }
+
+                    currentWellPlayers.add(p); // add the player to the list.
+                    playersNearWell.put(p, w.getWellName());
+
+                    // "Town's Well"
+                    Hologram hologram = DHAPI.getHologram(w.getTownName()); // gets the hologram from hashmap.
+                    if (hologram != null) {
+                        hologram.setShowPlayer(p); // displays the well hologram to the player.
+                    }
+
+                    p.sendMessage("You are near a well! [" + w.getWellName() + "]");
+                }
+            }
+
+
+            List<Player> notNearWells = Bukkit.getOnlinePlayers().stream()
+                    .filter(p -> !currentWellPlayers.contains(p))
+                    .collect(Collectors.toList());
+
+            for (Player p : notNearWells) {
+                if (this.playersNearWell.containsKey(p)) {
+                    String wellName = this.playersNearWell.get(p);
+                    Hologram h = DHAPI.getHologram(wellName);
+                    h.removeShowPlayer(p);
+                    p.sendMessage("You are no longer near a well. [" + wellName + "]");
+
+                    this.playersNearWell.remove(p);
+                }
+            }
+
+
+
+        }, 20, 20);
+    }
+
+
+
+    public void initWellHolograms() {
+        for (Well w : wellManager.getWells()) {
+            String townName = w.getTownName();
+            Location location = w.getLocation();
+
+            List<String> lines = Arrays.asList(w.getWellName(), location.toString());
+
+            try {
+                Hologram wellHologram = DHAPI.createHologram(w.getWellName(), location.add(0, 0.5, 0), lines);
+
+                wellHologram.setDefaultVisibleState(true);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Failed to create a new well with name '" + w.getWellName() + "'. ");
+
+                Hologram hologram = DHAPI.getHologram(w.getWellName());
+                hologram.setDefaultVisibleState(true);
+                hologram.showAll();
+                // the well is likely already made.
+            }
+        }
     }
 
 }

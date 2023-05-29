@@ -2,6 +2,7 @@ package me.emmetion.wells.commands;
 
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
+import me.emmetion.wells.Wells;
 import me.emmetion.wells.database.Database;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.model.Well;
@@ -99,6 +100,8 @@ public class WellCommand implements CommandExecutor {
             Block block = player.getLocation().getBlock();
             Utilities.blockRequirement(block, Material.WATER, 5);
             player.sendMessage("Look under you.");
+        } else if (arg1.equals("well_reset")) {
+            Wells.plugin.initWellHolograms();
         }
 
 
