@@ -72,6 +72,10 @@ public class Well {
         notifyObservers();
     }
 
+    public String prettyPosition() {
+        return this.getLocation().toVector().toString();
+    }
+
     @Override
     public String toString() {
         return "Well{" +

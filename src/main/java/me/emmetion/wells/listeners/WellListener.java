@@ -41,8 +41,6 @@ public class WellListener implements Listener {
         Player player = event.getPlayer();
         Block blockAgainst = event.getBlockAgainst();
 
-        boolean water_count = Utilities.blockRequirement(blockAgainst, Material.WATER, 3);
-        player.sendMessage(ChatColor.BLUE + "WaterCount: " + water_count);
         if (!Utilities.isWellBlockItem(event.getItemInHand())) {
             return;
         }
@@ -81,9 +79,6 @@ public class WellListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
         Location block_location = block.getLocation();
-
-        player.sendMessage("BlockBreakEvent");
-        player.sendMessage("Cache Size: " + manager.getCache().size());
 
         if (manager.isWell(block_location)) {
             event.setCancelled(true); // prevents the well block from being modified

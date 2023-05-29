@@ -116,12 +116,14 @@ public final class Wells extends JavaPlugin {
                     playersNearWell.put(p, w.getWellName());
 
                     // "Town's Well"
-                    Hologram hologram = DHAPI.getHologram(w.getTownName()); // gets the hologram from hashmap.
+                    Hologram hologram = DHAPI.getHologram(w.getWellName()); // gets the hologram from hashmap.
                     if (hologram != null) {
                         hologram.setShowPlayer(p); // displays the well hologram to the player.
-                    }
 
-                    p.sendMessage("You are near a well! [" + w.getWellName() + "]");
+                        p.sendMessage("You are near a well! [" + w.getWellName() + "]");
+                    } else {
+                        p.sendMessage("Hologram is null.");
+                    }
                 }
             }
 
@@ -135,6 +137,7 @@ public final class Wells extends JavaPlugin {
                     String wellName = this.playersNearWell.get(p);
                     Hologram h = DHAPI.getHologram(wellName);
                     h.removeShowPlayer(p);
+                    h.hide(p);
                     p.sendMessage("You are no longer near a well. [" + wellName + "]");
 
                     this.playersNearWell.remove(p);
@@ -151,20 +154,21 @@ public final class Wells extends JavaPlugin {
     public void initWellHolograms() {
         for (Well w : wellManager.getWells()) {
             String townName = w.getTownName();
-            Location location = w.getLocation();
+            Location location = w.getLocation().clone();
 
-            List<String> lines = Arrays.asList(w.getWellName(), location.toString());
+            List<String> lines = Arrays.asList(w.getWellName(), w.prettyPosition());
 
             try {
-                Hologram wellHologram = DHAPI.createHologram(w.getWellName(), location.add(0, 0.5, 0), lines);
+                Hologram wellHologram = DHAPI.createHologram(w.getWellName(), location.add(0, 3, 0), lines);
 
-                wellHologram.setDefaultVisibleState(true);
+                wellHologram.setDefaultVisibleState(false);
             } catch (IllegalArgumentException e) {
                 System.out.println("Failed to create a new well with name '" + w.getWellName() + "'. ");
 
-                Hologram hologram = DHAPI.getHologram(w.getWellName());
-                hologram.setDefaultVisibleState(true);
-                hologram.showAll();
+                DHAPI.removeHologram(w.getWellName());
+
+                Hologram hologram = DHAPI.createHologram(w.getWellName(), location, false, lines);
+                hologram.setDefaultVisibleState(false);
                 // the well is likely already made.
             }
         }
