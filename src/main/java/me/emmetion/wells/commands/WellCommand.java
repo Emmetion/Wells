@@ -56,7 +56,8 @@ public class WellCommand implements CommandExecutor {
         } else if (arg1.equals("print")) {
             player.sendMessage("--- Wells ---");
             for (Well well : manager.getWells()) {
-                player.sendMessage(well.toString());
+                player.sendMessage(well.getWellName());
+                player.sendMessage("  - " + well.prettyPosition());
             }
         } else if (arg1.equals("save")) {
             this.manager.saveAllWells();
@@ -93,13 +94,16 @@ public class WellCommand implements CommandExecutor {
             if (block_id.equals("WELL_BLOCK")) {
                 player.getInventory().addItem(Utilities.createWellBlockItem(1));
                 player.sendMessage("Gave you a WELL_BLOCK");
-            } else {
+            } else if (block_id.equals("GOLD_COIN")) {
+                player.getInventory().addItem(Utilities.createGoldCoin());
+                player.sendMessage(ChatColor.GOLD + "Gave you a Gold Coin");
+            }else {
                 player.sendMessage("Your item '" + block_id + "' wasn't found. " + ChatColor.RED + ":(");
             }
         } else if (arg1.equals("well_req")) {
             Block block = player.getLocation().getBlock();
             Utilities.blockRequirement(block, Material.WATER, 5);
-            player.sendMessage("Look under you.");
+            player.sendMessage(ChatColor.BLUE + "Look under you.");
         } else if (arg1.equals("well_reset")) {
             Wells.plugin.initWellHolograms();
         }

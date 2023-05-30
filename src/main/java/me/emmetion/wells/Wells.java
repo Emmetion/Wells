@@ -76,8 +76,14 @@ public final class Wells extends JavaPlugin {
             e.printStackTrace();
             System.out.println("There was an error closing the database connection!");
         }
+
+        deleteWellHolograms();
     }
 
+
+    public WellManager getWellManager() {
+        return this.wellManager;
+    }
 
     private void initCommands() {
         this.getCommand("wells").setExecutor(new WellCommand(wellManager));
@@ -91,7 +97,7 @@ public final class Wells extends JavaPlugin {
 
 
     private HashMap<Player, String> playersNearWell = new HashMap<>();
-    private HashMap<String, Hologram> hologramHashMap = new HashMap<>();
+    private HashMap<Player, Integer> nearWellMessageCooldown = new HashMap<>();
 
     private void initSchedules() {
         BukkitScheduler scheduler = Bukkit.getScheduler();
@@ -102,7 +108,7 @@ public final class Wells extends JavaPlugin {
 
             for (Well w : this.wellManager.getWells()) {
                 Location location = w.getLocation();
-                Collection<Player> nearbyPlayers = location.getNearbyPlayers(8);
+                Collection<Player> nearbyPlayers = location.getNearbyPlayers(5);
 
                 for (Player p : nearbyPlayers) {
 
@@ -117,12 +123,17 @@ public final class Wells extends JavaPlugin {
 
                     // "Town's Well"
                     Hologram hologram = DHAPI.getHologram(w.getWellName()); // gets the hologram from hashmap.
-                    if (hologram != null) {
-                        hologram.setShowPlayer(p); // displays the well hologram to the player.
+                    hologram.setShowPlayer(p); // displays the well hologram to the player.
 
-                        p.sendMessage("You are near a well! [" + w.getWellName() + "]");
+                    if (nearWellMessageCooldown.containsKey(p)) {
+                        if (nearWellMessageCooldown.get(p) == -1) { // removes cooldown if time is at -1.
+                            nearWellMessageCooldown.remove(p);
+                        } else {
+                            nearWellMessageCooldown.put(p, nearWellMessageCooldown.get(p) - 1); // count down every second.
+                        }
                     } else {
-                        p.sendMessage("Hologram is null.");
+                        p.sendMessage("You are near a well! [" + w.getWellName() + "]");
+                        nearWellMessageCooldown.put(p, 5); // -1 on cooldown each second.
                     }
                 }
             }
@@ -153,25 +164,29 @@ public final class Wells extends JavaPlugin {
 
     public void initWellHolograms() {
         for (Well w : wellManager.getWells()) {
-            String townName = w.getTownName();
-            Location location = w.getLocation().clone();
-
-            List<String> lines = Arrays.asList(w.getWellName(), w.prettyPosition());
-
-            try {
-                Hologram wellHologram = DHAPI.createHologram(w.getWellName(), location.add(0, 3, 0), lines);
-
-                wellHologram.setDefaultVisibleState(false);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Failed to create a new well with name '" + w.getWellName() + "'. ");
-
-                DHAPI.removeHologram(w.getWellName());
-
-                Hologram hologram = DHAPI.createHologram(w.getWellName(), location, false, lines);
-                hologram.setDefaultVisibleState(false);
-                // the well is likely already made.
-            }
+            createWellHologram(w);
         }
+    }
+
+    private void createWellHologram(Well well) {
+        if (DHAPI.getHologram(well.getWellName()) != null) {
+            DHAPI.removeHologram(well.getWellName());
+        }
+        // now we create it knowing it doesn't exist.
+
+        String wellName = well.getWellName();
+        Location location = well.getLocation();
+        boolean saveToFile = false;
+        List<String> lines = Arrays.asList(well.getWellName(), well.prettyPosition());
+
+        Hologram hologram = DHAPI.createHologram(wellName, location, saveToFile, lines);
+        hologram.setDefaultVisibleState(false);
+
+    }
+
+    private void deleteWellHolograms() {
+        this.wellManager.getWells().stream()
+                .forEach(well -> DHAPI.removeHologram(well.getWellName()));
     }
 
 }

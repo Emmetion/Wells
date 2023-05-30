@@ -73,7 +73,7 @@ public class Utilities {
                     Block temp_block = startPos.getWorld().getBlockAt(x, y, z);
                     if (temp_block.getType().equals(blockType))
                         total++;
-                    if (true) { // spawn particle at block location
+                    if (true) { // {DEBUG} spawn particle at block location
                         world.spawnParticle(Particle.FLAME, temp_block.getLocation(), 1, 0, 0, 0,0);
                     }
                 }
@@ -154,7 +154,6 @@ public class Utilities {
      * @param count - stack size
      * @return
      */
-
     public static ItemStack createWellBlockItem(int count) {
         if (count < 1 && count > 64) {
             System.out.println("Attempted to create Well Block with invalid stack count.");
@@ -175,6 +174,36 @@ public class Utilities {
         ItemStack item = nbtItem.getItem();
 
         return item;
+    }
+
+    /**
+     * Returns whether the passed in item is of COIN type.
+     * @param itemStack
+     * @return
+     */
+    public static boolean isCoin(ItemStack itemStack) {
+        if (itemStack == null)
+            return false;
+
+        NBTItem item = new NBTItem(itemStack);
+
+        if (item.hasKey("wells_id")) {
+            return item.getString("wells_id").equals("GOLD_COIN");
+        }
+        return false;
+    }
+
+    public static ItemStack createGoldCoin() {
+        ItemStack item = new ItemStack(Material.SUNFLOWER);
+        ItemMeta meta = item.getItemMeta();
+
+        meta.displayName(Component.text(ChatColor.GOLD + "Gold Coin"));
+        item.setItemMeta(meta);
+
+        NBTItem nbtitem = new NBTItem(item);
+        nbtitem.setString("wells_id", "GOLD_COIN");
+
+        return nbtitem.getItem();
     }
 
 }

@@ -5,11 +5,9 @@ import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.database.Database;
 import me.emmetion.wells.database.WellManager;
+import me.emmetion.wells.runnables.DroppedCoinRunnable;
 import me.emmetion.wells.util.Utilities;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -19,6 +17,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.Collection;
@@ -95,17 +94,23 @@ public class WellListener implements Listener {
         Player player = event.getPlayer();
         Item itemDrop = event.getItemDrop();
         ItemStack itemInHand = player.getInventory().getItemInMainHand();
-        //if (Utilities.isCoin(itemInHand)) {
-        if (coinTossCooldown.containsKey(player.getName())) {
-            player.sendMessage(ChatColor.BLUE + "You are on cooldown. [WELLS]");
-            event.setCancelled(true);
-            return;
+
+        if (Utilities.isCoin(itemDrop.getItemStack())) {
+            DroppedCoinRunnable droppedCoinRunnable = new DroppedCoinRunnable(Wells.plugin, itemDrop, player);
+            droppedCoinRunnable.runTaskTimer(Wells.plugin, 1, 1);
         }
 
-        coinTossCooldown.put(player.getName(), 1);
-        Bukkit.getScheduler().runTaskLater(Wells.plugin, () -> coinTossCooldown.remove(player.getName()), 3 * 20);
-        // schedule 1 second cooldown with bukkit scheduler
-        // }
+//        //if (Utilities.isCoin(itemInHand)) {
+//        if (coinTossCooldown.containsKey(player.getName())) {
+//            player.sendMessage(ChatColor.BLUE + "You are on cooldown. [WELLS]");
+//            event.setCancelled(true);
+//            return;
+//        }
+//
+//        coinTossCooldown.put(player.getName(), 1);
+//        Bukkit.getScheduler().runTaskLater(Wells.plugin, () -> coinTossCooldown.remove(player.getName()), 3 * 20);
+//        // schedule 1 second cooldown with bukkit scheduler
+//        // {}
     }
 
 
