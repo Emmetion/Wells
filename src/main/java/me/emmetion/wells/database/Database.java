@@ -67,7 +67,7 @@ public class Database {
 
         Statement wellsplayer = getConnection().createStatement();
 
-        String wellsPlayerSQL = "CREATE TABLE IF NOT EXISTS well_players (uuid varchar(36) primary key, bronzeCoins int, silverCoins int, goldCoins int, coinsDeposited int, expereincePoints int)";
+        String wellsPlayerSQL = "CREATE TABLE IF NOT EXISTS well_players (uuid varchar(36) primary key, bronzeCoins int, silverCoins int, goldCoins int, coinsDeposited int, experiencePoints int)";
 
         wellsplayer.execute(wellsPlayerSQL);
         wellsplayer.close();
@@ -253,6 +253,25 @@ public class Database {
         return well_players;
     }
 
+    public void createWellPlayer(WellPlayer wellPlayer) throws SQLException {
+        PreparedStatement statement = getConnection()
+                .prepareStatement("INSERT INTO well_players(uuid, bronzeCoins, silverCoins, goldCoins, coinsDeposited, experiencePoints) VALUES (?, ?, ?, ?, ?, ?)");
+        statement.setString(1, wellPlayer.getPlayerUUID().toString());
+        statement.setInt(2, wellPlayer.getBronzeCoins());
+        statement.setInt(3, wellPlayer.getSilverCoins());
+        statement.setInt(4, wellPlayer.getGoldCoins());
+        statement.setInt(5, wellPlayer.getCoinsDeposited());
+        statement.setInt(6, wellPlayer.getExperiencePoints());
+
+        try {
+            statement.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException e) {
+            System.out.println("Duplicate entry for well! Ignored.");
+        }
+
+        statement.close();
+    }
+
     public void updateWellPlayers(Collection<WellPlayer> wellPlayers) {
         for (WellPlayer wellPlayer : wellPlayers) {
             try {
@@ -265,13 +284,16 @@ public class Database {
     }
 
     public void updateWellPlayer(WellPlayer player) throws SQLException {
-        PreparedStatement statement = getConnection().prepareStatement("INSERT INTO well_players(uuid, bronzeCoins, silverCoins, goldCoins, coinsDeposited, experiencePoints) VALUES (?,?,?,?,?,?)");
+        PreparedStatement statement = getConnection().prepareStatement("UPDATE well_players SET uuid = ?, bronzeCoins = ?, silverCoins = ?, goldCoins = ?, coinsDeposited = ?, experiencePoints = ? WHERE uuid = ?");
+
         statement.setString(1, player.getPlayerUUID().toString());
         statement.setInt(2, player.getBronzeCoins());
         statement.setInt(3, player.getSilverCoins());
         statement.setInt(4, player.getGoldCoins());
         statement.setInt(5, player.getCoinsDeposited());
         statement.setInt(6, player.getExperiencePoints());
+
+        statement.setString(7, player.getPlayerUUID().toString());
 
         statement.executeUpdate();
         statement.close();
@@ -335,7 +357,7 @@ public class Database {
             return wp;
         } else {
             WellPlayer wellPlayer = new WellPlayer(uuid);
-            this.updateWellPlayer(wellPlayer); // inserts it into new db.
+            this.createWellPlayer(wellPlayer); // inserts it into new db.
 
             return wellPlayer;
         }
