@@ -1,5 +1,8 @@
 package me.emmetion.wells.util;
 
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
+import com.palmergames.bukkit.towny.object.TownBlock;
 import de.tr7zw.nbtapi.NBTBlock;
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTItem;
@@ -205,5 +208,14 @@ public class Utilities {
 
         return nbtitem.getItem();
     }
+
+    public static String getTownFromBlock(Block block) {
+        TownBlock townBlock = TownyAPI.getInstance().getTownBlock(block.getLocation());
+        if (townBlock != null && townBlock.hasTown()) {
+            return townBlock.getTownOrNull().getName();
+        }
+        return null;
+    }
+
 
 }

@@ -188,9 +188,20 @@ public class WellManager {
     public boolean wellExistsForPlayer(Player player) {
         Town town = TownyAPI.getInstance().getTown(player);
         if (town == null) { // not part of a town.
+            player.sendMessage("Not part of town.");
             return false;
         }
+
+        int size = wellHashMap.size();
+        player.sendMessage("wellHashMap#size(): " + size);
+        for (String s : wellHashMap.keySet()) {
+            player.sendMessage("key: " + s);
+        }
+
         String townname = town.getName();
+
+        player.sendMessage("Town of player: " + townname);
+
         return wellExistsByTownName(townname);
     }
 
@@ -203,7 +214,9 @@ public class WellManager {
     public boolean wellExistsByTownName(String townName) {
         if (wellHashMap == null)
             return false;
-        return wellHashMap.containsKey(townName);
+        boolean b = wellHashMap.containsKey(townName);
+        System.out.println("townname: " + b);
+        return b;
     }
 
     public boolean isWell(Location location) {
