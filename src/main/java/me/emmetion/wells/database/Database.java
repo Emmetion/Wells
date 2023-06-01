@@ -5,14 +5,17 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.model.Well;
+import me.emmetion.wells.model.WellPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.sql.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class Database {
@@ -53,13 +56,22 @@ public class Database {
      * @throws SQLException
      */
     public void initializeDatabase() throws SQLException {
-        Statement statement = getConnection().createStatement();
+        Statement wells = getConnection().createStatement();
 
         //Create the player_stats table
         String sql = "CREATE TABLE IF NOT EXISTS wells (townname varchar(36) primary key, level int, xcor int, ycor int, zcor int, worldname varchar(36))";
 
-        statement.execute(sql);
-        statement.close();
+        wells.execute(sql);
+        wells.close();
+
+
+        Statement wellsplayer = getConnection().createStatement();
+
+        String wellsPlayerSQL = "CREATE TABLE IF NOT EXISTS well_players (uuid varchar(36) primary key, bronzeCoins int, silverCoins int, goldCoins int, coinsDeposited int, expereincePoints int)";
+
+        wellsplayer.execute(wellsPlayerSQL);
+        wellsplayer.close();
+
     }
 
     /**
@@ -226,6 +238,107 @@ public class Database {
         statement.close();
     }
 
+    public HashMap<UUID, WellPlayer> getOnlineWellPlayersFromTable() throws SQLException {
+        HashMap<UUID, WellPlayer> well_players = new HashMap<>();
 
+        List<UUID> onlineUUIDS = Bukkit.getOnlinePlayers().stream()
+                .map(player -> player.getUniqueId())
+                .collect(Collectors.toList());
+
+        for (UUID uuid : onlineUUIDS) {
+            WellPlayer wp = getWellPlayerOrNew(uuid);
+            well_players.put(uuid, wp);
+        }
+
+        return well_players;
+    }
+
+    public void updateWellPlayers(Collection<WellPlayer> wellPlayers) {
+        for (WellPlayer wellPlayer : wellPlayers) {
+            try {
+                updateWellPlayer(wellPlayer);
+            } catch (SQLException e) {
+                System.out.println("Failed to save '" + wellPlayer.getPlayerUUID() + "'.");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void updateWellPlayer(WellPlayer player) throws SQLException {
+        PreparedStatement statement = getConnection().prepareStatement("INSERT INTO well_players(uuid, bronzeCoins, silverCoins, goldCoins, coinsDeposited, experiencePoints) VALUES (?,?,?,?,?,?)");
+        statement.setString(1, player.getPlayerUUID().toString());
+        statement.setInt(2, player.getBronzeCoins());
+        statement.setInt(3, player.getSilverCoins());
+        statement.setInt(4, player.getGoldCoins());
+        statement.setInt(5, player.getCoinsDeposited());
+        statement.setInt(6, player.getExperiencePoints());
+
+        statement.executeUpdate();
+        statement.close();
+    }
+
+    public void deleteWellPlayer(Player player) throws SQLException {
+        String uuid = player.getUniqueId().toString();
+        PreparedStatement statement = getConnection().prepareStatement("DELETE FROM well_players WHERE uuid = ?");
+        statement.setString(1, uuid);
+
+        statement.executeUpdate();
+        statement.close();
+    }
+
+    public WellPlayer getWellPlayerFromDatabase(Player player) throws SQLException {
+        UUID uuid = player.getUniqueId();
+        PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM well_players WHERE uuid = ?");
+        statement.setString(1, uuid.toString());
+
+        ResultSet set = statement.executeQuery();
+
+        WellPlayer wellPlayer;
+
+        if (set.next()) {
+            wellPlayer = new WellPlayer(uuid,
+                    set.getInt("bronzeCoins"),
+                    set.getInt("silverCoins"),
+                    set.getInt("goldCoins"),
+                    set.getInt("coinsDeposited"),
+                    set.getInt("experiencePoints")
+            );
+
+            statement.close();
+
+            return wellPlayer;
+
+        }
+
+        statement.close();
+
+        return null;
+    }
+
+    public WellPlayer getWellPlayerOrNew(UUID uuid) throws SQLException {
+        PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM well_players WHERE uuid = ?");
+        statement.setString(1, uuid.toString());
+        ResultSet resultSet = statement.executeQuery();
+
+        if (resultSet.next()) {
+            WellPlayer wp = new WellPlayer(
+                    uuid,
+                    resultSet.getInt("bronzeCoins"),
+                    resultSet.getInt("silverCoins"),
+                    resultSet.getInt("goldCoins"),
+                    resultSet.getInt("coinsDeposited"),
+                    resultSet.getInt("experiencePoints")
+            );
+
+            statement.close();
+
+            return wp;
+        } else {
+            WellPlayer wellPlayer = new WellPlayer(uuid);
+            this.updateWellPlayer(wellPlayer); // inserts it into new db.
+
+            return wellPlayer;
+        }
+    }
 
 }

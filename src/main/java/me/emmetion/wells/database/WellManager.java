@@ -5,13 +5,13 @@ import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import me.emmetion.wells.model.Well;
+import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.observer.IncrementObserver;
 import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -37,6 +37,8 @@ public class WellManager {
     private HashSet<Location> wellCache = new HashSet<>();
 
     private List<IncrementObserver> levelupObserver = new ArrayList<>();
+
+    private HashMap<UUID, WellPlayer> wellPlayerHashMap = new HashMap<>();
 
     /**
      * Used in isConnected(), returns whether the SQL Server was successfully connected and parsed.
@@ -65,6 +67,10 @@ public class WellManager {
                 IncrementObserver observer = new IncrementObserver(well);
                 levelupObserver.add(observer);
             }
+
+            this.wellPlayerHashMap = database.getOnlineWellPlayersFromTable();
+            Bukkit.getServer().sendMessage(Component.text("wphm: "+wellPlayerHashMap.size()));
+
             this.connected = true;
         } catch (SQLException e) {
             this.connected = false;
@@ -184,7 +190,6 @@ public class WellManager {
         return wellHashMap.containsKey(townname);
     }
 
-
     public boolean wellExistsForPlayer(Player player) {
         Town town = TownyAPI.getInstance().getTown(player);
         if (town == null) { // not part of a town.
@@ -242,6 +247,26 @@ public class WellManager {
     }
 
     /**
+     * Saves all WellPlayers to the database.
+     * This should also be executed every 5 minutes or when a WellPlayer is deleted.
+     */
+    public void saveAllWellPlayers() {
+        System.out.printf("Saving well players...");
+        Player em = Bukkit.getPlayer("Emmetion");
+
+        Collection<WellPlayer> wellPlayers = this.wellPlayerHashMap.values();
+        int count = wellPlayers.size();
+        em.sendMessage(Component.text("WellPlayersSize: " + count));
+        this.database.updateWellPlayers(wellPlayers);
+
+    }
+
+    public WellPlayer getWellPlayer(Player player) {
+        UUID uniqueId = player.getUniqueId();
+        return this.wellPlayerHashMap.get(uniqueId);
+    }
+
+    /**
      * Gets a current list of wells around the world.
      * @return
      */
@@ -255,6 +280,41 @@ public class WellManager {
 
     public Collection<Location> getCache() {
         return this.wellCache;
+    }
+
+    public Collection<WellPlayer> getWellPlayers() {
+        return this.wellPlayerHashMap.values();
+    }
+
+    public void loadWellPlayer(Player player) {
+
+        if (player == null) {
+            Player emmetion = Bukkit.getPlayer("Emmetion");
+            emmetion.sendMessage("player is null in loadWellPlayer");
+            return;
+
+        }
+        try {
+            WellPlayer wellPlayer = this.database.getWellPlayerOrNew(player.getUniqueId());
+            this.wellPlayerHashMap.put(wellPlayer.getPlayerUUID(), wellPlayer);
+            player.sendMessage("Got well player for load.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void unloadPlayer(Player player) {
+        UUID uuid = player.getUniqueId();
+        if (this.wellPlayerHashMap.containsKey(uuid)) {
+
+            WellPlayer wellPlayer = this.wellPlayerHashMap.get(uuid);
+            try {
+                this.database.updateWellPlayer(wellPlayer);
+                this.wellPlayerHashMap.remove(uuid);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -272,6 +332,8 @@ public class WellManager {
      * @throws SQLException
      */
     public void close() throws SQLException {
+        saveAllWells();
+        saveAllWellPlayers();
         if (this.database.getConnection().isClosed()) {
             this.database.getConnection().close();
         }

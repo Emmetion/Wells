@@ -7,6 +7,7 @@ import me.emmetion.wells.commands.WellCommand;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.listeners.WellBuffListener;
 import me.emmetion.wells.listeners.WellListener;
+import me.emmetion.wells.listeners.WellPlayerListener;
 import me.emmetion.wells.model.Well;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -95,6 +96,7 @@ public final class Wells extends JavaPlugin {
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new WellListener(wellManager), this);
         pluginManager.registerEvents(new WellBuffListener(wellManager), this);
+        pluginManager.registerEvents(new WellPlayerListener(wellManager), this);
     }
 
 

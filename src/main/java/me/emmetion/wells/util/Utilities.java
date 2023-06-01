@@ -6,6 +6,7 @@ import com.palmergames.bukkit.towny.object.TownBlock;
 import de.tr7zw.nbtapi.NBTBlock;
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTItem;
+import me.emmetion.wells.model.CoinType;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -17,6 +18,9 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Utilities {
 
@@ -191,8 +195,12 @@ public class Utilities {
         NBTItem item = new NBTItem(itemStack);
 
         if (item.hasKey("wells_id")) {
-            return item.getString("wells_id").equals("GOLD_COIN");
+            List<String> coin_ids = Arrays.stream(CoinType.values())
+                    .map(v -> v.getWellsId())
+                    .collect(Collectors.toList());
+            return coin_ids.contains(item.getString("wells_id"));
         }
+
         return false;
     }
 

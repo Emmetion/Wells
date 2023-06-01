@@ -6,7 +6,9 @@ import me.emmetion.wells.Wells;
 import me.emmetion.wells.database.Database;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.model.Well;
+import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.util.Utilities;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -106,6 +108,11 @@ public class WellCommand implements CommandExecutor {
             player.sendMessage(ChatColor.BLUE + "Look under you.");
         } else if (arg1.equals("well_reset")) {
             Wells.plugin.initWellHolograms();
+        } else if (arg1.equals("players")) {
+            player.sendMessage("Players");
+            int size = this.manager.getWellPlayers().size();
+            player.sendMessage("Size " + size);
+
         }
 
 

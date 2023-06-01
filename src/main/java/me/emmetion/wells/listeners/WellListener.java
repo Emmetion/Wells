@@ -98,7 +98,8 @@ public class WellListener implements Listener {
         ItemStack itemInHand = player.getInventory().getItemInMainHand();
 
         if (Utilities.isCoin(itemDrop.getItemStack())) {
-            DroppedCoinRunnable droppedCoinRunnable = new DroppedCoinRunnable(Wells.plugin, itemDrop, player);
+            player.sendMessage("Is coin!");
+            DroppedCoinRunnable droppedCoinRunnable = new DroppedCoinRunnable(Wells.plugin, itemDrop, player, manager);
             droppedCoinRunnable.runTaskTimer(Wells.plugin, 1, 1);
         }
 
