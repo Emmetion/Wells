@@ -141,7 +141,8 @@ public final class Wells extends JavaPlugin {
                             nearWellMessageCooldown.put(p, nearWellMessageCooldown.get(p) - 1); // count down every second.
                         }
                     } else {
-                        p.sendMessage("You are near a well! [" + w.getWellName() + "]");
+                        if (wellManager.isDebug())
+                            p.sendMessage("☢ You are near a well! [" + w.getWellName() + "]");
                         nearWellMessageCooldown.put(p, 5); // -1 on cooldown each second.
                     }
                 }
@@ -158,7 +159,8 @@ public final class Wells extends JavaPlugin {
                     Hologram h = DHAPI.getHologram(wellName);
                     h.removeShowPlayer(p);
                     h.hide(p);
-                    p.sendMessage("You are no longer near a well. [" + wellName + "]");
+                    if (wellManager.isDebug())
+                        p.sendMessage("☢ You are no longer near a well. [" + wellName + "]");
 
                     this.playersNearWell.remove(p);
                 }

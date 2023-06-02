@@ -139,8 +139,14 @@ public class WellCommand implements CommandExecutor {
             } catch (IndexOutOfBoundsException e) {
                 player.sendMessage("Syntax: /wells golo <add/sub> <x> <y> <z>");
             }
+        } else if (arg1.equals("debug")) {
+            try {
+                boolean mode = Boolean.valueOf(args[1]);
+                this.manager.setDebug(mode);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                player.sendMessage("Syntax: /wells debug <true/false>");
+            }
         }
-
 
         return true;
     }

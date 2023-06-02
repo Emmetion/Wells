@@ -46,6 +46,11 @@ public class WellManager {
     private boolean connected;
 
     /**
+     * Used to send messages to plugin developer, toggled via WellsCommand.
+     */
+    private boolean debug;
+
+    /**
      * Constructor for WellManager, calls WellManager#init() upon being called.
      */
     public WellManager() {
@@ -239,7 +244,8 @@ public class WellManager {
         Player emmetion = Bukkit.getPlayer("Emmetion");
         Collection<Well> wells = this.wellHashMap.values();
         int count = wells.size();
-        emmetion.sendMessage(Component.text("Wells Saved: " + count));
+        if (debug)
+            emmetion.sendMessage(Component.text("☢ Wells Saved: " + count));
 
         this.database.updateWells(wells);
         System.out.println("Saved!");
@@ -250,12 +256,13 @@ public class WellManager {
      * This should also be executed every 5 minutes or when a WellPlayer is deleted.
      */
     public void saveAllWellPlayers() {
-        System.out.printf("Saving well players...");
+        System.out.printf("☢ Saving well players...");
         Player em = Bukkit.getPlayer("Emmetion");
 
         Collection<WellPlayer> wellPlayers = this.wellPlayerHashMap.values();
         int count = wellPlayers.size();
-        em.sendMessage(Component.text("WellPlayersSize: " + count));
+        if (debug)
+            em.sendMessage(Component.text("☢ WellPlayersSize: " + count));
         this.database.updateWellPlayers(wellPlayers);
 
     }
@@ -283,6 +290,14 @@ public class WellManager {
 
     public Collection<WellPlayer> getWellPlayers() {
         return this.wellPlayerHashMap.values();
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
+    }
+
+    public boolean isDebug() {
+        return this.debug;
     }
 
     public void loadWellPlayer(Player player) {
