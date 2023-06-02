@@ -197,7 +197,8 @@ public class WellManager {
     public boolean wellExistsForPlayer(Player player) {
         Town town = TownyAPI.getInstance().getTown(player);
         if (town == null) { // not part of a town.
-            player.sendMessage("Not part of town.");
+            if (debug)
+                player.sendMessage("Not part of town.");
             return false;
         }
 
@@ -240,7 +241,7 @@ public class WellManager {
      * This should be executed every 5 minutes or when a well is deleted.
      */
     public void saveAllWells() {
-        System.out.println("Saving wells...");
+        System.out.println("☢ Saving wells...");
         Player emmetion = Bukkit.getPlayer("Emmetion");
         Collection<Well> wells = this.wellHashMap.values();
         int count = wells.size();
@@ -256,7 +257,7 @@ public class WellManager {
      * This should also be executed every 5 minutes or when a WellPlayer is deleted.
      */
     public void saveAllWellPlayers() {
-        System.out.printf("☢ Saving well players...");
+        System.out.println("☢ Saving well players...");
         Player em = Bukkit.getPlayer("Emmetion");
 
         Collection<WellPlayer> wellPlayers = this.wellPlayerHashMap.values();
@@ -304,14 +305,16 @@ public class WellManager {
 
         if (player == null) {
             Player emmetion = Bukkit.getPlayer("Emmetion");
-            emmetion.sendMessage("player is null in loadWellPlayer");
+            if (debug)
+                emmetion.sendMessage("☢ player is null in loadWellPlayer");
             return;
 
         }
         try {
             WellPlayer wellPlayer = this.database.getWellPlayerOrNew(player.getUniqueId());
             this.wellPlayerHashMap.put(wellPlayer.getPlayerUUID(), wellPlayer);
-            player.sendMessage("Got well player for load.");
+            if (debug)
+                player.sendMessage("☢ Got well player for load.");
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -3,6 +3,7 @@ me\emmetion\wells\anim\CropFarmAnimation.class
 me\emmetion\wells\listeners\WellBuffListener.class
 me\emmetion\wells\observer\Observer.class
 me\emmetion\wells\model\Well.class
+me\emmetion\wells\model\ActiveBuff.class
 me\emmetion\wells\commands\WellCommand.class
 me\emmetion\wells\model\WellPlayer$1.class
 me\emmetion\wells\observer\IncrementObserver.class
