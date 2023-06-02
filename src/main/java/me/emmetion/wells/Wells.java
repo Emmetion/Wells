@@ -10,6 +10,7 @@ import me.emmetion.wells.listeners.WellListener;
 import me.emmetion.wells.listeners.WellPlayerListener;
 import me.emmetion.wells.model.Well;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -41,6 +42,7 @@ public final class Wells extends JavaPlugin {
         if (instance == null) {
             System.out.println("Disabling because townyapi was not found.");
             this.setEnabled(false);
+            return;
         }
         System.out.println("DEBUG: townyapi was found... continuing...");
 
@@ -49,6 +51,7 @@ public final class Wells extends JavaPlugin {
         if (!wellManager.isConnected()) {
             System.out.println("Failed connection to the wellmanager.");
             this.setEnabled(false);
+            return;
         }
 
 
@@ -71,7 +74,6 @@ public final class Wells extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        this.wellManager.saveAllWells();
         try {
             this.wellManager.close();
         } catch (SQLException e) {
@@ -112,7 +114,7 @@ public final class Wells extends JavaPlugin {
 
             for (Well w : this.wellManager.getWells()) {
                 Location location = w.getLocation();
-                Collection<Player> nearbyPlayers = location.getNearbyPlayers(5);
+                Collection<Player> nearbyPlayers = location.getNearbyPlayers(10);
 
                 for (Player p : nearbyPlayers) {
 
@@ -127,6 +129,9 @@ public final class Wells extends JavaPlugin {
 
                     // "Town's Well"
                     Hologram hologram = DHAPI.getHologram(w.getWellName()); // gets the hologram from hashmap.
+                    if (hologram == null) {
+                        hologram = createWellHologram(w);
+                    }
                     hologram.setShowPlayer(p); // displays the well hologram to the player.
 
                     if (nearWellMessageCooldown.containsKey(p)) {
@@ -162,6 +167,11 @@ public final class Wells extends JavaPlugin {
 
 
         }, 20, 20);
+
+        scheduler.runTaskTimer(this, () -> {
+            System.out.println("update database.");
+            this.wellManager.updateDatabase();
+        }, 1, 300);
     }
 
 
@@ -172,19 +182,23 @@ public final class Wells extends JavaPlugin {
         }
     }
 
-    private void createWellHologram(Well well) {
+
+
+    private Hologram createWellHologram(Well well) {
         if (DHAPI.getHologram(well.getWellName()) != null) {
             DHAPI.removeHologram(well.getWellName());
         }
         // now we create it knowing it doesn't exist.
 
         String wellName = well.getWellName();
-        Location location = well.getLocation();
+        Location location = well.getHologramLocation();
         boolean saveToFile = false;
-        List<String> lines = Arrays.asList(well.getWellName(), well.prettyPosition());
+        List<String> lines = Arrays.asList(well.getWellName(), well.prettyPosition(), ChatColor.YELLOW + "Level: " + well.getWellLevel());
 
         Hologram hologram = DHAPI.createHologram(wellName, location, saveToFile, lines);
         hologram.setDefaultVisibleState(false);
+
+        return hologram;
 
     }
 

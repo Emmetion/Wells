@@ -56,7 +56,7 @@ public class WellPlayer {
         return experiencePoints;
     }
 
-    public void depositCoin(CoinType coinType) {
+    public void depositCoin(CoinType coinType, Well well) {
         if (coinType == null)
             return;
 

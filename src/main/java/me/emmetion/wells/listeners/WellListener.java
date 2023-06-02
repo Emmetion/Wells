@@ -8,6 +8,8 @@ import me.emmetion.wells.database.Database;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.runnables.DroppedCoinRunnable;
 import me.emmetion.wells.util.Utilities;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
@@ -98,6 +100,13 @@ public class WellListener implements Listener {
         ItemStack itemInHand = player.getInventory().getItemInMainHand();
 
         if (Utilities.isCoin(itemDrop.getItemStack())) {
+            if (coinTossCooldown.containsKey(player.getName())) {
+                player.sendMessage(
+                        Component.text("You are on cooldown! (" + coinTossCooldown.get(player.getName()))
+                        .color(TextColor.color(255,0,0))
+                );
+                return;
+            }
             player.sendMessage("Is coin!");
             DroppedCoinRunnable droppedCoinRunnable = new DroppedCoinRunnable(Wells.plugin, itemDrop, player, manager);
             droppedCoinRunnable.runTaskTimer(Wells.plugin, 1, 1);
@@ -110,8 +119,7 @@ public class WellListener implements Listener {
 //            return;
 //        }
 //
-//        coinTossCooldown.put(player.getName(), 1);
-//        Bukkit.getScheduler().runTaskLater(Wells.plugin, () -> coinTossCooldown.remove(player.getName()), 3 * 20);
+
 //        // schedule 1 second cooldown with bukkit scheduler
 //        // {}
     }

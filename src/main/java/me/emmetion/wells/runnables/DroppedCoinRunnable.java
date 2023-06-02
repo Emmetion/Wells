@@ -9,6 +9,7 @@ import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.event.HoverEventSource;
 import net.kyori.adventure.text.format.TextColor;
@@ -18,6 +19,7 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
@@ -46,16 +48,42 @@ public class DroppedCoinRunnable extends BukkitRunnable {
 
         if (!dropper.isOnline()) {
             this.cancel();
+            return;
+        }
+
+        if (item == null || item.isDead()) {
+            this.cancel();
+            return;
+        }
+
+        if (item.isOnGround()) {
+            ItemStack itemstack = item.getItemStack().asOne();
+            dropper.getInventory().addItem(itemstack);
+
+            Component text = Component.text("Your coin has been returned to you.")
+                    .color(TextColor.color(52, 217, 241));
+
+            dropper.sendMessage(text);
+            item.remove();
+            this.cancel();
         }
 
         if (item.isInWater()) {
-            dropper.sendMessage("Is in water!!");
             List<Well> collect = wells.getWellManager().getWells().stream().filter(w -> w.getLocation().distance(w.getLocation()) < 5).collect(Collectors.toList());
             if (collect.size() >= 1) {
-                dropper.sendMessage("Hit water! (" + coinType.toString() + ")");
+
+                Component component = Component.text("Exchanged Coin: ")
+                        .color(TextColor.color(251, 255, 246))
+                        .append(
+                                Component.text(coinType.getWellsId())
+                                        .color(coinType.getColor())
+                        );
+
+                dropper.sendMessage(component);
+
                 WellPlayer wellPlayer = wellManager.getWellPlayer(dropper);
-                wellPlayer.depositCoin(coinType);
-                dropper.sendMessage("Deposited coin.");
+                Well well = collect.get(0);
+                wellPlayer.depositCoin(coinType, well);
                 this.cancel();
                 return;
             }

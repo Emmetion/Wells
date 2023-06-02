@@ -104,8 +104,7 @@ public class WellManager {
                             wellPosition.getX(),
                             wellPosition.getY(),
                             wellPosition.getZ()
-                    ),
-                    0
+                    )
             );
             try {
                 this.wellCache.add(newWell.getLocation());
@@ -327,13 +326,20 @@ public class WellManager {
     }
 
     /**
+     * Call this every 5 minutes. Updates the MySQL database with the latest information.
+     */
+    public void updateDatabase() {
+        saveAllWellPlayers();
+        saveAllWells();
+    }
+
+    /**
      * Closes the connection on the database object.
      * Once closed, the database will not save until a new Database object has been created.
      * @throws SQLException
      */
     public void close() throws SQLException {
-        saveAllWells();
-        saveAllWellPlayers();
+        updateDatabase();
         if (this.database.getConnection().isClosed()) {
             this.database.getConnection().close();
         }

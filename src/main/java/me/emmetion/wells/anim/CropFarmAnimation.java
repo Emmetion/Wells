@@ -10,6 +10,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -47,6 +49,7 @@ public class CropFarmAnimation extends BukkitRunnable {
             Bat bat = location.getWorld().spawn(location, Bat.class);
 
             bat.setVisibleByDefault(false);
+            bat.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 10, 2, true, false, true));
 
             bats.add(bat);
         }

@@ -59,7 +59,7 @@ public class Database {
         Statement wells = getConnection().createStatement();
 
         //Create the player_stats table
-        String sql = "CREATE TABLE IF NOT EXISTS wells (townname varchar(36) primary key, level int, xcor int, ycor int, zcor int, worldname varchar(36))";
+        String sql = "CREATE TABLE IF NOT EXISTS wells (townname varchar(36) primary key, well_level int, experience int, xcor int, ycor int, zcor int, xholocor int, yholocor int, zholocor int, worldname varchar(36), buff1_id varchar(36), buff1_end date, buff2_id varchar(36), buff2_end date, buff3_id varchar(36), buff3_end date)";
 
         wells.execute(sql);
         wells.close();
@@ -85,21 +85,32 @@ public class Database {
         PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM wells WHERE townname = ?");
         statement.setString(1, townname);
 
-        ResultSet resultSet = statement.executeQuery();
+        ResultSet set = statement.executeQuery();
 
 
 
-        if(resultSet.next()){
+        if(set.next()){
 
             Well well = new Well(
-                    resultSet.getString("townname"),
+                    set.getString("townname"),
                     new Location(
-                            Bukkit.getWorld("world"),
-                            resultSet.getInt("xcor"),
-                            resultSet.getInt("ycor"),
-                            resultSet.getInt("zcor")
-                    ),
-                    resultSet.getInt("level")
+                            Bukkit.getWorld(set.getString("worldname")),
+                            set.getInt("xcor"),
+                            set.getInt("ycor"),
+                            set.getInt("zcor")),
+                    new Location(
+                            Bukkit.getWorld(set.getString("worldname")),
+                            set.getInt("xholocor"),
+                            set.getInt("yholocor"),
+                            set.getInt("zholocor")),
+                    set.getInt("well_level"),
+                    set.getInt("experience"),
+                    set.getString("buff1_id"),
+                    set.getDate("buff1_end"),
+                    set.getString("buff2_id"),
+                    set.getDate("buff2_end"),
+                    set.getString("buff3_id"),
+                    set.getDate("buff3_end")
             );
 
             statement.close();
@@ -118,13 +129,23 @@ public class Database {
         announceWellPlacement(well);
 
         PreparedStatement statement = getConnection()
-                .prepareStatement("INSERT INTO wells(townname, level, xcor, ycor, zcor, worldname) VALUES (?, ?, ?, ?, ?, ?)");
+                .prepareStatement("INSERT INTO wells(townname, well_level, experience, xcor, ycor, zcor, xholocor, yholocor, zholocor, worldname, buff1_id, buff1_end, buff2_id, buff2_end, buff3_id, buff3_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         statement.setString(1, well.getTownName());
-        statement.setInt(2, well.getLevel());
-        statement.setInt(3, well.getLocation().getBlockX());
-        statement.setInt(4, well.getLocation().getBlockY());
-        statement.setInt(5, well.getLocation().getBlockZ());
-        statement.setString(6, well.getLocation().getWorld().getName());
+        statement.setInt(2, well.getWellLevel());
+        statement.setInt(3, well.getExperience());
+        statement.setInt(4, well.getLocation().getBlockX());
+        statement.setInt(5, well.getLocation().getBlockY());
+        statement.setInt(6, well.getLocation().getBlockZ());
+        statement.setInt(7, well.getHologramLocation().getBlockX());
+        statement.setInt(8, well.getHologramLocation().getBlockY());
+        statement.setInt(9, well.getHologramLocation().getBlockZ());
+        statement.setString(10, well.getLocation().getWorld().getName());
+        statement.setString(11, well.getBuff1().getBuffID());
+        statement.setDate(12, well.getBuff1().getEndDate());
+        statement.setString(13, well.getBuff2().getBuffID());
+        statement.setDate(14, well.getBuff2().getEndDate());
+        statement.setString(15, well.getBuff3().getBuffID());
+        statement.setDate(16, well.getBuff3().getEndDate());
 
         try {
             statement.executeUpdate();
@@ -144,7 +165,7 @@ public class Database {
         for (Resident r : town.getResidents()) {
             r.sendMessage(Component.text(ChatColor.GREEN + "---- Town Announcement ----"));
             r.sendMessage(Component.text(ChatColor.YELLOW + "A well has been created in your town!"));
-            r.sendMessage(Component.text("Well '" + well.getTownName() + "' Level: " + ChatColor.YELLOW + well.getLevel()));
+            r.sendMessage(Component.text("Well '" + well.getTownName() + "' Level: " + ChatColor.YELLOW + well.getWellLevel()));
             r.sendMessage(Component.text(ChatColor.YELLOW + "x: " + well.getLocation().getBlockX() + " y: " + well.getLocation().getBlockY()+" z: " + well.getLocation().getBlockZ()));
         }
     }
@@ -177,9 +198,21 @@ public class Database {
                                     Bukkit.getWorld(set.getString("worldname")),
                                     set.getInt("xcor"),
                                     set.getInt("ycor"),
-                                    set.getInt("zcor")
-                        ),
-                        set.getInt("level"))
+                                    set.getInt("zcor")),
+                            new Location(
+                                    Bukkit.getWorld(set.getString("worldname")),
+                                    set.getInt("xholocor"),
+                                    set.getInt("yholocor"),
+                                    set.getInt("zholocor")),
+                            set.getInt("well_level"),
+                            set.getInt("experience"),
+                            set.getString("buff1_id"),
+                            set.getDate("buff1_end"),
+                            set.getString("buff2_id"),
+                            set.getDate("buff2_end"),
+                            set.getString("buff3_id"),
+                            set.getDate("buff3_end")
+                    )
             );
         }
 
@@ -195,15 +228,26 @@ public class Database {
      */
     public void updateWell(Well well) throws SQLException {
 
-        PreparedStatement statement = getConnection().prepareStatement("UPDATE wells SET townname = ?, level = ?, xcor = ?, ycor = ?, zcor = ?, worldname = ? WHERE townname = ?");
+        PreparedStatement statement = getConnection().prepareStatement("UPDATE wells SET townname = ?, well_level = ?, experience = ?, xcor = ?, ycor = ?, zcor = ?, xholocor = ?, yholocor = ?, zholocor = ?, worldname = ?, buff1_id = ?, buff1_end = ?, buff2_id = ?, buff2_end = ?, buff3_id = ?, buff3_end = ? WHERE townname = ?");
 
         statement.setString(1, well.getTownName());
-        statement.setInt(2, well.getLevel());
-        statement.setInt(3, well.getLocation().getBlockX());
-        statement.setInt(4, well.getLocation().getBlockY());
-        statement.setInt(5, well.getLocation().getBlockZ());
-        statement.setString(6, well.getLocation().getWorld().getName());
-        statement.setString(7, well.getTownName());
+        statement.setInt(2, well.getWellLevel());
+        statement.setInt(3, well.getExperience());
+        statement.setInt(4, well.getLocation().getBlockX());
+        statement.setInt(5, well.getLocation().getBlockY());
+        statement.setInt(6, well.getLocation().getBlockZ());
+        statement.setInt(7, well.getHologramLocation().getBlockX());
+        statement.setInt(8, well.getHologramLocation().getBlockY());
+        statement.setInt(9, well.getHologramLocation().getBlockZ());
+        statement.setString(10, well.getLocation().getWorld().getName());
+        statement.setString(11, well.getBuff1().getBuffID());
+        statement.setDate(12, well.getBuff1().getEndDate());
+        statement.setString(13, well.getBuff2().getBuffID());
+        statement.setDate(14, well.getBuff2().getEndDate());
+        statement.setString(15, well.getBuff3().getBuffID());
+        statement.setDate(16, well.getBuff3().getEndDate());
+
+        statement.setString(17, well.getTownName());
 
         statement.executeUpdate();
         statement.close();
