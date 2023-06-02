@@ -3,12 +3,9 @@ package me.emmetion.wells.commands;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.Wells;
-import me.emmetion.wells.database.Database;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.model.Well;
-import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.util.Utilities;
-import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -64,7 +61,7 @@ public class WellCommand implements CommandExecutor {
         } else if (arg1.equals("save")) {
             this.manager.saveAllWells();
             player.sendMessage("Saved wells.");
-        } else if (arg1.equals("increment")) {
+        } else if (arg1.equals("level")) {
             if (args.length < 3) {
                 player.sendMessage("Too few arguments!");
                 return true;
@@ -78,15 +75,15 @@ public class WellCommand implements CommandExecutor {
             String option = args[2];
             if (option.equals("increase")) {
                 well.incrementLevel();
+                player.sendMessage("Incremented level of " + townname + " to " + well.getWellLevel());
                 well.notifyObservers();
             } else if (option.equals("decrease")) {
-                well.incrementLevel();
+                well.decrementLevel();
+                player.sendMessage("Incremented level of " + townname + " to " + well.getWellLevel());
                 well.notifyObservers();
             } else {
                 player.sendMessage("Syntax: /wells increment <townname> <increase/decrease>");
             }
-            well.incrementLevel();
-            player.sendMessage("Incremented level of " + townname + " to " + well.getLevel());
         } else if (arg1.equals("give")) {
             if (args.length < 2) {
                 player.sendMessage("Too few arguments!");
@@ -112,7 +109,36 @@ public class WellCommand implements CommandExecutor {
             player.sendMessage("Players");
             int size = this.manager.getWellPlayers().size();
             player.sendMessage("Size " + size);
+        } else if (arg1.equals("holo")) {
+            Well well = manager.getWellByTownName(town.getName());
+            if (well == null) {
+                player.sendMessage("You aren't in a town! You cannot use this command!");
+                return true;
+            }
+            try {
+                String addsub = String.valueOf(args[1]);
+                if (addsub.equals("add")) {
+                    float x = Float.parseFloat(args[2]);
+                    float y = Float.parseFloat(args[3]);
+                    float z = Float.parseFloat(args[4]);
 
+                    if (well.addHologramLocation(x, y, z))
+                        well.recreateHologram();
+                    else
+                        player.sendMessage("Well hologram out of bounds! (dist: >5)");
+                } else if (addsub.equals("sub")) {
+                    float x = Float.parseFloat(args[2]);
+                    float y = Float.parseFloat(args[3]);
+                    float z = Float.parseFloat(args[4]);
+
+                    if (well.subtractHologramLocation(x, y, z))
+                        well.recreateHologram();
+                    else
+                        player.sendMessage("Well hologram out of bounds! (dist: >5)");
+                }
+            } catch (IndexOutOfBoundsException e) {
+                player.sendMessage("Syntax: /wells golo <add/sub> <x> <y> <z>");
+            }
         }
 
 
