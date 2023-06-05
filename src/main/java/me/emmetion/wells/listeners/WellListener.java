@@ -2,15 +2,16 @@ package me.emmetion.wells.listeners;
 
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
-import io.papermc.paper.event.entity.WaterBottleSplashEvent;
 import me.emmetion.wells.Wells;
-import me.emmetion.wells.database.Database;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.runnables.DroppedCoinRunnable;
 import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -18,18 +19,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitScheduler;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 
 public class WellListener implements Listener {
 
     private WellManager manager;
+
+    private Collection<Player> playersOnCooldown = new ArrayList<>();
 
     public WellListener(WellManager manager) {
         this.manager = manager;
@@ -37,6 +36,7 @@ public class WellListener implements Listener {
 
     /**
      * WellPlace event. Listens for a BlockPlaceEvent, then checks for item in hand.
+     *
      * @param event
      */
     @EventHandler
@@ -75,6 +75,7 @@ public class WellListener implements Listener {
 
     /**
      * BlockBreak event. Checks a block in a BlockBreakEvent for being a Well Block. Cancelled if true.
+     *
      * @param event
      */
     @EventHandler
@@ -90,47 +91,25 @@ public class WellListener implements Listener {
 
     }
 
-
-    private HashMap<String, Integer> coinTossCooldown = new HashMap<>();
-
     @EventHandler
     public void onCoinToss(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
         Item itemDrop = event.getItemDrop();
-        ItemStack itemInHand = player.getInventory().getItemInMainHand();
 
         if (Utilities.isCoin(itemDrop.getItemStack())) {
-            if (coinTossCooldown.containsKey(player.getName())) {
-                player.sendMessage(
-                        Component.text("You are on cooldown! (3s)")
-                        .color(TextColor.color(255,0,0))
-                );
+            if (playersOnCooldown.contains(player)) {
+                player.sendMessage(Component.text("You are on cooldown!").color(TextColor.color(255, 0, 0)));
+                event.setCancelled(true);
                 return;
             }
             player.sendActionBar(Component.text("You have thrown a coin!"));
-            DroppedCoinRunnable droppedCoinRunnable = new DroppedCoinRunnable(Wells.plugin, itemDrop, player, manager);
+            DroppedCoinRunnable droppedCoinRunnable = new DroppedCoinRunnable(Wells.plugin, itemDrop, player, manager, playersOnCooldown);
             droppedCoinRunnable.runTaskTimer(Wells.plugin, 1, 1);
-            coinTossCooldown.put(player.getName(), 3);
+
+            if (!playersOnCooldown.contains(player)) playersOnCooldown.add(player);
             Bukkit.getScheduler().runTaskLater(Wells.plugin, () -> {
-                this.coinTossCooldown.remove(player.getName());
+                this.playersOnCooldown.remove(player);
             }, 3 * 20);
         }
-
-//        //if (Utilities.isCoin(itemInHand)) {
-//        if (coinTossCooldown.containsKey(player.getName())) {
-//            player.sendMessage(ChatColor.BLUE + "You are on cooldown. [WELLS]");
-//            event.setCancelled(true);
-//            return;
-//        }
-//
-
-//        // schedule 1 second cooldown with bukkit scheduler
-//        // {}
     }
-
-//    @EventHandler
-//    public void onCoinEnterWater(Event e) {
-//        e.
-//    }
-
 }
