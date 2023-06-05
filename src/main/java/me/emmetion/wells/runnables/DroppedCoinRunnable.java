@@ -1,19 +1,13 @@
 package me.emmetion.wells.runnables;
 
-import de.tr7zw.nbtapi.NBTContainer;
 import de.tr7zw.nbtapi.NBTItem;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.model.CoinType;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
-import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.event.HoverEventSource;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -22,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,23 +25,27 @@ public class DroppedCoinRunnable extends BukkitRunnable {
     private Wells wells;
     private Item item;
     private CoinType coinType;
-    private Player dropper;
+    private Player player;
     private WellManager wellManager;
+    private Collection<Player> playersOnCooldown;
 
-    public DroppedCoinRunnable(Wells wells, Item item, Player dropper, WellManager wellManager) {
+    public DroppedCoinRunnable(Wells wells, Item item, Player player, WellManager wellManager, Collection<Player> playersOnCooldown) {
         this.wells = wells;
         this.item = item;
         NBTItem nbt = new NBTItem(item.getItemStack());
         String wells_id = nbt.getString("wells_id");
         this.coinType = CoinType.getCoinTypeFromWellsID(wells_id);
-        this.dropper = dropper;
+        this.player = player;
         this.wellManager = wellManager;
+        this.playersOnCooldown = playersOnCooldown;
+
+        item.setCanPlayerPickup(false);
     }
 
     @Override
     public void run() {
 
-        if (!dropper.isOnline()) {
+        if (!player.isOnline()) {
             this.cancel();
             return;
         }
@@ -58,35 +57,42 @@ public class DroppedCoinRunnable extends BukkitRunnable {
 
         if (item.isOnGround()) {
             ItemStack itemstack = item.getItemStack().asOne();
-            dropper.getInventory().addItem(itemstack);
+            player.getInventory().addItem(itemstack);
 
-            Component text = Component.text("Your coin has been returned to you.")
-                    .color(TextColor.color(52, 217, 241));
+            Component text = Component.text("You missed your coin toss!")
+                    .color(TextColor.color(52, 217, 241))
+                    .append(
+                            Component.text()
+                    );
 
-            dropper.sendMessage(text);
+            player.sendMessage(text);
             item.remove();
             this.cancel();
         }
 
         if (item.isInWater()) {
-            List<Well> collect = wells.getWellManager().getWells().stream().filter(w -> w.getLocation().distance(w.getLocation()) < 5).collect(Collectors.toList());
+            List<Well> collect = wells.getWellManager().getWells().stream().filter(w -> w.getLocation().distance(w.getLocation()) < 2).collect(Collectors.toList());
             if (collect.size() >= 1) {
-
-                Component component = Component.text("Exchanged Coin: ")
-                        .color(TextColor.color(251, 255, 246))
-                        .append(
-                                Component.text(coinType.getWellsId())
-                                        .color(coinType.getColor())
-                        );
-
-                dropper.sendMessage(component);
-
-                WellPlayer wellPlayer = wellManager.getWellPlayer(dropper);
+                WellPlayer wellPlayer = wellManager.getWellPlayer(player);
                 Well well = collect.get(0);
+
                 wellPlayer.depositCoin(coinType, well);
+                item.remove();
+                if (playersOnCooldown.contains(player)) // removes cooldown located in WellListener object.
+                    playersOnCooldown.remove(player);
+                this.cancel();
+                return;
+            } else {
+                Component text = Component.text("You coin wasn't close to a well!")
+                        .color(TextColor.color(52, 217, 241))
+                        .append(
+                                Component.text()
+                        );
+                player.sendActionBar(text);
                 this.cancel();
                 return;
             }
+
         }
 
         if (item == null || item.isOnGround() || item.isInWater()) {
@@ -94,6 +100,8 @@ public class DroppedCoinRunnable extends BukkitRunnable {
         }
 
         Location location = item.getLocation();
-        location.getWorld().spawnParticle(Particle.REDSTONE, location, 1, new Particle.DustOptions(Color.fromRGB(255,128,0), 1));
+        location.getWorld().spawnParticle(Particle.REDSTONE, location, 1, new Particle.DustOptions(
+                Color.fromRGB(255,128,0)
+                , 1));
     }
 }

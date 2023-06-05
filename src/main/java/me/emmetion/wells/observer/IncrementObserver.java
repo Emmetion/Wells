@@ -17,6 +17,8 @@ public class IncrementObserver implements Observer {
     @Override
     public void update(Well well) {
         Server server = Bukkit.getServer();
+        well.recreateHologram();
+
         System.out.println("HELLO WORLD!");
         server.sendMessage(Component.text("IncrementObserver called."));
     }

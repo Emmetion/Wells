@@ -1,5 +1,6 @@
 package me.emmetion.wells.model;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -57,11 +58,19 @@ public class WellPlayer {
     }
 
     public void depositCoin(CoinType coinType, Well well) {
+        if (well == null) { // don't know what would cause this, but if it ever happens, we prevent it here.
+            System.out.println("Well was null on deposited coin.");
+            return;
+        }
+
         if (coinType == null)
             return;
 
         this.experiencePoints += coinType.getExperience();
         this.coinsDeposited += 1;
+
+        well.depositCoin(this, coinType);
+        // add well experiences.
         switch (coinType) {
             case GOLD:
                 this.goldCoins += 1;
@@ -76,8 +85,15 @@ public class WellPlayer {
 
         Player player = Bukkit.getPlayer(playerUUID);
         if (player != null) {
-            player.sendMessage(ChatColor.GRAY + "You have deposited a " + coinType.getWellsId() + ChatColor.GRAY + "!");
+            player.sendMessage(ChatColor.WHITE + "You have deposited a " + coinType.getWellsId() + "! (" + coinType.getExperience() + "xp)");
         }
     }
+
+    public void sendMessage(String text) {
+        Player player = Bukkit.getPlayer(playerUUID);
+        if (player != null)
+            player.sendMessage(Component.text(text));
+    }
+
 
 }
