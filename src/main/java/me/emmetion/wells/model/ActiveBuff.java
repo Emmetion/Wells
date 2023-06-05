@@ -35,5 +35,11 @@ public class ActiveBuff {
         return new ActiveBuff("none", null);
     }
 
-
+    @Override
+    public String toString() {
+        return "ActiveBuff{" +
+                "buff_id='" + buff_id + '\'' +
+                ", buff_end=" + endDate +
+                '}';
+    }
 }

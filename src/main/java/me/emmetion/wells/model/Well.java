@@ -199,9 +199,15 @@ public class Well {
     @Override
     public String toString() {
         return "Well{" +
-                "townName='" + townName + '\'' +
+                "observers=" + observers +
+                ", townName='" + townName + '\'' +
                 ", position=" + position +
-                ", level=" + well_level +
+                ", hologramPosition=" + hologramPosition +
+                ", well_level=" + well_level +
+                ", experience=" + experience +
+                ", buff1=" + buff1 +
+                ", buff2=" + buff2 +
+                ", buff3=" + buff3 +
                 '}';
     }
 }

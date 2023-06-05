@@ -59,7 +59,7 @@ public class Database {
         Statement wells = getConnection().createStatement();
 
         //Create the player_stats table
-        String sql = "CREATE TABLE IF NOT EXISTS wells (townname varchar(36) primary key, well_level int, experience int, xcor int, ycor int, zcor int, xholocor int, yholocor int, zholocor int, worldname varchar(36), buff1_id varchar(36), buff1_end date, buff2_id varchar(36), buff2_end date, buff3_id varchar(36), buff3_end date)";
+        String sql = "CREATE TABLE IF NOT EXISTS wells (townname varchar(36) primary key, well_level int, experience int, xcor int, ycor int, zcor int, xholocor double, yholocor double, zholocor double, worldname varchar(36), buff1_id varchar(36), buff1_end date, buff2_id varchar(36), buff2_end date, buff3_id varchar(36), buff3_end date)";
 
         wells.execute(sql);
         wells.close();
@@ -100,9 +100,9 @@ public class Database {
                             set.getInt("zcor")),
                     new Location(
                             Bukkit.getWorld(set.getString("worldname")),
-                            set.getInt("xholocor"),
-                            set.getInt("yholocor"),
-                            set.getInt("zholocor")),
+                            set.getDouble("xholocor"),
+                            set.getDouble("yholocor"),
+                            set.getDouble("zholocor")),
                     set.getInt("well_level"),
                     set.getInt("experience"),
                     set.getString("buff1_id"),
@@ -136,9 +136,9 @@ public class Database {
         statement.setInt(4, well.getLocation().getBlockX());
         statement.setInt(5, well.getLocation().getBlockY());
         statement.setInt(6, well.getLocation().getBlockZ());
-        statement.setInt(7, well.getHologramLocation().getBlockX());
-        statement.setInt(8, well.getHologramLocation().getBlockY());
-        statement.setInt(9, well.getHologramLocation().getBlockZ());
+        statement.setDouble(7, well.getHologramLocation().getX());
+        statement.setDouble(8, well.getHologramLocation().getY());
+        statement.setDouble(9, well.getHologramLocation().getZ());
         statement.setString(10, well.getLocation().getWorld().getName());
         statement.setString(11, well.getBuff1().getBuffID());
         statement.setDate(12, well.getBuff1().getEndDate());
@@ -201,9 +201,9 @@ public class Database {
                                     set.getInt("zcor")),
                             new Location(
                                     Bukkit.getWorld(set.getString("worldname")),
-                                    set.getInt("xholocor"),
-                                    set.getInt("yholocor"),
-                                    set.getInt("zholocor")),
+                                    set.getDouble("xholocor"),
+                                    set.getDouble("yholocor"),
+                                    set.getDouble("zholocor")),
                             set.getInt("well_level"),
                             set.getInt("experience"),
                             set.getString("buff1_id"),
@@ -236,9 +236,9 @@ public class Database {
         statement.setInt(4, well.getLocation().getBlockX());
         statement.setInt(5, well.getLocation().getBlockY());
         statement.setInt(6, well.getLocation().getBlockZ());
-        statement.setInt(7, well.getHologramLocation().getBlockX());
-        statement.setInt(8, well.getHologramLocation().getBlockY());
-        statement.setInt(9, well.getHologramLocation().getBlockZ());
+        statement.setDouble(7, well.getHologramLocation().getX());
+        statement.setDouble(8, well.getHologramLocation().getY());
+        statement.setDouble(9, well.getHologramLocation().getZ());
         statement.setString(10, well.getLocation().getWorld().getName());
         statement.setString(11, well.getBuff1().getBuffID());
         statement.setDate(12, well.getBuff1().getEndDate());

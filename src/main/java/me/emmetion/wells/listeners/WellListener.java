@@ -102,14 +102,18 @@ public class WellListener implements Listener {
         if (Utilities.isCoin(itemDrop.getItemStack())) {
             if (coinTossCooldown.containsKey(player.getName())) {
                 player.sendMessage(
-                        Component.text("You are on cooldown! (" + coinTossCooldown.get(player.getName()))
+                        Component.text("You are on cooldown! (3s)")
                         .color(TextColor.color(255,0,0))
                 );
                 return;
             }
-            player.sendMessage("Is coin!");
+            player.sendActionBar(Component.text("You have thrown a coin!"));
             DroppedCoinRunnable droppedCoinRunnable = new DroppedCoinRunnable(Wells.plugin, itemDrop, player, manager);
             droppedCoinRunnable.runTaskTimer(Wells.plugin, 1, 1);
+            coinTossCooldown.put(player.getName(), 3);
+            Bukkit.getScheduler().runTaskLater(Wells.plugin, () -> {
+                this.coinTossCooldown.remove(player.getName());
+            }, 3 * 20);
         }
 
 //        //if (Utilities.isCoin(itemInHand)) {
