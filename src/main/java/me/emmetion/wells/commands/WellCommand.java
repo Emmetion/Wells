@@ -55,8 +55,7 @@ public class WellCommand implements CommandExecutor {
         } else if (arg1.equals("print")) {
             player.sendMessage("--- Wells ---");
             for (Well well : manager.getWells()) {
-                player.sendMessage(well.getWellName());
-                player.sendMessage("  - " + well.prettyPosition());
+                player.sendMessage(well.createHoverableTextComponent());
             }
         } else if (arg1.equals("save")) {
             this.manager.saveAllWells();
@@ -81,6 +80,8 @@ public class WellCommand implements CommandExecutor {
                 well.decrementLevel();
                 player.sendMessage("Incremented level of " + townname + " to " + well.getWellLevel());
                 well.notifyObservers();
+            } else if (option.equals("reset")) {
+              well.resetLevel();
             } else {
                 player.sendMessage("Syntax: /wells increment <townname> <increase/decrease>");
             }
