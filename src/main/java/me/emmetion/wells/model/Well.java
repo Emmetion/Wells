@@ -3,6 +3,9 @@ package me.emmetion.wells.model;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
 import me.emmetion.wells.observer.Observer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 
@@ -21,6 +24,8 @@ public class Well {
 
     private int well_level;
     private int experience;
+
+    private int experienceRequired; // this is calculated upon initialization, and then later used when we deposit coins.
 
     private ActiveBuff buff1;
     private ActiveBuff buff2;
@@ -57,6 +62,9 @@ public class Well {
                     buff3_id, buff3_end
             );
         }
+
+        // calculate experience needed for next level.
+        this.experienceRequired = 100 + (well_level * 5); // increments experience needed by 5 every level.
     }
 
     public Well(String townName, Location location) {
@@ -110,7 +118,7 @@ public class Well {
         String wellName = this.getWellName();
         Location location = this.getHologramLocation();
         boolean saveToFile = false;
-        List<String> lines = Arrays.asList(this.getWellName(), this.prettyPosition(), ChatColor.YELLOW + "Level: " + this.getWellLevel());
+        List<String> lines = Arrays.asList(this.getWellName(), ChatColor.YELLOW + "Level: " + this.getWellLevel(), ChatColor.BLUE + "XP: " + this.experience + "/" + this.experienceRequired);
 
         Hologram hologram = DHAPI.createHologram(wellName, location, saveToFile, lines);
         hologram.setDefaultVisibleState(false);
@@ -156,7 +164,21 @@ public class Well {
     }
 
     public void depositCoin(WellPlayer wellPlayer, CoinType coinType) {
+        if (experience + coinType.getExperience() >= this.experienceRequired) {
 
+            wellPlayer.sendMessage("Your well has leveled up!");
+            incrementLevel();
+            wellPlayer.sendMessage("this.experience = " + ((experience + coinType.getExperience()) % this.experienceRequired));
+            this.experience = ((experience + coinType.getExperience()) % this.experienceRequired);
+
+            this.experienceRequired = 100 + (well_level * 5);
+            // coin will increase level
+        } else {
+            experience = experience + coinType.getExperience();
+            // coin won't increase level.
+        }
+
+        recreateHologram(); // updates hologram.
     }
 
     public int getWellLevel() {
@@ -194,6 +216,24 @@ public class Well {
 
     public String prettyPosition() {
         return this.getLocation().toVector().toString();
+    }
+
+    public void resetLevel() {
+        this.experience = 0;
+        this.experienceRequired = 100;
+        this.well_level = 0;
+
+        recreateHologram();
+    }
+
+    public TextComponent createHoverableTextComponent() {
+        return Component.text(this.getWellName(), TextColor.color(255,170,0))
+                .hoverEvent(
+                        Component.text("Town: " + this.getTownName()).appendNewline().append(
+                        Component.text("Experience: " + this.experience + "/" + this.experienceRequired).appendNewline().append(
+                        Component.text("Buff1: " + this.buff1)).appendNewline().append(
+                        Component.text("Buff2: " + this.buff2)
+                                )));
     }
 
     @Override
