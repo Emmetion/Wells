@@ -8,15 +8,19 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.sql.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Well {
 
     private List<Observer> observers = new ArrayList<>();
+
+    private List<WellPlayer> nearbyPlayers = new ArrayList<>();
 
     public String townName;
     public Location position;
@@ -111,16 +115,19 @@ public class Well {
         this.position = position;
     }
 
-    public Hologram recreateHologram() {
-        if (DHAPI.getHologram(this.getWellName()) != null)
-            DHAPI.removeHologram(this.getWellName());
+    public Hologram updateHologram() {
 
-        String wellName = this.getWellName();
-        Location location = this.getHologramLocation();
-        boolean saveToFile = false;
         List<String> lines = Arrays.asList(this.getWellName(), ChatColor.YELLOW + "Level: " + this.getWellLevel(), ChatColor.BLUE + "XP: " + this.experience + "/" + this.experienceRequired);
 
-        Hologram hologram = DHAPI.createHologram(wellName, location, saveToFile, lines);
+        Hologram hologram;
+        if (DHAPI.getHologram(this.getWellName()) == null)
+            hologram = DHAPI.createHologram(this.getWellName(), this.getHologramLocation(), false, lines);
+        else
+            hologram = DHAPI.getHologram(this.getWellName());
+
+        DHAPI.setHologramLine(hologram, 1, ChatColor.YELLOW + "Level: " + this.getWellLevel());
+        DHAPI.setHologramLine(hologram, 2, ChatColor.BLUE + "XP: " + this.experience + "/" + this.experienceRequired);
+
         hologram.setDefaultVisibleState(false);
 
         return hologram;
@@ -136,6 +143,7 @@ public class Well {
             return false;
         } else {
             this.hologramPosition = subtract;
+            updateHologram();
             return true;
         }
     }
@@ -149,8 +157,10 @@ public class Well {
             return false;
         } else {
             this.hologramPosition = subtract;
+            updateHologram();
             return true;
         }
+
     }
 
     public void incrementLevel() {
@@ -178,7 +188,7 @@ public class Well {
             // coin won't increase level.
         }
 
-        recreateHologram(); // updates hologram.
+        updateHologram(); // updates hologram.
     }
 
     public int getWellLevel() {
@@ -218,12 +228,32 @@ public class Well {
         return this.getLocation().toVector().toString();
     }
 
+    public void addNearbyPlayer(WellPlayer wellPlayer) {
+        if (!this.nearbyPlayers.contains(wellPlayer))
+            this.nearbyPlayers.add(wellPlayer);
+    }
+
+    public void removeNearbyPlayer(WellPlayer wellPlayer) {
+        if (this.nearbyPlayers.contains(wellPlayer))
+            this.nearbyPlayers.remove(wellPlayer);
+    }
+
+    public boolean containsNearbyPlayer(Player player) {
+        if (player == null || player.getUniqueId() == null)
+            return false;
+
+        return this.nearbyPlayers.stream()
+                .map(wellPlayer -> wellPlayer.getPlayerUUID())
+                .collect(Collectors.toList())
+                .contains(player.getUniqueId());
+    }
+
     public void resetLevel() {
         this.experience = 0;
         this.experienceRequired = 100;
         this.well_level = 0;
 
-        recreateHologram();
+        updateHologram();
     }
 
     public TextComponent createHoverableTextComponent() {

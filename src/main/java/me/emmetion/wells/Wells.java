@@ -9,6 +9,7 @@ import me.emmetion.wells.listeners.WellBuffListener;
 import me.emmetion.wells.listeners.WellListener;
 import me.emmetion.wells.listeners.WellPlayerListener;
 import me.emmetion.wells.model.Well;
+import me.emmetion.wells.model.WellPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -96,6 +97,7 @@ public final class Wells extends JavaPlugin {
 
     private void initListeners() {
         PluginManager pluginManager = Bukkit.getPluginManager();
+
         pluginManager.registerEvents(new WellListener(wellManager), this);
         pluginManager.registerEvents(new WellBuffListener(wellManager), this);
         pluginManager.registerEvents(new WellPlayerListener(wellManager), this);
@@ -118,14 +120,19 @@ public final class Wells extends JavaPlugin {
 
                 for (Player p : nearbyPlayers) {
 
+                    WellPlayer wellPlayer = wellManager.getWellPlayer(p);
+
                     if (playersNearWell.containsKey(p)) { // if player was already near a well
                         if (!playersNearWell.get(p).equals(w.getWellName())) { // and the well the player is currently at is different. (maybe tp, other reasons idk)
+
+                            w.removeNearbyPlayer(wellPlayer); // remove from well's collection.
                             this.playersNearWell.remove(p); // remove from the list
                         }
                     }
 
                     currentWellPlayers.add(p); // add the player to the list.
                     playersNearWell.put(p, w.getWellName());
+                    w.addNearbyPlayer(wellPlayer);
 
                     // "Town's Well"
                     Hologram hologram = DHAPI.getHologram(w.getWellName()); // gets the hologram from hashmap.
@@ -154,10 +161,18 @@ public final class Wells extends JavaPlugin {
                     .collect(Collectors.toList());
 
             for (Player p : notNearWells) {
+
+                WellPlayer wp = wellManager.getWellPlayer(p);
+
                 if (this.playersNearWell.containsKey(p)) {
                     String wellName = this.playersNearWell.get(p);
                     Hologram h = DHAPI.getHologram(wellName);
                     h.removeShowPlayer(p);
+
+                    Well wellByWellName = wellManager.getWellByWellName(wellName);
+
+                    wellByWellName.removeNearbyPlayer(wp);
+
                     h.hide(p);
                     if (wellManager.isDebug())
                         p.sendMessage("☢ You are no longer near a well. [" + wellName + "]");
@@ -180,7 +195,7 @@ public final class Wells extends JavaPlugin {
 
     public void initWellHolograms() {
         for (Well w : wellManager.getWells()) {
-            createWellHologram(w);
+            w.updateHologram();
         }
     }
 

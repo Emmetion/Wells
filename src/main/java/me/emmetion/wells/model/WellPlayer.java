@@ -9,7 +9,6 @@ import java.util.UUID;
 
 public class WellPlayer {
 
-
     private UUID playerUUID;
 
     private int bronzeCoins;
@@ -72,13 +71,13 @@ public class WellPlayer {
         well.depositCoin(this, coinType);
         // add well experiences.
         switch (coinType) {
-            case GOLD:
+            case GOLD_COIN:
                 this.goldCoins += 1;
                 break;
-            case SILVER:
+            case SILVER_COIN:
                 this.silverCoins += 1;
                 break;
-            case BRONZE:
+            case BRONZE_COIN:
                 this.bronzeCoins += 1;
                 break;
         }
@@ -93,6 +92,15 @@ public class WellPlayer {
         Player player = Bukkit.getPlayer(playerUUID);
         if (player != null)
             player.sendMessage(Component.text(text));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof WellPlayer) {
+            WellPlayer other = (WellPlayer) obj;
+            return this.playerUUID.equals(other.playerUUID);
+        }
+        return false;
     }
 
 

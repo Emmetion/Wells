@@ -204,7 +204,10 @@ public class Utilities {
         return false;
     }
 
-    public static ItemStack createGoldCoin() {
+    public static ItemStack createCoinFromID(String id) {
+        if (id == null || CoinType.valueOf(id) == null)
+            return null;
+
         ItemStack item = new ItemStack(Material.SUNFLOWER);
         ItemMeta meta = item.getItemMeta();
 
@@ -212,7 +215,7 @@ public class Utilities {
         item.setItemMeta(meta);
 
         NBTItem nbtitem = new NBTItem(item);
-        nbtitem.setString("wells_id", "GOLD_COIN");
+        nbtitem.setString("wells_id", id);
 
         return nbtitem.getItem();
     }

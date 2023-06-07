@@ -94,10 +94,10 @@ public class WellCommand implements CommandExecutor {
             if (block_id.equals("WELL_BLOCK")) {
                 player.getInventory().addItem(Utilities.createWellBlockItem(1));
                 player.sendMessage("Gave you a WELL_BLOCK");
-            } else if (block_id.equals("GOLD_COIN")) {
-                player.getInventory().addItem(Utilities.createGoldCoin());
-                player.sendMessage(ChatColor.GOLD + "Gave you a Gold Coin");
-            }else {
+            } else if (block_id.endsWith("_COIN")) { // handles things ending with _COIN, ex. BRONZE_COIN, SILVER_COIN, GOLD_COIN
+                player.getInventory().addItem(Utilities.createCoinFromID(block_id));
+                player.sendMessage(ChatColor.GOLD + "Gave you a " + block_id);
+            } else {
                 player.sendMessage("Your item '" + block_id + "' wasn't found. " + ChatColor.RED + ":(");
             }
         } else if (arg1.equals("well_req")) {
@@ -123,18 +123,16 @@ public class WellCommand implements CommandExecutor {
                     float y = Float.parseFloat(args[3]);
                     float z = Float.parseFloat(args[4]);
 
-                    if (well.addHologramLocation(x, y, z))
-                        well.recreateHologram();
-                    else
+                    boolean success = well.addHologramLocation(x, y, z);
+                    if (!success)
                         player.sendMessage("Well hologram out of bounds! (dist: >5)");
                 } else if (addsub.equals("sub")) {
                     float x = Float.parseFloat(args[2]);
                     float y = Float.parseFloat(args[3]);
                     float z = Float.parseFloat(args[4]);
 
-                    if (well.subtractHologramLocation(x, y, z))
-                        well.recreateHologram();
-                    else
+                    boolean success = well.subtractHologramLocation(x, y, z);
+                    if (!success)
                         player.sendMessage("Well hologram out of bounds! (dist: >5)");
                 }
             } catch (IndexOutOfBoundsException e) {
