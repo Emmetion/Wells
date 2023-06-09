@@ -1,6 +1,7 @@
 package me.emmetion.wells.model;
 
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.ChatColor;
 import org.jetbrains.annotations.NotNull;
 
 public enum CoinType {

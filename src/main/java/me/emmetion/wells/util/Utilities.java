@@ -8,6 +8,9 @@ import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTItem;
 import me.emmetion.wells.model.CoinType;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -210,8 +213,9 @@ public class Utilities {
 
         ItemStack item = new ItemStack(Material.SUNFLOWER);
         ItemMeta meta = item.getItemMeta();
-
-        meta.displayName(Component.text(ChatColor.GOLD + "Gold Coin"));
+        CoinType cointype = CoinType.valueOf(id);
+        String name = StringUtils.capitalize(id.replace("_", " ").toLowerCase());
+        meta.displayName(Component.text(name).style(Style.style(cointype.getColor(), TextDecoration.BOLD)));
         item.setItemMeta(meta);
 
         NBTItem nbtitem = new NBTItem(item);

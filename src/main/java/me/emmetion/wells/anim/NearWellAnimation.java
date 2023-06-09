@@ -2,10 +2,13 @@ package me.emmetion.wells.anim;
 
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.model.Well;
+import me.emmetion.wells.model.WellPlayer;
 import org.bukkit.*;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Random;
+import java.util.UUID;
 
 public class NearWellAnimation extends BukkitRunnable {
 
@@ -46,8 +49,15 @@ public class NearWellAnimation extends BukkitRunnable {
         Location location2 = new Location(world, x2, y2, z2);
 
         // Spawn the particles at the calculated positions
-        world.spawnParticle(particle, location1, 1, 0, 0, 0, 0);
-        world.spawnParticle(particle, location2, 1, 0, 0, 0, 0);
+        for (WellPlayer wp : well.getNearbyPlayers()) {
+            UUID playerUUID = wp.getPlayerUUID();
+            Player player = Bukkit.getPlayer(playerUUID);
+
+            if (player != null) {
+                player.spawnParticle(particle, location1, 1, 0.01, 0.01, 0.01, 0.01);
+                player.spawnParticle(particle, location2, 1, 0.01, 0.01, 0.01, 0.01);
+            }
+        }
 
         angle += 0.1;
         height += 0.1;
@@ -56,7 +66,7 @@ public class NearWellAnimation extends BukkitRunnable {
     }
 
     public void start() {
-        runTaskTimer(Wells.plugin, 2, 2);
+        runTaskTimer(Wells.plugin, 3, 3);
     }
 }
 

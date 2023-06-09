@@ -7,6 +7,7 @@ import me.emmetion.wells.observer.Observer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -125,6 +126,7 @@ public class Well {
     }
 
     public Hologram updateHologram() {
+        Bukkit.broadcast(Component.text(""));
 
         List<String> lines = Arrays.asList(this.getWellName(), ChatColor.YELLOW + "Level: " + this.getWellLevel(), ChatColor.BLUE + "XP: " + this.experience + "/" + this.experienceRequired);
 
@@ -133,6 +135,9 @@ public class Well {
             hologram = DHAPI.createHologram(this.getWellName(), this.getHologramLocation(), false, lines);
         else
             hologram = DHAPI.getHologram(this.getWellName());
+
+        hologram.setLocation(hologramPosition);
+        hologram.realignLines();
 
         DHAPI.setHologramLine(hologram, 1, ChatColor.YELLOW + "Level: " + this.getWellLevel());
         DHAPI.setHologramLine(hologram, 2, ChatColor.BLUE + "XP: " + this.experience + "/" + this.experienceRequired);
@@ -166,11 +171,13 @@ public class Well {
             return false;
         } else {
             this.hologramPosition = subtract;
+
             updateHologram();
             return true;
         }
 
     }
+
 
     public void incrementLevel() {
         notifyObservers();
@@ -235,6 +242,10 @@ public class Well {
 
     public String prettyPosition() {
         return this.getLocation().toVector().toString();
+    }
+
+    public List<WellPlayer> getNearbyPlayers() {
+        return this.nearbyPlayers;
     }
 
     public void addNearbyPlayer(WellPlayer wellPlayer) {
