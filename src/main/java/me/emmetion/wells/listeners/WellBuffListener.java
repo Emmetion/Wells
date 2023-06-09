@@ -63,7 +63,7 @@ public class WellBuffListener implements Listener {
             well.incrementLevel();
 
             CropFarmAnimation animation = new CropFarmAnimation(player, block);
-            animation.runTaskTimer(Wells.plugin, 1, 1);
+            animation.start();
 
 
         } else {

@@ -10,19 +10,14 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.Random;
 import java.util.UUID;
 
-public class NearWellAnimation extends BukkitRunnable {
+public class NearWellAnimation extends BukkitRunnable implements Animation {
 
     private Random random = new Random();
 
     private Location center;
     private final Particle particle = Particle.END_ROD;
     private float angle = 0.0f;
-    private float height = 0.0f;
     private final double radius = 3.0f;
-    private final double y_radius = 0f;
-
-    private double rad_flip = -0.05;
-//    private float size = 2f;
 
     private Well well;
 
@@ -60,25 +55,12 @@ public class NearWellAnimation extends BukkitRunnable {
         }
 
         angle += 0.1;
-        height += 0.1;
-
 
     }
 
+    @Override
     public void start() {
         runTaskTimer(Wells.plugin, 3, 3);
     }
+
 }
-
-
-
-//        size -= 0.05;
-//        double increment = (2 * Math.PI) / 50; // Number of particles in the circle
-//
-//        for (double angle = 0; angle < 2 * Math.PI; angle += increment) {
-//            double x = center.getX() + radius * Math.cos(angle);
-//            double z = center.getZ() + radius * Math.sin(angle);
-//            Location particleLocation = new Location(center.getWorld(), x, center.getY() + angle, z);
-//
-//            center.getWorld().spawnParticle(particle, particleLocation, 1, new Particle.DustOptions(Color.GREEN, 3));
-//        }

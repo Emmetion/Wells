@@ -1,5 +1,6 @@
 package me.emmetion.wells.anim;
 
+import me.emmetion.wells.Wells;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -18,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 
-public class CropFarmAnimation extends BukkitRunnable {
+public class CropFarmAnimation extends BukkitRunnable implements Animation {
 
     private Player farmer;
     private Block cropBlock;
@@ -80,6 +81,11 @@ public class CropFarmAnimation extends BukkitRunnable {
         for (Entity bat : bats) {
             bat.remove();
         }
+    }
+
+    @Override
+    public void start() {
+        runTaskTimer(Wells.plugin, 1, 1);
     }
 
 //    @Override
