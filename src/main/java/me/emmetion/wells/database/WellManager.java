@@ -177,7 +177,7 @@ public class WellManager {
     public Well getWellByWellName(String well_name) {
         if (wellHashMap == null || well_name == null || well_name.length() <= 7)
             return null; // 's Well
-        Bukkit.broadcast(Component.text("well_name" + well_name.substring(0, well_name.length() - 7)));
+        // Bukkit.broadcast(Component.text("well_name" + well_name.substring(0, well_name.length() - 7)));
         return wellHashMap.get(well_name.substring(0, well_name.length() - 7));
     }
 

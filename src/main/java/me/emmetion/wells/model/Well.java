@@ -2,6 +2,7 @@ package me.emmetion.wells.model;
 
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
+import me.emmetion.wells.anim.NearWellAnimation;
 import me.emmetion.wells.observer.Observer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -34,6 +35,8 @@ public class Well {
     private ActiveBuff buff1;
     private ActiveBuff buff2;
     private ActiveBuff buff3;
+
+    private NearWellAnimation animation;
 
     public Well(String townName, Location position, Location hologramPosition,
                 int well_level, int experience,
@@ -69,10 +72,16 @@ public class Well {
 
         // calculate experience needed for next level.
         this.experienceRequired = 100 + (well_level * 5); // increments experience needed by 5 every level.
+
+        this.animation = new NearWellAnimation(this);
+        this.animation.start();
     }
 
     public Well(String townName, Location location) {
         this(townName, location, location, 0, 0, "none", null, "none", null, "none", null);
+
+        this.animation = new NearWellAnimation(this);
+        this.animation.start();
     }
 
     public String getTownName() {

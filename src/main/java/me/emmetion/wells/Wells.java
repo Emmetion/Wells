@@ -186,7 +186,6 @@ public final class Wells extends JavaPlugin {
         }, 20, 20);
 
         scheduler.runTaskTimer(this, () -> {
-            System.out.println("update database.");
             this.wellManager.updateDatabase();
         }, 1, 300);
     }
