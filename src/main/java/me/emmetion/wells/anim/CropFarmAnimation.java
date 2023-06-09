@@ -1,18 +1,15 @@
 package me.emmetion.wells.anim;
 
 import me.emmetion.wells.Wells;
-import net.kyori.adventure.text.Component;
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -27,8 +24,7 @@ public class CropFarmAnimation extends BukkitRunnable implements Animation {
 
     private Material cropType;
 
-
-    private Collection<Entity> bats = new ArrayList<>();
+    private Collection<Bat> bats = new ArrayList<>();
 
     public CropFarmAnimation(Player farmer, Block crop) {
         this.farmer = farmer;
@@ -37,48 +33,48 @@ public class CropFarmAnimation extends BukkitRunnable implements Animation {
 
         this.cropType = cropBlock.getType();
 
-        Random random = new Random();
-        for (int i = 0; i < 2; i++) {
-            Location location = crop.getLocation().clone();
-
-            double x = random.nextDouble();
-            double z = random.nextDouble();
-            location.add(x, 0, z);
-
-
-
-            Bat bat = location.getWorld().spawn(location, Bat.class);
-
-            bat.setVisibleByDefault(false);
-            bat.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 10, 2, true, false, true));
-
-            bats.add(bat);
-        }
+        createBats();
     }
 
 
     @Override
     public void run() {
+        for (Bat b : bats) {
+            Location location = b.getLocation();
+            World world = location.getWorld();
+            world.spawnParticle(Particle.FIREWORKS_SPARK, location, 1, 0, 0, 0, 0);
+        }
         if (this.frame == 25) {
             killBats();
             this.cancel();
             return;
         }
-
-        for (Entity bat : bats) {
-            Location location = bat.getLocation();
-            World world = location.getWorld();
-//            world.spawnParticle(Particle.CLOUD, );
-        }
-
+        frame++;
     }
 
     private void createBats() {
+        Random r = new Random();
 
+        for (int i = 0; i < 2; i++) {
+            World world = this.cropBlock.getLocation().getWorld();
+            Location location = this.cropBlock.getLocation();
+            Bat bat = world.spawn(location, Bat.class);
+            bat.setTargetLocation(this.cropBlock.getLocation().add(
+                    0,
+                    r.nextFloat() * 4,
+                    0
+            ));
+            bat.setInvisible(true);
+
+            bats.add(bat);
+        }
     }
 
     private void killBats() {
         for (Entity bat : bats) {
+            Location location = bat.getLocation();
+            World world = location.getWorld();
+            world.dropItemNaturally(location, new ItemStack(cropType));
             bat.remove();
         }
     }
