@@ -189,11 +189,19 @@ public class Well {
     }
 
     public void depositCoin(WellPlayer wellPlayer, CoinType coinType) {
+        if (coinType.equals(CoinType.LEVEL_UP_COIN)) {
+            incrementLevel();
+            this.experience = 0;
+            this.experienceRequired = 100 + (well_level * 5);
+            updateHologram();
+            return;
+        }
+
         if (experience + coinType.getExperience() >= this.experienceRequired) {
 
             wellPlayer.sendMessage("Your well has leveled up!");
             incrementLevel();
-            wellPlayer.sendMessage("this.experience = " + ((experience + coinType.getExperience()) % this.experienceRequired));
+//            wellPlayer.sendMessage("this.experience = " + ((experience + coinType.getExperience()) % this.experienceRequired));
             this.experience = ((experience + coinType.getExperience()) % this.experienceRequired);
 
             this.experienceRequired = 100 + (well_level * 5);
