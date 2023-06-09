@@ -14,7 +14,7 @@ public class NearWellAnimation extends BukkitRunnable {
 
     private Random random = new Random();
 
-    private final Location center;
+    private Location center;
     private final Particle particle = Particle.END_ROD;
     private float angle = 0.0f;
     private float height = 0.0f;
@@ -28,12 +28,12 @@ public class NearWellAnimation extends BukkitRunnable {
 
     public NearWellAnimation(Well well) {
         this.well = well;
-        center = well.getHologramLocation().clone().subtract(0,1,0);
     }
 
 
     @Override
     public void run() {
+        center = well.getHologramLocation().clone().subtract(0,1,0); // this causes the particle animation to move when "/wells holo add/sub x y z" is used.
 
         World world = center.getWorld();
 

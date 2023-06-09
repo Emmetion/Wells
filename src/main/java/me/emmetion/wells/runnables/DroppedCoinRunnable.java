@@ -60,10 +60,7 @@ public class DroppedCoinRunnable extends BukkitRunnable {
             player.getInventory().addItem(itemstack);
 
             Component text = Component.text("You missed your coin toss!")
-                    .color(TextColor.color(52, 217, 241))
-                    .append(
-                            Component.text()
-                    );
+                    .color(TextColor.color(52, 217, 241));
 
             player.sendMessage(text);
             item.remove();

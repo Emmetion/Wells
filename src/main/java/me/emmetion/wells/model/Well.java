@@ -171,7 +171,6 @@ public class Well {
             return false;
         } else {
             this.hologramPosition = subtract;
-
             updateHologram();
             return true;
         }

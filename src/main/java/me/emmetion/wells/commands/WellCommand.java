@@ -38,7 +38,20 @@ public class WellCommand implements CommandExecutor {
         Town town = TownyAPI.getInstance().getTown(player);
 
         String arg1 = args[0];
-        if (arg1.equals("delete")) {
+        if (arg1.equals("help")) {
+            player.sendMessage(ChatColor.BLUE + "-- Well Commands! --");
+            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells delete' deletes your current town.");
+            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells create' creates a well at your location.");
+            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells print' prints every placed well in chat.");
+            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells save' save all changed data to database.");
+            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells level <increase/decrease/reset>' increases/decreases your well level by 1, or resets to 0.");
+            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells give <wells_id>' give yourself a custom wells item.");
+            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells well_req' displays the block requirements of a well underneath you.");
+            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells well_reset' resets all well holograms and animations.");
+            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells players' prints how many players are apart of wellplayers.");
+            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells holo <add/sub> <x> <y> <z>' changes the position of a well hologram, max dist 5.");
+            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells debug <true/false>' toggles debug messages.");
+        } else if (arg1.equals("delete")) {
             if (town == null) {
                 player.sendMessage(ChatColor.RED + "You are not part of a town!");
                 return true;
