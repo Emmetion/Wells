@@ -155,8 +155,17 @@ public class WellCommand implements CommandExecutor {
             try {
                 boolean mode = Boolean.valueOf(args[1]);
                 this.manager.setDebug(mode);
+                player.sendMessage("Toggled debug to " + mode + ".");
             } catch (ArrayIndexOutOfBoundsException e) {
                 player.sendMessage("Syntax: /wells debug <true/false>");
+            }
+        } else if (arg1.equals("particle")) {
+            try {
+                Boolean aBoolean = Boolean.valueOf(args[1]);
+                this.manager.getWellPlayer(player).setHideParticles(aBoolean);
+                player.sendMessage("Toggled particles to " + aBoolean + ".");
+            } catch (ArrayIndexOutOfBoundsException e) {
+                player.sendMessage("Syntax: /wells particle <true/false>");
             }
         }
 

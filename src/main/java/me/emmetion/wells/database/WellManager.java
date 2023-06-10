@@ -150,10 +150,10 @@ public class WellManager {
             return false;
 
         try {
+            well.endAnimation();
             this.wellHashMap.remove(well.getTownName());
             this.wellCache.remove(well.getLocation());
             this.database.deleteWell(well);
-
             return true;
         } catch (SQLException e) {
             e.printStackTrace();

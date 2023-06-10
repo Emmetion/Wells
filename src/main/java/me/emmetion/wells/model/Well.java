@@ -12,10 +12,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.sql.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class Well {
@@ -23,6 +21,10 @@ public class Well {
     private List<Observer> observers = new ArrayList<>();
 
     private List<WellPlayer> nearbyPlayers = new ArrayList<>();
+
+    // Will use 'contributions' to create a total donations board.
+    // Storable in the MySQL server.
+    private HashMap<UUID, Integer> contributions = new HashMap<>();
 
     public String townName;
     public Location position;
@@ -189,6 +191,9 @@ public class Well {
     }
 
     public void depositCoin(WellPlayer wellPlayer, CoinType coinType) {
+        if (coinType == null)
+            return;
+
         if (coinType.equals(CoinType.LEVEL_UP_COIN)) {
             incrementLevel();
             this.experience = 0;
@@ -196,6 +201,8 @@ public class Well {
             updateHologram();
             return;
         }
+
+        this.animation.enqueueDepositedCoinType(coinType);
 
         if (experience + coinType.getExperience() >= this.experienceRequired) {
 
@@ -281,6 +288,11 @@ public class Well {
         this.well_level = 0;
 
         updateHologram();
+    }
+
+    public void endAnimation() {
+        if (!this.animation.isCancelled())
+            this.animation.cancel();
     }
 
     public TextComponent createHoverableTextComponent() {

@@ -19,6 +19,8 @@ public class WellPlayer {
 
     private int experiencePoints;
 
+    private boolean hideParticles = false;
+
     public WellPlayer(UUID uuid) {
         this(uuid, 0, 0, 0, 0, 0);
     }
@@ -86,6 +88,14 @@ public class WellPlayer {
         if (player != null) {
             player.sendMessage(ChatColor.WHITE + "You have deposited a " + coinType.getWellsId() + "! (" + coinType.getExperience() + "xp)");
         }
+    }
+
+    public void setHideParticles(boolean hide) {
+        this.hideParticles = hide;
+    }
+
+    public boolean canSeeParticles() {
+        return !this.hideParticles;
     }
 
     public void sendMessage(String text) {

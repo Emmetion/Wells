@@ -1,5 +1,6 @@
 me\emmetion\wells\runnables\DroppedCoinRunnable.class
 me\emmetion\wells\anim\CropFarmAnimation.class
+me\emmetion\wells\anim\Animation.class
 me\emmetion\wells\listeners\WellBuffListener.class
 me\emmetion\wells\observer\Observer.class
 me\emmetion\wells\model\Well.class
