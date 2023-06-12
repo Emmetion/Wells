@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -230,6 +231,32 @@ public class Utilities {
             return townBlock.getTownOrNull().getName();
         }
         return null;
+    }
+
+    public static String getColor(String string) {
+        return ChatColor.translateAlternateColorCodes('&', string);
+    }
+
+    public static List<String> getColor(List<String> strings) {
+        if (strings == null)
+            return null;
+        else
+            return strings.stream().map(Utilities::getColor).collect(Collectors.toList());
+    }
+
+    public static ItemStack createItemStack(Material material, int amount, @Nullable  Component displayname, @Nullable List<Component> lore) {
+        ItemStack item = new ItemStack(material, amount);
+        ItemMeta im = item.getItemMeta();
+        if (displayname != null)
+            im.displayName(displayname);
+        if (lore != null)
+            im.lore(lore);
+        item.setItemMeta(im);
+        return item;
+    }
+
+    public static ItemStack createItemStack(Material material, @Nullable Component displayname, @Nullable List<Component> lore) {
+        return createItemStack(material, 1, displayname, lore);
     }
 
 

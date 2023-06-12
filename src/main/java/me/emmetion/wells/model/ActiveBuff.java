@@ -1,15 +1,35 @@
 package me.emmetion.wells.model;
 
+import org.bukkit.ChatColor;
+import org.bukkit.Particle;
+
 import java.sql.Date;
+import java.sql.Time;
+import java.text.FieldPosition;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
+import java.util.Locale;
 
 public class ActiveBuff {
 
     private String buff_id;
+    private BuffData buffData;
     private Date endDate;
 
     public ActiveBuff(String buff_id, Date endDate) {
         this.buff_id = buff_id;
+        try {
+            buffData = BuffData.valueOf(buff_id);
+        } catch (IllegalArgumentException e) { // this exception will cause all unknown buff_ids to have to value if removed in update.
+            buffData = BuffData.NONE;
+            buff_id = "NONE";
+        }
+
         this.endDate = endDate;
     }
 
@@ -17,22 +37,48 @@ public class ActiveBuff {
         return buff_id;
     }
 
+    public boolean isNone() {
+        return this.buff_id.equals("NONE");
+    }
+
     public Date getEndDate() {
         return endDate;
     }
 
+    public String getEndDateAsString() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEEE dd MMMMM yyyy HH:mm:ss.SSSZ", Locale.ENGLISH);
+
+        return simpleDateFormat.format(endDate);
+    }
+
+//        Date date = new Date();
+//        Time time = new Time();
+//
+//        Instant instant = new LocalDateTime();
+//        Date curr = new Date(new java.util.Date().getTime());
+//        Date end = this.endDate;
+
     public boolean hasEnded() {
         Date date = new Date(new java.util.Date().getTime());
         long time = date.getTime(); // current time;
-        long end_time = endDate.getTime();
+        long end_time = endDate.getTime(); // end time
         if (time >= end_time) {
             return true;
         }
         return false;
     }
 
+    public String getTimeRemainingString() {
+        if (hasEnded()) {
+            return ChatColor.RED + "0d 0h 0m";
+        }
+        Date date = new Date(new java.util.Date().getTime());
+        Date end_date = this.endDate;
+        return ChatColor.YELLOW + date.toLocalDate().minus(end_date.getTime(), ChronoUnit.MILLIS).toString();
+    }
+
     public static ActiveBuff defaultActiveBuff() {
-        return new ActiveBuff("none", null);
+        return new ActiveBuff("NONE", null);
     }
 
     @Override
@@ -41,5 +87,26 @@ public class ActiveBuff {
                 "buff_id='" + buff_id + '\'' +
                 ", buff_end=" + endDate +
                 '}';
+    }
+
+    public enum BuffData {
+        NONE("none", null),
+        FARM_BOOST("FARM_BOOST", Particle.SCRAPE);
+
+        private String buff_id;
+        private Particle anim_particle;
+
+        BuffData(String buff_id, Particle particle) {
+            this.buff_id = buff_id;
+            this.anim_particle = particle;
+        }
+
+        public String getBuffID() {
+            return buff_id;
+        }
+
+        public Particle getParticle() {
+            return anim_particle;
+        }
     }
 }

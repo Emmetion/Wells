@@ -1,0 +1,59 @@
+package me.emmetion.wells.menu;
+
+
+import me.emmetion.wells.Wells;
+import me.emmetion.wells.util.Utilities;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+
+import static me.emmetion.wells.util.Utilities.getColor;
+
+public abstract class Menu implements InventoryHolder, Listener {
+
+    protected Inventory inventory;
+
+    protected PlayerMenuUtility playerMenuUtility;
+    protected Wells wells;
+
+    protected ItemStack FILLER_GLASS = Utilities.createItemStack(Material.BLACK_STAINED_GLASS_PANE, 1, Component.text(""), null);
+
+    public abstract int getSlots();
+
+    public abstract String getTitle();
+
+    public Menu(Wells wells, PlayerMenuUtility utility){
+        this.wells = wells;
+        this.playerMenuUtility = utility;
+    }
+
+    @EventHandler
+    public abstract void handleClick(InventoryClickEvent e);
+
+    @EventHandler
+    public abstract void handleClose(InventoryCloseEvent e);
+
+    public abstract boolean cancelAllClicks();
+
+    public abstract void setMenuItems();
+
+    public void open(){
+        inventory = Bukkit.createInventory(this, getSlots(), Utilities.getColor(getTitle()));
+
+        this.setMenuItems();
+
+        playerMenuUtility.getOwner().openInventory(inventory);
+    }
+
+    @Override
+    public Inventory getInventory(){ return inventory; }
+
+
+}

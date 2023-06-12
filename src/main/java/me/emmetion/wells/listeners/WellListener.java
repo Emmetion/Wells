@@ -4,6 +4,10 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.database.WellManager;
+import me.emmetion.wells.menu.PlayerMenuUtility;
+import me.emmetion.wells.menu.WellMenu;
+import me.emmetion.wells.model.Well;
+import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.runnables.DroppedCoinRunnable;
 import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
@@ -17,9 +21,11 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,7 +76,9 @@ public class WellListener implements Listener {
         player.sendMessage(ChatColor.GREEN + "Well Criteria Met!...");
         // all criteria met, now we create it in database
         manager.createWell(player, blockAgainst);
-
+        Well well = manager.getWellByTownName(town.getName());
+        well.addHologramLocation(0.5f, 2, 0.5f);
+        event.setCancelled(true);
     }
 
     /**
@@ -111,5 +119,26 @@ public class WellListener implements Listener {
                 this.playersOnCooldown.remove(player);
             }, 3 * 20);
         }
+    }
+
+    @EventHandler
+    public void onWellClick(PlayerInteractEvent e) {
+        Player player = e.getPlayer();
+        Block clickedBlock = e.getClickedBlock();
+        Action action = e.getAction();
+        if (!action.equals(Action.RIGHT_CLICK_BLOCK))
+            return;
+        if (!manager.isWell(clickedBlock.getLocation()))
+            return;
+
+        Well well = manager.getWellFromLocation(clickedBlock.getLocation());
+        if (well == null)
+            return;
+
+        e.setCancelled(true);
+
+        WellMenu wellMenu = new WellMenu(Wells.plugin, well,
+                new PlayerMenuUtility(player, manager.getWellPlayer(player)));
+        wellMenu.open();
     }
 }

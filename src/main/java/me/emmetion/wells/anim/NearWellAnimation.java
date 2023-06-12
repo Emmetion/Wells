@@ -59,22 +59,38 @@ public class NearWellAnimation extends BukkitRunnable implements Animation {
             if (player == null || !wellPlayer.canSeeParticles()) {
                 continue;
             }
-            player.spawnParticle(particle, location1, 1, 0.001, 0, 0.001, 0.01);
-            player.spawnParticle(particle, location2, 1, 0.001, 0, 0.001, 0.01);
+            int wellLevel = well.getWellLevel();
 
-            player.spawnParticle(Particle.DRAGON_BREATH, location1, 1, 0.001, 0, 0.001, 0.01);
-            player.spawnParticle(Particle.SCRAPE, location2, 1, 0.001, 0, 0.001, 0.01);
-
-            // this is written twice, each with different locations. (2 spiraling trails).
-            if (!particleQueue.isEmpty()) {
-                CoinType cointype = particleQueue.poll();
-                spawnTrailByCoinType(location1, cointype);
+            if (wellLevel > 0) {
+                player.spawnParticle(particle, location1, 1, 0.001, 0, 0.001, 0.01);
+                // this is written twice, each with different locations. (2 spiraling trails).
+                if (!particleQueue.isEmpty()) {
+                    player.sendMessage("Polling Cointype...");
+                    CoinType cointype = particleQueue.poll();
+                    spawnTrailByCoinType(location1, cointype);
+                }
             }
 
-            if (!particleQueue.isEmpty()) {
-                CoinType cointype = particleQueue.poll();
-                spawnTrailByCoinType(location2, cointype);
+            if (wellLevel > 1) {
+                player.spawnParticle(particle, location2, 1, 0.001, 0, 0.001, 0.01);
+                if (!particleQueue.isEmpty()) {
+                    player.sendMessage("Polling Cointype...");
+                    CoinType cointype = particleQueue.poll();
+                    spawnTrailByCoinType(location2, cointype);
+                }
             }
+
+            if (wellLevel > 2) {
+                player.spawnParticle(Particle.DRAGON_BREATH, location1, 1, 0.001, 0, 0.001, 0.01);
+            }
+
+            if (wellLevel > 3) {
+                player.spawnParticle(Particle.SCRAPE, location2, 1, 0.001, 0, 0.001, 0.01);
+            }
+
+
+
+
         }
 
         angle += 0.1;

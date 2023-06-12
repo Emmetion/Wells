@@ -4,6 +4,7 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.database.WellManager;
+import me.emmetion.wells.model.ActiveBuff;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.util.Utilities;
 import org.bukkit.ChatColor;
@@ -14,6 +15,13 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.sql.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
+import java.time.temporal.TemporalUnit;
+import java.util.concurrent.TimeUnit;
 
 public class WellCommand implements CommandExecutor {
 
@@ -166,6 +174,34 @@ public class WellCommand implements CommandExecutor {
                 player.sendMessage("Toggled particles to " + aBoolean + ".");
             } catch (ArrayIndexOutOfBoundsException e) {
                 player.sendMessage("Syntax: /wells particle <true/false>");
+            }
+        } else if (arg1.equals("buff")) {
+            try {
+                String townname = String.valueOf(args[1]);
+                String buff_id = String.valueOf(args[2]);
+                ActiveBuff.BuffData buffData = ActiveBuff.BuffData.valueOf(buff_id);
+                Well well = manager.getWellByTownName(townname);
+
+                Date newdate = new Date(System.currentTimeMillis());
+
+                if (well == null) {
+                    throw new IllegalArgumentException();
+                }
+                switch (buffData) {
+                    case FARM_BOOST:
+                        ActiveBuff activebuff = new ActiveBuff(ActiveBuff.BuffData.FARM_BOOST.getBuffID(), newdate);
+                        well.setActiveBuff(activebuff);
+                        break;
+                    case NONE:
+                        player.sendMessage("Cannot put buff_id 'NONE' onto well!");
+                        break;
+                    default:
+                        player.sendMessage("Unknown?");
+                        break;
+                }
+            } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
+                player.sendMessage("Syntax: /wells buff <townname> <buff_id>");
+
             }
         }
 

@@ -18,13 +18,13 @@ import java.util.stream.Collectors;
 
 public class Well {
 
-    private List<Observer> observers = new ArrayList<>();
+    private final List<Observer> observers = new ArrayList<>();
 
-    private List<WellPlayer> nearbyPlayers = new ArrayList<>();
+    private final List<WellPlayer> nearbyPlayers = new ArrayList<>();
 
     // Will use 'contributions' to create a total donations board.
     // Storable in the MySQL server.
-    private HashMap<UUID, Integer> contributions = new HashMap<>();
+    private final HashMap<UUID, Integer> contributions = new HashMap<>();
 
     public String townName;
     public Location position;
@@ -51,21 +51,21 @@ public class Well {
         this.hologramPosition = hologramPosition;
         this.well_level = well_level;
         this.experience = experience;
-        if (buff1_id.equals("none")) {
+        if (buff1_id.equals("NONE")) {
             this.buff1 = ActiveBuff.defaultActiveBuff();
         } else {
             this.buff1 = new ActiveBuff(
                     buff1_id, buff1_end
             );
         }
-        if (buff2_id.equals("none")) {
+        if (buff2_id.equals("NONE")) {
             this.buff2 = ActiveBuff.defaultActiveBuff();
         } else {
             this.buff2 = new ActiveBuff(
                     buff2_id, buff2_end
             );
         }
-        if (buff3_id.equals("none")) {
+        if (buff3_id.equals("NONE")) {
             this.buff3 = ActiveBuff.defaultActiveBuff();
         } else {
             this.buff3 = new ActiveBuff(
@@ -81,7 +81,7 @@ public class Well {
     }
 
     public Well(String townName, Location location) {
-        this(townName, location, location, 0, 0, "none", null, "none", null, "none", null);
+        this(townName, location, location, 0, 0, "NONE", null, "NONE", null, "NONE", null);
 
         this.animation = new NearWellAnimation(this);
         this.animation.start();
@@ -125,6 +125,32 @@ public class Well {
 
     public void setLocation(Location position) {
         this.position = position;
+    }
+
+    public boolean hasBuff1() {
+        return !buff1.isNone();
+    }
+
+    public boolean hasBuff2() {
+        return !buff2.isNone();
+    }
+
+    public boolean hasBuff3() {
+        return !buff3.isNone();
+    }
+
+
+
+    public void setActiveBuff(ActiveBuff activeBuff) {
+        if (!hasBuff1()) {
+            buff1 = activeBuff;
+        } else if (!hasBuff2()) {
+            buff2 = activeBuff;
+        } else if (!hasBuff3()) {
+            buff3 = activeBuff;
+        } else {
+
+        }
     }
 
     public Hologram updateHologram() {

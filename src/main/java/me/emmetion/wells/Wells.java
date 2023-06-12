@@ -5,9 +5,11 @@ import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
 import me.emmetion.wells.commands.WellCommand;
 import me.emmetion.wells.database.WellManager;
+import me.emmetion.wells.listeners.MenuListener;
 import me.emmetion.wells.listeners.WellBuffListener;
 import me.emmetion.wells.listeners.WellListener;
 import me.emmetion.wells.listeners.WellPlayerListener;
+import me.emmetion.wells.menu.WellMenu;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import org.bukkit.Bukkit;
@@ -99,6 +101,7 @@ public final class Wells extends JavaPlugin {
         PluginManager pluginManager = Bukkit.getPluginManager();
 
         pluginManager.registerEvents(new WellListener(wellManager), this);
+        pluginManager.registerEvents(new MenuListener(wellManager), this);
         pluginManager.registerEvents(new WellBuffListener(wellManager), this);
         pluginManager.registerEvents(new WellPlayerListener(wellManager), this);
     }

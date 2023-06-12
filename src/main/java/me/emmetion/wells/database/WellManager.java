@@ -243,6 +243,14 @@ public class WellManager {
             return wellCache.contains(location);
     }
 
+    public Well getWellFromLocation(Location location) {
+        for (Well w : this.wellHashMap.values()) {
+            if (w.getLocation().equals(location))
+                return w;
+        }
+        return null;
+    }
+
     /**
      * Saves all wells to the database.
      * This should be executed every 5 minutes or when a well is deleted.
