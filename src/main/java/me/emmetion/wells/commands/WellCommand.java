@@ -17,7 +17,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.time.temporal.TemporalUnit;
@@ -182,15 +185,16 @@ public class WellCommand implements CommandExecutor {
                 ActiveBuff.BuffData buffData = ActiveBuff.BuffData.valueOf(buff_id);
                 Well well = manager.getWellByTownName(townname);
 
-                Date newdate = new Date(System.currentTimeMillis());
+                Timestamp plus_five_min = Timestamp.from(Instant.now().plus(5, ChronoUnit.MINUTES));
 
                 if (well == null) {
                     throw new IllegalArgumentException();
                 }
                 switch (buffData) {
                     case FARM_BOOST:
-                        ActiveBuff activebuff = new ActiveBuff(ActiveBuff.BuffData.FARM_BOOST.getBuffID(), newdate);
+                        ActiveBuff activebuff = new ActiveBuff(ActiveBuff.BuffData.FARM_BOOST.getBuffID(), plus_five_min);
                         well.setActiveBuff(activebuff);
+                        player.sendMessage("New time: " + plus_five_min.toLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                         break;
                     case NONE:
                         player.sendMessage("Cannot put buff_id 'NONE' onto well!");

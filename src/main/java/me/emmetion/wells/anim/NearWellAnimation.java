@@ -87,10 +87,6 @@ public class NearWellAnimation extends BukkitRunnable implements Animation {
             if (wellLevel > 3) {
                 player.spawnParticle(Particle.SCRAPE, location2, 1, 0.001, 0, 0.001, 0.01);
             }
-
-
-
-
         }
 
         angle += 0.1;

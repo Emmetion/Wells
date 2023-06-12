@@ -1,12 +1,15 @@
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\runnables\DroppedCoinRunnable.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\listeners\WellListener.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\WellMenu.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\observer\IncrementObserver.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\observer\Observer.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\anim\NearWellAnimation.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\Wells.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\Menu.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\anim\Animation.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\database\Database.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\anim\CropFarmAnimation.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\PlayerMenuUtility.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\model\CoinType.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\listeners\WellPlayerListener.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\util\Utilities.java
@@ -15,4 +18,5 @@ D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\model\Well.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\commands\WellCommand.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\model\ActiveBuff.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\model\WellPlayer.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\listeners\MenuListener.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\database\WellManager.java

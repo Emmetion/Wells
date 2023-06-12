@@ -4,24 +4,18 @@ import org.bukkit.ChatColor;
 import org.bukkit.Particle;
 
 import java.sql.Date;
-import java.sql.Time;
-import java.text.FieldPosition;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
 import java.util.Locale;
 
 public class ActiveBuff {
 
     private String buff_id;
     private BuffData buffData;
-    private Date endDate;
+    private Timestamp endDate;
 
-    public ActiveBuff(String buff_id, Date endDate) {
+    public ActiveBuff(String buff_id, Timestamp endDate) {
         this.buff_id = buff_id;
         try {
             buffData = BuffData.valueOf(buff_id);
@@ -41,7 +35,7 @@ public class ActiveBuff {
         return this.buff_id.equals("NONE");
     }
 
-    public Date getEndDate() {
+    public Timestamp getEndTimestamp() {
         return endDate;
     }
 
@@ -73,7 +67,7 @@ public class ActiveBuff {
             return ChatColor.RED + "0d 0h 0m";
         }
         Date date = new Date(new java.util.Date().getTime());
-        Date end_date = this.endDate;
+        Timestamp end_date = this.endDate;
         return ChatColor.YELLOW + date.toLocalDate().minus(end_date.getTime(), ChronoUnit.MILLIS).toString();
     }
 

@@ -12,6 +12,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.sql.Date;
 import java.util.stream.Collectors;
@@ -43,9 +44,9 @@ public class Well {
 
     public Well(String townName, Location position, Location hologramPosition,
                 int well_level, int experience,
-                String buff1_id, Date buff1_end,
-                String buff2_id, Date buff2_end,
-                String buff3_id, Date buff3_end) {
+                String buff1_id, Timestamp buff1_end,
+                String buff2_id, Timestamp buff2_end,
+                String buff3_id, Timestamp buff3_end) {
         this.townName = townName;
         this.position = position;
         this.hologramPosition = hologramPosition;
