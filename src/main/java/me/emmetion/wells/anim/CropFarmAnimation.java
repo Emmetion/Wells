@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 
-public class CropFarmAnimation extends BukkitRunnable implements Animation {
+public class CropFarmAnimation extends Animation {
 
     private Player farmer;
     private Block cropBlock;
@@ -80,9 +80,10 @@ public class CropFarmAnimation extends BukkitRunnable implements Animation {
     }
 
     @Override
-    public void start() {
-        runTaskTimer(Wells.plugin, 1, 1);
+    public AnimationSettings getAnimationSettings() {
+        return new AnimationSettings("CropFarmAnimation", 1, 1);
     }
+
 
 //    @Override
 //    public void run() {
