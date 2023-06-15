@@ -104,6 +104,15 @@ public class WellPlayer {
             player.sendMessage(Component.text(text));
     }
 
+    /**
+     * Toggles hideParticles between true and false.
+     * @return canSeeParticles.
+     */
+    public boolean toggleParticles() {
+        this.hideParticles = this.hideParticles ? false : true;
+        return canSeeParticles();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof WellPlayer) {

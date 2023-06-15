@@ -12,6 +12,7 @@ import me.emmetion.wells.listeners.WellPlayerListener;
 import me.emmetion.wells.menu.WellMenu;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
+import me.emmetion.wells.runnables.ActiveBuffRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -30,6 +31,7 @@ public final class Wells extends JavaPlugin {
 
     public static Wells plugin;
 
+    private ActiveBuffRunnable activeBuffRunnable;
     private WellManager wellManager;
 
     @Override
@@ -69,6 +71,7 @@ public final class Wells extends JavaPlugin {
         initListeners();
         initSchedules();
         initWellHolograms();
+
     }
 
     // leftover code snippets
@@ -191,6 +194,10 @@ public final class Wells extends JavaPlugin {
         scheduler.runTaskTimer(this, () -> {
             this.wellManager.updateDatabase();
         }, 1, 300);
+
+
+        activeBuffRunnable = new ActiveBuffRunnable(this);
+        activeBuffRunnable.runTaskTimer(Wells.plugin, 1, 1);
     }
 
 

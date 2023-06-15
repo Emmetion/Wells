@@ -88,6 +88,11 @@ public class Well {
         this.animation.start();
     }
 
+    public void handleAllBuffUpdate() {
+        this.getActiveBuffs().stream()
+                .forEach(buff -> buff.update());
+    }
+
     public String getTownName() {
         return townName;
     }
@@ -270,11 +275,19 @@ public class Well {
         List<ActiveBuff> activeBuffs = Arrays.asList(buff1, buff2, buff3);
         ArrayList<ActiveBuff> realBuff = new ArrayList<>();
         for (ActiveBuff ab : activeBuffs) {
-            if (ab.getBuffID().equals("none"))
+            if (ab.getBuffID().equalsIgnoreCase("none"))
                 realBuff.add(ab);
         }
 
         return realBuff;
+    }
+
+    /**
+     * Get buffs regardless of being none or ended duration.
+     * @return
+     */
+    public List<ActiveBuff> getBuffs() {
+        return Arrays.asList(buff1, buff2, buff3);
     }
 
     private void performStateChange() {

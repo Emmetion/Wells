@@ -1,8 +1,10 @@
 package me.emmetion.wells.menu;
 
 import me.emmetion.wells.Wells;
+import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.model.ActiveBuff;
 import me.emmetion.wells.model.Well;
+import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
@@ -14,6 +16,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
+
+import static me.emmetion.wells.util.Utilities.getColor;
 
 public class WellMenu extends Menu {
 
@@ -42,8 +46,25 @@ public class WellMenu extends Menu {
 
         int rawslot = e.getRawSlot();
 
+        player.sendMessage("clicked slot: "+rawslot);
+
         if (rawslot == 13) {
             player.sendMessage("You have clicked on the middle cauldron!");
+        } else if (rawslot == 8) {
+            WellPlayer wellPlayer = this.playerMenuUtility.getWellPlayer();
+            boolean new_option = wellPlayer.toggleParticles();
+
+            if (new_option) {
+                player.sendMessage("You have set your particles to: " + ChatColor.GREEN + "ON");
+            } else {
+                player.sendMessage("You have set your particles to: " + ChatColor.RED + "OFF");
+            }
+
+            setMenuItems();
+        } else if (rawslot == 11) {
+            player.sendMessage(Component.text("Buff1: " + well.getBuff1().toString()));
+        } else if (rawslot == 15) {
+            player.sendMessage(Component.text("Buff2: " + well.getBuff2().toString()));
         }
     }
 
@@ -52,7 +73,6 @@ public class WellMenu extends Menu {
         Player owner = playerMenuUtility.getOwner();
         if (e.getReason().equals(InventoryCloseEvent.Reason.PLAYER)) {
             owner.sendMessage(Component.text("You have closed the well menu."));
-
         }
     }
 
@@ -66,6 +86,21 @@ public class WellMenu extends Menu {
         for (int i = 0; i < 27; i++) {
             this.inventory.setItem(i, FILLER_GLASS);
         }
+
+        boolean see = this.playerMenuUtility.getWellPlayer().canSeeParticles();
+
+        ItemStack item;
+        if (see) {
+            item = Utilities.createItemStack(Material.GREEN_STAINED_GLASS_PANE, 1,
+                    Component.text(getColor("&aCan see Particles.")), null);
+
+        } else {
+            item = Utilities.createItemStack(Material.RED_STAINED_GLASS_PANE, 1,
+                    Component.text(getColor("&cCannot see Particles.")), null);
+        }
+        this.inventory.setItem(8, item);
+
+
 
         ItemStack cauldron = Utilities.createItemStack(Material.CAULDRON,
                 Component.text(ChatColor.GOLD + well.getWellName()),
