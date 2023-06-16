@@ -161,7 +161,8 @@ public class WellListener implements Listener {
                 return;
             }
             player.sendActionBar(Component.text("You have thrown a coin!"));
-            DroppedCoinRunnable droppedCoinRunnable = new DroppedCoinRunnable(Wells.plugin, itemDrop, player, manager, playersOnCooldown);
+            WellPlayer wp = manager.getWellPlayer(player);
+            DroppedCoinRunnable droppedCoinRunnable = new DroppedCoinRunnable(Wells.plugin, itemDrop, wp, manager, playersOnCooldown);
             droppedCoinRunnable.runTaskTimer(Wells.plugin, 1, 1);
 
             if (!playersOnCooldown.contains(player))
