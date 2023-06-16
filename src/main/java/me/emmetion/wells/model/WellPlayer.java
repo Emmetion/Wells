@@ -113,6 +113,13 @@ public class WellPlayer {
         return canSeeParticles();
     }
 
+    public boolean isOnline() {
+        Player player = Bukkit.getPlayer(this.playerUUID);
+        if (player == null)
+            return false;
+        return true;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof WellPlayer) {

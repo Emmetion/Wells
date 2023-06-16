@@ -82,7 +82,7 @@ public class WellCommand implements CommandExecutor {
                 player.sendMessage(well.createHoverableTextComponent());
             }
         } else if (arg1.equals("save")) {
-            this.manager.saveAllWells();
+            this.manager.updateDatabase();
             player.sendMessage("Saved wells.");
         } else if (arg1.equals("level")) {
             if (args.length < 3) {

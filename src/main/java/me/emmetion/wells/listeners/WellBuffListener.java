@@ -6,7 +6,9 @@ import com.palmergames.bukkit.towny.object.TownBlock;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.anim.CropFarmAnimation;
 import me.emmetion.wells.database.WellManager;
+import me.emmetion.wells.events.FarmBoostEvent;
 import me.emmetion.wells.model.Well;
+import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -42,13 +44,11 @@ public class WellBuffListener implements Listener {
         }
 
         Town town = TownyAPI.getInstance().getTown(player);
-
         if (town == null) {
             return;
         }
 
         String town_name = Utilities.getTownFromBlock(block);
-
         if (town_name == null) {
             player.sendMessage("Block broken was not in town.");
             return;
@@ -61,6 +61,11 @@ public class WellBuffListener implements Listener {
             Well well = wellManager.getWellByTownName(town_name);
 
             well.incrementLevel();
+
+            WellPlayer wellPlayer = wellManager.getWellPlayer(player);
+
+
+            FarmBoostEvent farmboost = new FarmBoostEvent(wellPlayer);
 
             CropFarmAnimation animation = new CropFarmAnimation(player, block);
             animation.start();

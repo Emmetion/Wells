@@ -29,6 +29,9 @@ public class DroppedCoinRunnable extends BukkitRunnable {
     private WellManager wellManager;
     private Collection<Player> playersOnCooldown;
 
+    private boolean isComplete;
+
+
     public DroppedCoinRunnable(Wells wells, Item item, Player player, WellManager wellManager, Collection<Player> playersOnCooldown) {
         this.wells = wells;
         this.item = item;
@@ -39,7 +42,13 @@ public class DroppedCoinRunnable extends BukkitRunnable {
         this.wellManager = wellManager;
         this.playersOnCooldown = playersOnCooldown;
 
+        this.isComplete = false;
+        item.set
         item.setCanPlayerPickup(false);
+    }
+
+    private void setComplete(boolean b) {
+        this.isComplete = b;
     }
 
     @Override
@@ -101,4 +110,9 @@ public class DroppedCoinRunnable extends BukkitRunnable {
                 Color.fromRGB(255,128,0)
                 , 1));
     }
+
+    public boolean isComplete() {
+        return this.complete;
+    }
+
 }
