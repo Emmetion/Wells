@@ -26,6 +26,7 @@ import java.time.temporal.TemporalAmount;
 import java.time.temporal.TemporalUnit;
 import java.util.concurrent.TimeUnit;
 
+//TODO Migrate this command to use Utilities.getColor().
 public class WellCommand implements CommandExecutor {
 
     private WellManager manager;

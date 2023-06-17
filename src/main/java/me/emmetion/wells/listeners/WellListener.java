@@ -139,38 +139,15 @@ public class WellListener implements Listener {
 
     @EventHandler
     public void onCoinTossEvent(CoinTossEvent event) {
-
-
+        // Other plugins can now listen in on this event, and determine whether they want to cancel it for themselves
+        // or not.
         DroppedCoinRunnable runnable = new DroppedCoinRunnable(Wells.plugin,
                 event.getDroppedItem(),
                 event.getPlayer(),
                 this.manager,
                 playersOnCooldown);
+        runnable.runTaskTimer(Wells.plugin, 1, 1);
 
-    }
-
-    @EventHandler
-    public void onCoinToss(PlayerDropItemEvent event) {
-        Player player = event.getPlayer();
-        Item itemDrop = event.getItemDrop();
-
-        if (Utilities.isCoin(itemDrop.getItemStack())) {
-            if (playersOnCooldown.contains(player)) {
-                player.sendMessage(Component.text("You are on cooldown!").color(TextColor.color(255, 0, 0)));
-                event.setCancelled(true);
-                return;
-            }
-            player.sendActionBar(Component.text("You have thrown a coin!"));
-            WellPlayer wp = manager.getWellPlayer(player);
-            DroppedCoinRunnable droppedCoinRunnable = new DroppedCoinRunnable(Wells.plugin, itemDrop, wp, manager, playersOnCooldown);
-            droppedCoinRunnable.runTaskTimer(Wells.plugin, 1, 1);
-
-            if (!playersOnCooldown.contains(player))
-                playersOnCooldown.add(player);
-            Bukkit.getScheduler().runTaskLater(Wells.plugin, () -> {
-                this.playersOnCooldown.remove(player);
-            }, 3 * 20);
-        }
     }
 
     @EventHandler
