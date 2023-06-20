@@ -7,11 +7,13 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.block.BlockDropItemEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class CoinTossEvent extends Event implements Cancellable {
 
-    public static final HandlerList handlers = new HandlerList();
+    private static final HandlerList handlers = new HandlerList();
 
     private Item droppedItem;
     private WellPlayer player;
@@ -22,6 +24,8 @@ public class CoinTossEvent extends Event implements Cancellable {
         this.player = player;
         this.droppedItem = droppedItem;
     }
+
+//    BlockDropItemEvent
 
     @Override
     public boolean isCancelled() {
@@ -45,4 +49,6 @@ public class CoinTossEvent extends Event implements Cancellable {
     public @NotNull HandlerList getHandlers() {
         return handlers;
     }
+
+    public static @NotNull HandlerList getHandlerList() { return handlers; }
 }

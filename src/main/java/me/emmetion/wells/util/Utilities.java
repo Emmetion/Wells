@@ -244,7 +244,9 @@ public class Utilities {
             return strings.stream().map(Utilities::getColor).collect(Collectors.toList());
     }
 
-    public static ItemStack createItemStack(Material material, int amount, @Nullable  Component displayname, @Nullable List<Component> lore) {
+
+
+    public static ItemStack createItemStack(Material material, int amount, @Nullable Component displayname, @Nullable List<Component> lore) {
         ItemStack item = new ItemStack(material, amount);
         ItemMeta im = item.getItemMeta();
         if (displayname != null)

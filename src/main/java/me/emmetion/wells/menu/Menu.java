@@ -18,6 +18,9 @@ import static me.emmetion.wells.util.Utilities.getColor;
 
 public abstract class Menu implements InventoryHolder, Listener {
 
+    protected ItemStack nextPage = Utilities.createItemStack(Material.ARROW, 1, Component.text("Next Page"), null);
+    protected ItemStack prevPage = Utilities.createItemStack(Material.ARROW, 1, Component.text("Previous Page"), null);
+
     protected Inventory inventory;
 
     protected PlayerMenuUtility playerMenuUtility;
@@ -55,5 +58,8 @@ public abstract class Menu implements InventoryHolder, Listener {
     @Override
     public Inventory getInventory(){ return inventory; }
 
+    public int getCurrentPage() {
+        return 1;
+    }
 
 }

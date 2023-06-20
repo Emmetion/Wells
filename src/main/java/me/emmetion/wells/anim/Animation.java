@@ -8,6 +8,10 @@ public abstract class Animation extends BukkitRunnable {
 
     protected BukkitTask animationTask;
 
+    private boolean hasBegun = false;
+    private boolean hasEnded = false;
+
+
     /**
      * Each animation stores an animation settings.
      * @return
@@ -25,16 +29,26 @@ public abstract class Animation extends BukkitRunnable {
         }
 
         animationTask = runTaskTimer(Wells.plugin, getAnimationSettings().getDelay(), getAnimationSettings().getPeriod());
-
+        this.hasBegun = true;
     }
 
+    public boolean hasBegun() {
+        return this.hasBegun;
+    }
+
+    private boolean hasEnded() {
+        return this.hasEnded;
+    }
+
+
     /**
-     *
      * This will end the animation if it is not
      */
     public void end() {
-        if (!animationTask.isCancelled())
+        if (!animationTask.isCancelled()) {
             animationTask.cancel();
+            this.hasEnded = true;
+        }
     }
 
 

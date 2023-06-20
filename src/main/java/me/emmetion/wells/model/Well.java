@@ -344,6 +344,25 @@ public class Well {
                                 )));
     }
 
+    // IntelliJ default equals() and hashCode().
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Well well = (Well) o;
+
+        if (!townName.equals(well.townName)) return false;
+        return position.equals(well.position);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = townName.hashCode();
+        result = 31 * result + position.hashCode();
+        return result;
+    }
+
     @Override
     public String toString() {
         return "Well{" +

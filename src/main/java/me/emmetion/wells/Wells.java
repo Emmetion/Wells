@@ -4,15 +4,13 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
 import me.emmetion.wells.commands.WellCommand;
+import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.database.WellManager;
-import me.emmetion.wells.listeners.MenuListener;
-import me.emmetion.wells.listeners.WellBuffListener;
-import me.emmetion.wells.listeners.WellListener;
-import me.emmetion.wells.listeners.WellPlayerListener;
-import me.emmetion.wells.menu.WellMenu;
+import me.emmetion.wells.listeners.*;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.runnables.ActiveBuffRunnable;
+import me.emmetion.wells.runnables.WellCreatureRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -32,7 +30,10 @@ public final class Wells extends JavaPlugin {
     public static Wells plugin;
 
     private ActiveBuffRunnable activeBuffRunnable;
+    private WellCreatureRunnable wellCreatureRunnable;
+
     private WellManager wellManager;
+    private CreatureManager creatureManager;
 
     @Override
     public void onEnable() {
@@ -59,6 +60,8 @@ public final class Wells extends JavaPlugin {
             return;
         }
 
+        this.creatureManager = new CreatureManager();
+
 
         // Console startup debug.
 //        boolean b = this.wellManager.wellExistsByTownName("Emmet's Town");
@@ -71,7 +74,6 @@ public final class Wells extends JavaPlugin {
         initListeners();
         initSchedules();
         initWellHolograms();
-
     }
 
     // leftover code snippets
@@ -95,8 +97,12 @@ public final class Wells extends JavaPlugin {
         return this.wellManager;
     }
 
+    public CreatureManager getCreatureManager() {
+        return this.creatureManager;
+    }
+
     private void initCommands() {
-        this.getCommand("wells").setExecutor(new WellCommand(wellManager));
+        this.getCommand("wells").setExecutor(new WellCommand(wellManager, creatureManager));
         System.out.println("Commands have been successfully enabled.");
     }
 
@@ -107,6 +113,7 @@ public final class Wells extends JavaPlugin {
         pluginManager.registerEvents(new MenuListener(wellManager), this);
         pluginManager.registerEvents(new WellBuffListener(wellManager), this);
         pluginManager.registerEvents(new WellPlayerListener(wellManager), this);
+        pluginManager.registerEvents(new WellCreatureListener(creatureManager), this);
     }
 
 
@@ -116,6 +123,7 @@ public final class Wells extends JavaPlugin {
     private void initSchedules() {
         BukkitScheduler scheduler = Bukkit.getScheduler();
 
+        // Locates nearby well players.
         scheduler.runTaskTimer(this, () -> {
 
             List<Player> currentWellPlayers = new ArrayList<>();
@@ -125,6 +133,9 @@ public final class Wells extends JavaPlugin {
                 Collection<Player> nearbyPlayers = location.getNearbyPlayers(10);
 
                 for (Player p : nearbyPlayers) {
+
+                    if (!p.isOnline())
+                        continue;
 
                     WellPlayer wellPlayer = wellManager.getWellPlayer(p);
 
@@ -191,13 +202,18 @@ public final class Wells extends JavaPlugin {
 
         }, 20, 20);
 
+        // Updates the wells database every 300ticks.
         scheduler.runTaskTimer(this, () -> {
             this.wellManager.updateDatabase();
         }, 1, 300);
 
-
+        // Creates the ActiveBuffRunnable.
         activeBuffRunnable = new ActiveBuffRunnable(this);
         activeBuffRunnable.runTaskTimer(Wells.plugin, 1, 1);
+
+        // Creatres the WellCreatureRunnable
+        wellCreatureRunnable = new WellCreatureRunnable(this, wellManager, creatureManager);
+        wellCreatureRunnable.runTaskTimer(Wells.plugin, 1, 1);
     }
 
 

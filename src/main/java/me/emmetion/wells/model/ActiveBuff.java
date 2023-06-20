@@ -1,26 +1,21 @@
 package me.emmetion.wells.model;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Particle;
 
-import java.sql.Date;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.temporal.ChronoUnit;
-import java.util.Locale;
 
 public class ActiveBuff {
 
     private String buff_id;
-    private BuffData buffData;
+    private BuffType buffData;
     private Timestamp endDate;
 
     public ActiveBuff(String buff_id, Timestamp endDate) {
         this.buff_id = buff_id;
         try {
-            buffData = BuffData.valueOf(buff_id);
+            buffData = BuffType.valueOf(buff_id);
         } catch (IllegalArgumentException e) { // this exception will cause all unknown buff_ids to have to value if removed in update.
-            buffData = BuffData.NONE;
+            buffData = BuffType.NONE;
             buff_id = "NONE";
         }
 
@@ -40,7 +35,7 @@ public class ActiveBuff {
     }
 
     public boolean isNone() {
-        return this.buffData.equals(BuffData.NONE);
+        return this.buffData.equals(BuffType.NONE);
     }
 
     public Timestamp getEndTimestamp() {
@@ -55,8 +50,8 @@ public class ActiveBuff {
      */
     public void update() {
         if (hasEnded()) {
-            if (this.buffData != BuffData.NONE) {
-                this.buffData = BuffData.NONE;
+            if (this.buffData != BuffType.NONE) {
+                this.buffData = BuffType.NONE;
                 this.buff_id = "NONE";
             }
         }
@@ -64,7 +59,9 @@ public class ActiveBuff {
 
     public String getEndDateAsString() {
         Timestamp now = new Timestamp(System.currentTimeMillis());
-        int duration = endDate.compareTo(new Timestamp(System.currentTimeMillis()));
+        int duration = endDate.compareTo(now);
+        System.out.println("duration = "+duration);
+
         if (duration <= 0) {
             return "00d 00h 00m 00s";
         }
@@ -112,14 +109,14 @@ public class ActiveBuff {
                 '}';
     }
 
-    public enum BuffData {
+    public enum BuffType {
         NONE("NONE", null),
         FARM_BOOST("FARM_BOOST", Particle.VILLAGER_HAPPY);
 
         private String buff_id;
         private Particle anim_particle;
 
-        BuffData(String buff_id, Particle particle) {
+        BuffType(String buff_id, Particle particle) {
             this.buff_id = buff_id;
             this.anim_particle = particle;
         }

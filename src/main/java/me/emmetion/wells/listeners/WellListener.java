@@ -31,6 +31,8 @@ import org.slf4j.helpers.Util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class WellListener implements Listener {
 
@@ -40,10 +42,6 @@ public class WellListener implements Listener {
     private WellManager manager;
 
 
-    //TODO
-    // Change this to a HashMap<Player, Boolean>. Only send the cooldown message once,
-    // then check if the HashMap is true when sending further messages.
-    private Collection<Player> playersOnCooldown = new ArrayList<>();
 
     public WellListener(WellManager manager) {
         this.manager = manager;
@@ -108,6 +106,12 @@ public class WellListener implements Listener {
 
     }
 
+
+    //TODO
+    // Change this to a HashMap<Player, Boolean>. Only send the cooldown message once,
+    // then check if the HashMap is true when sending further messages.
+    private Map<Player, Boolean> playersOnCooldown = new HashMap<>();
+
     @EventHandler
     public void onItemThrow(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
@@ -116,8 +120,11 @@ public class WellListener implements Listener {
         if (!Utilities.isCoin(itemDrop.getItemStack()))
             return;
 
-        if (playersOnCooldown.contains(player)) {
-            player.sendMessage(Component.text("You are on cooldown!").color(TextColor.color(255, 0, 0)));
+        if (playersOnCooldown.containsKey(player)) {
+            if (!playersOnCooldown.get(player)) {
+                player.sendMessage(Component.text("You are on cooldown!").color(TextColor.color(255, 0, 0)));
+                playersOnCooldown.put(player, true);
+            }
             event.setCancelled(true);
             return;
         }
@@ -128,8 +135,8 @@ public class WellListener implements Listener {
 
         Bukkit.getPluginManager().callEvent(new CoinTossEvent(wellPlayer, itemDrop));
 
-        if (!playersOnCooldown.contains(player))
-            playersOnCooldown.add(player);
+        if (!playersOnCooldown.containsKey(player))
+            playersOnCooldown.put(player, false);
 
         Bukkit.getScheduler().runTaskLater(Wells.plugin, () -> {
             this.playersOnCooldown.remove(player);
@@ -141,13 +148,14 @@ public class WellListener implements Listener {
     public void onCoinTossEvent(CoinTossEvent event) {
         // Other plugins can now listen in on this event, and determine whether they want to cancel it for themselves
         // or not.
+
         DroppedCoinRunnable runnable = new DroppedCoinRunnable(Wells.plugin,
                 event.getDroppedItem(),
                 event.getPlayer(),
                 this.manager,
                 playersOnCooldown);
         runnable.runTaskTimer(Wells.plugin, 1, 1);
-
+        event.getPlayer().sendMessage("CoinTossEvent!");
     }
 
     @EventHandler

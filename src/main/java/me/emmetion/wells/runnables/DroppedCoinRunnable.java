@@ -19,6 +19,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DroppedCoinRunnable extends BukkitRunnable {
@@ -28,12 +29,14 @@ public class DroppedCoinRunnable extends BukkitRunnable {
     private CoinType coinType;
     private WellPlayer wplayer;
     private WellManager wellManager;
-    private Collection<Player> playersOnCooldown;
+
+    private Map<Player, Boolean> playersOnCooldown;
 
     private boolean isComplete;
 
 
-    public DroppedCoinRunnable(Wells wells, Item item, WellPlayer wplayer, WellManager wellManager, Collection<Player> playersOnCooldown) {
+    public DroppedCoinRunnable(Wells wells, Item item, WellPlayer wplayer, WellManager wellManager,
+                               Map<Player, Boolean> playersOnCooldown) {
         this.wells = wells;
         this.item = item;
         NBTItem nbt = new NBTItem(item.getItemStack());
@@ -47,12 +50,17 @@ public class DroppedCoinRunnable extends BukkitRunnable {
         item.setCanPlayerPickup(false);
     }
 
-    private void setComplete(boolean b) {
+    public void setComplete(boolean b) {
         this.isComplete = b;
     }
 
     @Override
-    public void run() {
+    public void run() { //
+        if (isComplete()) {
+            this.cancel();
+            return;
+        }
+
         if (!wplayer.isOnline()) {
             this.cancel();
             return;
@@ -61,7 +69,7 @@ public class DroppedCoinRunnable extends BukkitRunnable {
         Player player = Bukkit.getPlayer(wplayer.getPlayerUUID());
 
         if (item == null || item.isDead()) {
-            this.cancel();
+            setComplete(true);
             return;
         }
 
@@ -85,9 +93,9 @@ public class DroppedCoinRunnable extends BukkitRunnable {
 
                 wellPlayer.depositCoin(coinType, well);
                 item.remove();
-                if (playersOnCooldown.contains(player)) // removes cooldown located in WellListener object.
+                if (playersOnCooldown.containsKey(player)) // removes cooldown located in WellListener object.
                     playersOnCooldown.remove(player);
-                this.cancel();
+                setComplete(true);
                 return;
             } else {
                 Component text = Component.text("You coin wasn't close to a well!")
@@ -96,7 +104,7 @@ public class DroppedCoinRunnable extends BukkitRunnable {
                                 Component.text()
                         );
                 player.sendActionBar(text);
-                this.cancel();
+                setComplete(true);
                 return;
             }
 
