@@ -42,7 +42,7 @@ public abstract class Animation extends BukkitRunnable {
 
 
     /**
-     * This will end the animation if it is not
+     * This will end the animation if it has not already ended.
      */
     public void end() {
         if (!animationTask.isCancelled()) {

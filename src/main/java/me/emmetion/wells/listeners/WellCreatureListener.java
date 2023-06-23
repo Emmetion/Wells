@@ -1,47 +1,58 @@
 package me.emmetion.wells.listeners;
 
-import de.tr7zw.nbtapi.NBTEntity;
-import me.emmetion.wells.commands.WellCommand;
 import me.emmetion.wells.creature.WellCreature;
 import me.emmetion.wells.database.CreatureManager;
+import me.emmetion.wells.events.CreatureClickEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-
-import java.util.UUID;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 
 public class WellCreatureListener implements Listener {
 
-    private CreatureManager creatureManager;
+    private final CreatureManager creatureManager;
 
     public WellCreatureListener(CreatureManager manager) {
         this.creatureManager = manager;
     }
 
     @EventHandler
-    public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
-        Player player = event.getPlayer();
-        player.sendMessage("PlayerInteractEntityEvent.");
-
-        Entity rightClicked = event.getRightClicked();
-        NBTEntity entity = new NBTEntity(rightClicked);
-
-        String creature_uuid = entity.getString("creature_uuid");
-        if (creature_uuid == null) {
+    public void leftClickListener(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Player)) {
             return;
         }
-        UUID uuid = UUID.fromString(creature_uuid);
-        WellCreature wellCreature = creatureManager.getWellCreature(uuid);
-        if (wellCreature == null) {
+        Player player = (Player) event.getDamager();
+        Entity entity = event.getEntity();
+
+
+        WellCreature wc = creatureManager.getWellCreatureFromEntity(entity);
+        if (wc == null)
+            return;
+
+        wc.handleLeftClick(event);
+        Bukkit.getPluginManager().callEvent(new CreatureClickEvent(player, wc,
+                CreatureClickEvent.ClickType.LEFT_CLICK));
+    }
+
+    @EventHandler
+    public void rightClickListener(PlayerInteractAtEntityEvent e) {
+        Entity entity = e.getRightClicked();
+        Player player = e.getPlayer();
+        if (entity == null) {
             return;
         }
 
-        player.sendMessage("wellCreature.handleInteraction(event)");
-        wellCreature.handleInteraction(event);
+        WellCreature wc = creatureManager.getWellCreatureFromEntity(entity);
+        if (wc == null) {
+            return;
+        }
 
+        wc.handleRightClick(e);
+        Bukkit.getPluginManager().callEvent(new CreatureClickEvent(player, wc,
+                CreatureClickEvent.ClickType.RIGHT_CLICK));
     }
 
 }

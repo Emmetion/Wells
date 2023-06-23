@@ -75,8 +75,6 @@ public class WellManager {
             }
 
             this.wellPlayerHashMap = database.getOnlineWellPlayersFromTable();
-            Bukkit.getServer().sendMessage(Component.text("wphm: "+wellPlayerHashMap.size()));
-
             this.connected = true;
         } catch (SQLException e) {
             this.connected = false;
@@ -232,9 +230,7 @@ public class WellManager {
     public boolean wellExistsByTownName(String townName) {
         if (wellHashMap == null)
             return false;
-        boolean b = wellHashMap.containsKey(townName);
-        System.out.println("townname: " + b);
-        return b;
+        return wellHashMap.containsKey(townName);
     }
 
     /**
@@ -276,7 +272,6 @@ public class WellManager {
     public void saveAllWells() {
         Collection<Well> wells = this.wellHashMap.values();
         this.database.updateWells(wells);
-        Wells.plugin.getLogger().info("");
     }
 
     /**
@@ -284,18 +279,17 @@ public class WellManager {
      * This should also be executed every 5 minutes or when a WellPlayer is deleted.
      */
     public void saveAllWellPlayers() {
-        System.out.println("☢ Saving well players...");
-        Player em = Bukkit.getPlayer("Emmetion");
-
         Collection<WellPlayer> wellPlayers = this.wellPlayerHashMap.values();
         int count = wellPlayers.size();
         if (debug)
-            em.sendMessage(Component.text("☢ WellPlayersSize: " + count));
+            System.out.println("☢ WellPlayersSize: " + count);
         this.database.updateWellPlayers(wellPlayers);
 
     }
 
     public WellPlayer getWellPlayer(Player player) {
+        if (player == null)
+            return null;
         UUID uniqueId = player.getUniqueId();
         return this.wellPlayerHashMap.get(uniqueId);
     }

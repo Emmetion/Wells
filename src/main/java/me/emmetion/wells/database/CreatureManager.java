@@ -1,21 +1,27 @@
 package me.emmetion.wells.database;
 
 import de.tr7zw.nbtapi.NBTEntity;
+import me.emmetion.wells.Wells;
 import me.emmetion.wells.creature.*;
 import me.emmetion.wells.model.Well;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataType;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static me.emmetion.wells.util.Utilities.getColor;
 
 public class CreatureManager {
 
-    private Map<UUID, WellCreature> wellCreatureMap;
-    private Map<Well, List<UUID>> wellsWithCreatures;
+    private HashMap<UUID, WellCreature> wellCreatureMap;
+    private HashMap<Well, Set<UUID>> wellsWithCreatures;
 
 
     public CreatureManager() {
@@ -29,13 +35,30 @@ public class CreatureManager {
      * ex. Pixie#move();
      */
     public void handleFrameUpdate() {
+        Player e = Bukkit.getPlayer("Emmetion");
+        if (e != null) {
+            e.sendActionBar(getColor("Creatures: " + wellCreatureMap.size()));
+        }
+
+        List<WellCreature> creatures = new ArrayList<>(); // store dead creatures, handle afterward.
+
         for (WellCreature wc : wellCreatureMap.values()) {
+            if (wc.isKilled()) {
+                continue;
+            }
+            if (wc == null)
+                continue;
             if (wc instanceof Movable) { // if creature can move, it executes the movement method on it.
                 Movable movable = (Movable) wc;
                 movable.move();
             }
             wc.updateCreature();
             wc.incrementFrame();
+        }
+
+        // remove creatures that were newly marked killed.
+        for (WellCreature wc : creatures) {
+            this.removeCreature(wc);
         }
     }
 
@@ -47,7 +70,7 @@ public class CreatureManager {
     }
 
     public List<WellCreature> getCreaturesAtWell(Well well) {
-        if (!wellCreatureMap.containsKey(well)) {
+        if (!wellsWithCreatures.containsKey(well)) {
             return null;
         }
 
@@ -57,6 +80,14 @@ public class CreatureManager {
                 .collect(Collectors.toList());
 
         return creatures;
+    }
+
+    public Collection<Well> getWellsWithCreatures() {
+        return this.wellsWithCreatures.keySet();
+    }
+
+    public Collection<WellCreature> getAllWellCreatures() {
+        return this.wellCreatureMap.values();
     }
 
     private void addToMaps(WellCreature creature, Well well) {
@@ -69,22 +100,28 @@ public class CreatureManager {
 
         this.wellCreatureMap.put(creature.getUUID(), creature);
 
-        List<UUID> uuids = this.wellsWithCreatures.get(well);
+        Set<UUID> uuids = this.wellsWithCreatures.get(well);
+        if (uuids == null)
+            uuids = new HashSet<>();
+
         uuids.add(creature.getUUID());
 
         this.wellsWithCreatures.put(well, uuids);
     }
 
     private void removeFromMaps(UUID uuid) {
-        WellCreature wellCreature = this.wellCreatureMap.get(uuid);
-        if (wellCreature == null)
-            return;
 
-        this.wellCreatureMap.remove(wellCreature);
+        WellCreature wellCreature = this.wellCreatureMap.get(uuid);
+        if (wellCreature == null) {
+            return;
+        }
+
+        this.wellCreatureMap.remove(uuid);
+
         if (wellCreature instanceof WellBound) {
             WellBound wb = (WellBound) wellCreature;
             Well boundWell = wb.getBoundWell();
-            List<UUID> uuids = this.wellsWithCreatures.get(boundWell);
+            Set<UUID> uuids = this.wellsWithCreatures.get(boundWell);
             uuids.remove(wellCreature.getUUID());
             this.wellsWithCreatures.put(boundWell, uuids); // update well with removed wellcreature uuid.
         }
@@ -93,7 +130,6 @@ public class CreatureManager {
     public void spawnCreature(Class<? extends WellCreature> creature, @Nullable Well well) {
         CreatureType type = CreatureType.getFromClazz(creature);
         WellCreature wellCreature = null;
-
 
 
         switch (type) {
@@ -118,15 +154,19 @@ public class CreatureManager {
     }
 
     public WellCreature getWellCreatureFromEntity(Entity entity) {
-        if (entity == null)
-            return null;
-
-        NBTEntity nbtEntity = new NBTEntity(entity);
-        String creature_uuid = nbtEntity.getString("creature_uuid");
-        if (creature_uuid == null) {
+//        Player e = Bukkit.getPlayer("Emmetion");
+        if (entity == null) {
             return null;
         }
-        return wellCreatureMap.get(creature_uuid);
+        NamespacedKey nk = new NamespacedKey(Wells.plugin, "creature-uuid");
+        String creature_uuid = entity.getPersistentDataContainer().get(nk, PersistentDataType.STRING);
+//        for (NamespacedKey key : entity.getPersistentDataContainer().getKeys()) {
+//            e.sendMessage(key.asString());
+//        }
+
+        UUID uuid = UUID.fromString(creature_uuid);
+//        e.sendMessage(uuid.toString());
+        return wellCreatureMap.get(uuid);
     }
 
     public CreatureType getCreatureTypeFromEntity(Entity e) {
@@ -135,7 +175,7 @@ public class CreatureManager {
         return this.getWellCreatureFromEntity(e).getCreatureType();
     }
 
-    public void killCreature(UUID uuid) {
+    public void removeCreature(UUID uuid) {
         if (uuid == null)
             return;
 
@@ -143,16 +183,33 @@ public class CreatureManager {
         if (wellCreature == null)
             return;
 
-        wellCreature.kill();
         removeFromMaps(uuid);
     }
 
 
 
-    public void killCreature(WellCreature wellCreature) {
+    public void removeCreature(WellCreature wellCreature) {
         if (wellCreature == null)
             return;
-        killCreature(wellCreature.getUUID());
+        removeCreature(wellCreature.getUUID());
+    }
+
+    public static UUID getUUIDFromEntity(Entity e) {
+        if (e == null)
+            return null;
+
+        NBTEntity entity = new NBTEntity(e);
+        if (!entity.hasKey("creature_uuid"))
+            return null;
+
+        return entity.getUUID("creature_uuid");
+    }
+
+    public void saveCreatures() {
+        for (UUID uuid : this.wellCreatureMap.keySet()) {
+
+        }
+
     }
 
 }

@@ -2,28 +2,24 @@ package me.emmetion.wells;
 
 import com.palmergames.bukkit.towny.TownyAPI;
 import eu.decentsoftware.holograms.api.DHAPI;
-import eu.decentsoftware.holograms.api.holograms.Hologram;
 import me.emmetion.wells.commands.WellCommand;
 import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.listeners.*;
 import me.emmetion.wells.model.Well;
-import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.runnables.ActiveBuffRunnable;
+import me.emmetion.wells.runnables.NearWellRunnable;
+import me.emmetion.wells.runnables.UpdateDatabaseRunnable;
 import me.emmetion.wells.runnables.WellCreatureRunnable;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitScheduler;
 
 import java.sql.SQLException;
-import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+
+import static me.emmetion.wells.util.Utilities.getColor;
 
 public final class Wells extends JavaPlugin {
 
@@ -31,6 +27,8 @@ public final class Wells extends JavaPlugin {
 
     private ActiveBuffRunnable activeBuffRunnable;
     private WellCreatureRunnable wellCreatureRunnable;
+    private NearWellRunnable nearWellRunnable;
+    private UpdateDatabaseRunnable updateDatabaseRunnable;
 
     private WellManager wellManager;
     private CreatureManager creatureManager;
@@ -62,23 +60,13 @@ public final class Wells extends JavaPlugin {
 
         this.creatureManager = new CreatureManager();
 
-
-        // Console startup debug.
-//        boolean b = this.wellManager.wellExistsByTownName("Emmet's Town");
-//        System.out.println("FakeWell present: " + b);
-//
-//        boolean connected = this.wellManager.isConnected();
-//        System.out.println("isConnected(): " + connected);
-
         initCommands();
         initListeners();
         initSchedules();
         initWellHolograms();
+
+        Bukkit.broadcastMessage(getColor("&c&lReload! &fWell's has been reloaded!"));
     }
-
-    // leftover code snippets
-    // Well fakeWell = new Well("Emmet's Town", new Location(Bukkit.getWorld("world"), 0,0,0), 0);
-
 
     @Override
     public void onDisable() {
@@ -90,6 +78,7 @@ public final class Wells extends JavaPlugin {
         }
 
         deleteWellHolograms();
+        deleteCreatures();
     }
 
 
@@ -100,6 +89,8 @@ public final class Wells extends JavaPlugin {
     public CreatureManager getCreatureManager() {
         return this.creatureManager;
     }
+
+    // Helper methods for startup/shutdown.
 
     private void initCommands() {
         this.getCommand("wells").setExecutor(new WellCommand(wellManager, creatureManager));
@@ -116,96 +107,15 @@ public final class Wells extends JavaPlugin {
         pluginManager.registerEvents(new WellCreatureListener(creatureManager), this);
     }
 
-
-    private HashMap<Player, String> playersNearWell = new HashMap<>();
-    private HashMap<Player, Integer> nearWellMessageCooldown = new HashMap<>();
-
     private void initSchedules() {
-        BukkitScheduler scheduler = Bukkit.getScheduler();
 
         // Locates nearby well players.
-        scheduler.runTaskTimer(this, () -> {
+        nearWellRunnable = new NearWellRunnable(wellManager);
+        nearWellRunnable.runTaskTimer(Wells.plugin, 1, 1);
 
-            List<Player> currentWellPlayers = new ArrayList<>();
-
-            for (Well w : this.wellManager.getWells()) {
-                Location location = w.getLocation();
-                Collection<Player> nearbyPlayers = location.getNearbyPlayers(10);
-
-                for (Player p : nearbyPlayers) {
-
-                    if (!p.isOnline())
-                        continue;
-
-                    WellPlayer wellPlayer = wellManager.getWellPlayer(p);
-
-                    if (playersNearWell.containsKey(p)) { // if player was already near a well
-                        if (!playersNearWell.get(p).equals(w.getWellName())) { // and the well the player is currently at is different. (maybe tp, other reasons idk)
-
-                            w.removeNearbyPlayer(wellPlayer); // remove from well's collection.
-                            this.playersNearWell.remove(p); // remove from the list
-                        }
-                    }
-
-                    currentWellPlayers.add(p); // add the player to the list.
-                    playersNearWell.put(p, w.getWellName());
-                    w.addNearbyPlayer(wellPlayer);
-
-                    // "Town's Well"
-                    Hologram hologram = DHAPI.getHologram(w.getWellName()); // gets the hologram from hashmap.
-                    if (hologram == null) {
-                        hologram = createWellHologram(w);
-                    }
-                    hologram.setShowPlayer(p); // displays the well hologram to the player.
-
-                    if (nearWellMessageCooldown.containsKey(p)) {
-                        if (nearWellMessageCooldown.get(p) == -1) { // removes cooldown if time is at -1.
-                            nearWellMessageCooldown.remove(p);
-                        } else {
-                            nearWellMessageCooldown.put(p, nearWellMessageCooldown.get(p) - 1); // count down every second.
-                        }
-                    } else {
-                        if (wellManager.isDebug())
-                            p.sendMessage("☢ You are near a well! [" + w.getWellName() + "]");
-                        nearWellMessageCooldown.put(p, 5); // -1 on cooldown each second.
-                    }
-                }
-            }
-
-
-            List<Player> notNearWells = Bukkit.getOnlinePlayers().stream()
-                    .filter(p -> !currentWellPlayers.contains(p))
-                    .collect(Collectors.toList());
-
-            for (Player p : notNearWells) {
-
-                WellPlayer wp = wellManager.getWellPlayer(p);
-
-                if (this.playersNearWell.containsKey(p)) {
-                    String wellName = this.playersNearWell.get(p);
-                    Hologram h = DHAPI.getHologram(wellName);
-                    h.removeShowPlayer(p);
-
-                    Well wellByWellName = wellManager.getWellByWellName(wellName);
-
-                    wellByWellName.removeNearbyPlayer(wp);
-
-                    h.hide(p);
-                    if (wellManager.isDebug())
-                        p.sendMessage("☢ You are no longer near a well. [" + wellName + "]");
-
-                    this.playersNearWell.remove(p);
-                }
-            }
-
-
-
-        }, 20, 20);
-
-        // Updates the wells database every 300ticks.
-        scheduler.runTaskTimer(this, () -> {
-            this.wellManager.updateDatabase();
-        }, 1, 300);
+        // Updates the wells database every 5 minutes.
+        updateDatabaseRunnable = new UpdateDatabaseRunnable(wellManager);
+        updateDatabaseRunnable.runTaskTimer(Wells.plugin, 1, 3000);
 
         // Creates the ActiveBuffRunnable.
         activeBuffRunnable = new ActiveBuffRunnable(this);
@@ -216,8 +126,6 @@ public final class Wells extends JavaPlugin {
         wellCreatureRunnable.runTaskTimer(Wells.plugin, 1, 1);
     }
 
-
-
     public void initWellHolograms() {
         for (Well w : wellManager.getWells()) {
             w.updateHologram();
@@ -225,28 +133,13 @@ public final class Wells extends JavaPlugin {
     }
 
 
-
-    private Hologram createWellHologram(Well well) {
-        if (DHAPI.getHologram(well.getWellName()) != null) {
-            DHAPI.removeHologram(well.getWellName());
-        }
-        // now we create it knowing it doesn't exist.
-
-        String wellName = well.getWellName();
-        Location location = well.getHologramLocation();
-        boolean saveToFile = false;
-        List<String> lines = Arrays.asList(well.getWellName(), well.prettyPosition(), ChatColor.YELLOW + "Level: " + well.getWellLevel());
-
-        Hologram hologram = DHAPI.createHologram(wellName, location, saveToFile, lines);
-        hologram.setDefaultVisibleState(false);
-
-        return hologram;
-
-    }
-
     private void deleteWellHolograms() {
         this.wellManager.getWells().stream()
                 .forEach(well -> DHAPI.removeHologram(well.getWellName()));
+    }
+
+    private void deleteCreatures() {
+        this.creatureManager.saveCreatures();
     }
 
 }

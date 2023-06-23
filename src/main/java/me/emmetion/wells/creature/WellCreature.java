@@ -1,36 +1,30 @@
 package me.emmetion.wells.creature;
 
-import me.emmetion.wells.Wells;
-import me.emmetion.wells.model.Well;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 
 import java.util.UUID;
 
 public abstract class WellCreature {
 
-    // Every well creature has a customm UUID. These uuids are mapped inside of CreatureManager.java.
-    private UUID uuid;
-    // stores the current location, the the creature is an entity, particle, or just a hitbox.
+    // Every well creature has a custom UUID. These uuids are mapped inside CreatureManager.java.
+    private final UUID uuid;
+    // stores the current location, the creature is an entity, particle, or just a hit-box.
     private Location currentLocation;
 
-    private Class<? extends Entity> defaultEntityClass = ArmorStand.class;
+    private Location spawnLocation;
+
+    private final Class<? extends Entity> defaultEntityClass = ArmorStand.class;
     // Entity of hitbox/monster/trader
     private Entity entity;
 
     private int frame = 0;
 
-    private CreatureType creatureType;
+    private boolean isKilled = false;
 
     public WellCreature(Location location) {
         currentLocation = location;
@@ -40,9 +34,7 @@ public abstract class WellCreature {
     }
 
 
-    public CreatureType getCreatureType() {
-        return creatureType;
-    }
+    public abstract CreatureType getCreatureType();
 
     public UUID getUUID() {
         return this.uuid;
@@ -53,7 +45,7 @@ public abstract class WellCreature {
 
         Entity entity;
         if (entityClassType() == null) {
-            // if the entity class was null, then we will assume it's an armorstand and
+            // if the entity class was null, then we will assume it's an armor-stand and
             // handle entity spawn the same way.
             entity = world.spawn(currentLocation, defaultEntityClass);
         } else {
@@ -63,17 +55,14 @@ public abstract class WellCreature {
         handleEntitySpawn(entity);
 
         this.entity = entity;
+        this.spawnLocation = currentLocation;
+
         return entity;
     }
 
     public abstract void handleEntitySpawn(Entity entity);
 
-    public void kill() {
-        if (this.entity == null || this.entity.isDead())
-            return;
-        // removes the entity in-game. This will change to be updated with NPC's, should maybe make it overwritable.
-        this.entity.remove();
-    }
+    public abstract void kill();
 
     public void setLocation(Location location) {
         if (this.currentLocation.distance(location) >= 1) {
@@ -88,9 +77,6 @@ public abstract class WellCreature {
         if (this.entity == null)
             return;
 
-        if (this.currentLocation.distance(location) >= 1) {
-            System.out.println("Cannot teleport over a distance >= 1.");
-        }
         this.entity.teleport(location);
     }
 
@@ -98,12 +84,15 @@ public abstract class WellCreature {
         return currentLocation;
     }
 
-    public abstract void handleInteraction(PlayerEvent event);
+
+    public abstract void handleLeftClick(EntityDamageByEntityEvent event);
+
+    public abstract void handleRightClick(PlayerInteractAtEntityEvent event);
 
     public abstract Class<? extends Entity> entityClassType();
 
     // this can be used to update the creature on a frame-by-frame basis.
-    // could check it's potiooon
+    // could check its potion
     public abstract void updateCreature();
 
     public boolean isSpawnFrame() {
@@ -117,4 +106,13 @@ public abstract class WellCreature {
     public int getFrame() {
         return frame;
     }
+
+    public Entity getEntity() {
+        return entity;
+    }
+
+    public boolean isKilled() {
+        return this.isKilled;
+    }
+
 }

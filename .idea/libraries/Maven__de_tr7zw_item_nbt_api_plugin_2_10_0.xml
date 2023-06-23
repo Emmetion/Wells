@@ -8,6 +8,8 @@
     </JAVADOC>
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/de/tr7zw/item-nbt-api-plugin/2.10.0/item-nbt-api-plugin-2.10.0-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/de/tr7zw/item-nbt-api-plugin/2.10.0/item-nbt-api-plugin-2.10.0-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/de/tr7zw/item-nbt-api-plugin/2.10.0/item-nbt-api-plugin-2.10.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

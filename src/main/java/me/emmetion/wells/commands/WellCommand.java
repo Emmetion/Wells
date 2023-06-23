@@ -5,6 +5,7 @@ import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.creature.CreatureType;
 import me.emmetion.wells.creature.Pixie;
+import me.emmetion.wells.creature.WellCreature;
 import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.model.ActiveBuff;
@@ -23,6 +24,9 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+import static me.emmetion.wells.util.Utilities.getColor;
 
 //TODO Migrate this command to use Utilities.getColor().
 public class WellCommand implements CommandExecutor {
@@ -37,6 +41,7 @@ public class WellCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+
         if (!(sender instanceof Player)) {
             sender.sendMessage("You must be a Player to use this command!");
             return true;
@@ -230,6 +235,21 @@ public class WellCommand implements CommandExecutor {
             } catch (ArrayIndexOutOfBoundsException e) {
                 player.sendMessage("Syntax: /wells spawn <creature_type> [town_name]");
             }
+        } else if (arg1.equals("maps")) {
+            player.sendMessage(getColor("&c -- Creature Maps --"));
+            for (Well well : this.creatureManager.getWellsWithCreatures()) {
+                List<WellCreature> creatures = this.creatureManager.getCreaturesAtWell(well);
+                if (creatures == null)
+                    continue;
+                player.sendMessage(well.getWellName());
+                int i = 1;
+                for (WellCreature wc : creatures) {
+                    CreatureType ct = wc.getCreatureType();
+                    player.sendMessage(getColor(" " + i + ":  Type: "  + ct + " UUID: " + wc.getUUID().toString().substring(0, 5)));
+                    i++;
+                }
+            }
+
         }
 
         return true;

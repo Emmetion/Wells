@@ -1,20 +1,18 @@
 package me.emmetion.wells.creature;
 
-import de.tr7zw.nbtapi.NBTEntity;
 import me.emmetion.wells.Wells;
-import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.model.Well;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 
 import java.util.Random;
-import java.util.UUID;
 
 import static me.emmetion.wells.util.Utilities.getColor;
 
@@ -25,13 +23,8 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
     private int id;
 
     // --- Position Information ---
-    private int ticksPlayed = 0;
     private int max_pixies;
-    private final double radius = 3.0f;
-
-    private final double angle_from_id;
-    private Location center;
-    private float angle = 0.0f;
+    private boolean upwards = true;
 
     private PixieType pixieType = PixieType.NONE;
 
@@ -48,29 +41,34 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
             this.id = well.getBuffs().size();
         }
 
-        this.angle_from_id = (Math.PI / 3) * (id + 1); // 1/3 * Math.PI, 2/3 * Math.PI, 1 * Math.PI
         this.id = well.getActiveBuffs().size();
         this.setLocation(location);
 
-        // was 'calculatePixieType();'
+        //
         Random random = new Random();
 
-        int i = random.nextInt(100) + 1;
-        if (i > 20) { // Commons.
-            this.pixieType = PixieType.COMMON;
-        } else if (i > 5) { // Rare.
-            this.pixieType = PixieType.RARE;
-        } else if (i > 0) { // Legendary.
-            this.pixieType = PixieType.LEGENDARY;
-        } else { // edge cases are common;
-            System.out.println("Pixie edge case: i=" + i);
-            this.pixieType = PixieType.COMMON;
-        }
-        System.out.println("Pixie");
+        // Determines location of Pixie.
+        int angle = random.nextInt(360) + 1;
+
+        Location hl = getLocation();
+
+        int radius = 3;
+
+        double x = hl.getX() + radius * Math.cos(angle);
+        double y = hl.getY();
+        double z = hl.getZ() + radius * Math.sin(angle);
+
+        Location newLoc = new Location(hl.getWorld(), x, y, z);
+        setLocation(newLoc);
     }
 
-    // This is essentially additional information you can apply to an entity after it's been spawned in.
-    // I can think of lot sof use cases for this.
+
+
+    @Override
+    public CreatureType getCreatureType() {
+        return CreatureType.PIXIE;
+    }
+
     @Override
     public void handleEntitySpawn(Entity entity) {
         if (!(entity instanceof ArmorStand)) // validates that the entity is of armorstand type.
@@ -79,70 +77,53 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
         ArmorStand armorStand = (ArmorStand) entity;
 
         armorStand.setInvisible(true);
-        if (pixieType == null)
-            pixieType = PixieType.COMMON;
-        armorStand.setCustomName(getColor(pixieType.getDisplayName())); //
+        armorStand.setSmall(true);
+        armorStand.setCustomName("..."); //
         armorStand.setCustomNameVisible(true);
-        NBTEntity nbtEntity = new NBTEntity(armorStand);
-        nbtEntity.setString("creature_uuid", this.getUUID().toString());
-        nbtEntity.setString("creature_type", "PIXIE");
-        nbtEntity.setObject("pixie_type", pixieType);
+        NamespacedKey nk = new NamespacedKey(Wells.plugin, "creature-uuid");
+        armorStand.getPersistentDataContainer().set(nk,
+                PersistentDataType.STRING, this.getUUID().toString());
     }
 
-    /**
-     * Because PlayerEvent is a generic event of all PlayerInteract events, I'm using PlayerEvent as a method of
-     * handling specific events.
-     *
-     * @param event
-     */
     @Override
-    public void handleInteraction(PlayerEvent event) {
-        Player player = event.getPlayer();
-        player.sendMessage("Interaction Event!.");
+    public void kill() {
+        if (this.getEntity() == null || this.getEntity().isDead())
+            return;
+        // removes the entity in-game. This will change to be updated with NPC's, should maybe make it overridable.
+        this.getEntity().remove();
+        Wells.plugin.getCreatureManager().removeCreature(getUUID());
+    }
 
-        if (event instanceof PlayerInteractEntityEvent) {
-            handle((PlayerInteractEntityEvent) event);
+    @Override
+    public void handleLeftClick(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Player)) {
+            return;
         }
+        Entity entity = event.getEntity();
+        Player player = (Player) event.getDamager();
+
+        handle(entity, player);
+        event.setCancelled(true);
+    }
+
+    @Override
+    public void handleRightClick(PlayerInteractAtEntityEvent event) {
+
+        Entity entity = event.getRightClicked();
+        Player player = event.getPlayer();
+
+        handle(entity, player);
     }
 
     // This method is called above in #handleInteraction.
-    private void handle(PlayerInteractEntityEvent event) {
-        Player player = event.getPlayer();
-        Entity entity = event.getRightClicked();
-
-        if (!(entity instanceof ArmorStand)) {
-            return;
-        }
+    private void handle(Entity entity, Player player) {
         ArmorStand as = (ArmorStand) entity;
-        NBTEntity nbtEntity = new NBTEntity(as);
 
+        player.sendMessage(getColor("&a&lPixie Punched! &7(+" + this.pixieType.xp + " well xp)"));
 
-        CreatureType creature_type = nbtEntity.getObject("creature_type", CreatureType.class);
-        String uuidString = nbtEntity.getString("creature_uuid");
-        UUID uuid = UUID.fromString(uuidString);
+        well.depositXP(this.pixieType.xp);
 
-        if (creature_type == null) {
-            return;
-        }
-
-        if (creature_type != CreatureType.PIXIE) {
-            return;
-        }
-
-        PixieType type = PixieType.valueOf(
-                nbtEntity.getString("pixie_type")
-        );
-
-        Vector vector = event.getRightClicked().getLocation().toVector();
-        player.sendMessage("Pixie Punched: " + vector.toString() + " id: " + this.id + "pixie_type: " + type.toString().toUpperCase());
-
-        CreatureManager cm = Wells.plugin.getCreatureManager();
-        WellCreature wc = cm.getWellCreature(getUUID());
-        if (wc != null) {
-            event.setCancelled(true);
-            player.sendMessage("Killing WellCreaure: " + wc.getCreatureType() + " frame: " + wc.getFrame());
-            wc.kill();
-        }
+        kill();
     }
 
     @Override
@@ -152,7 +133,10 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
 
     @Override
     public void updateCreature() {
-
+        if (pixieType.equals(PixieType.NONE)) {
+            calculateRarity();
+            updateName();
+        }
     }
 
     @Override
@@ -166,23 +150,22 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
     // displays the new location and sets the location of the entity.
     @Override
     public void move() {
-        center = well.getHologramLocation().clone().subtract(0,1,0);
+        World world = getLocation().getWorld();
+        world.spawnParticle(particle(), getLocation().clone().add(0,0.3,0), 2, 0.1, 0.1, 0.1,
+                pixieType.getDustOptions());
 
-        World world = center.getWorld();
-
-        double x1 = center.getX() + radius * Math.cos(angle + angle_from_id);
-        double y1 = center.getY(); // (y_radius * Math.sin(angle));
-        double z1 = center.getZ() + radius * Math.sin(angle + angle_from_id);
-        for (int i = 0; i < 2; i++) {
-            Location loc = new Location(world, x1, y1, z1).toLocation(world);
-            world.spawnParticle(particle(), loc, 1, 0, 0, 0, 0, new Particle.DustOptions(Color.PURPLE, 0.8f), false);
+        if (getFrame() % 20 == 0) { // Flip between up and down movements.
+            this.upwards = !this.upwards;
         }
-        Location loc = new Location(world, x1, y1, z1).toLocation(world);
 
-        angle += 0.1;
-        setLocation(loc);
-        this.teleportEntityTo(loc.clone().subtract(0,1.6,0));
+        if (getFrame() % 5 == 0) // only moves every 4 frames.
+            return;
 
+        if (upwards) {
+            setLocation(getLocation().clone().add(0,0.1,0));
+        } else {
+            setLocation(getLocation().clone().subtract(0,0.1,0));
+        }
     }
 
     @Override
@@ -190,23 +173,47 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
         return well;
     }
 
+    private void calculateRarity() {
+        Random random = new Random();
+        // Determines rarity of Pixie.
+        int i = random.nextInt(100) + 1;
+        if (i > 20) { // Commons.
+            this.pixieType = PixieType.COMMON;
+        } else if (i > 5) { // Rare.
+            this.pixieType = PixieType.RARE;
+        } else if (i >= 0) { // Legendary.
+            this.pixieType = PixieType.LEGENDARY;
+        }
+    }
+
+    private void updateName() {
+        getEntity().setCustomName(getColor(this.pixieType.getDisplayName()));
+    }
+
     enum PixieType {
-        COMMON("&fCommon Pixie"),
-        RARE("&bRare Pixie"),
-        LEGENDARY("&6Legendary Pixie"),
-        NONE("None.");
+        COMMON("&7Pixie", new Particle.DustOptions(Color.GRAY, 1), 1),
+        RARE("&bPixie", new Particle.DustOptions(Color.BLUE, 1), 3),
+        LEGENDARY("&6Pixie", new Particle.DustOptions(Color.ORANGE, 1), 10),
+        NONE("&f...", new Particle.DustOptions(Color.WHITE, 1), 0);
 
         private final String display_name;
+        private final Particle.DustOptions dust_options;
+        private final int xp;
 
-        PixieType(String display_name) {
+
+        PixieType(String display_name, Particle.DustOptions dust_option, int xp) {
             this.display_name = display_name;
+            this.dust_options = dust_option;
+            this.xp = xp;
         }
 
         public String getDisplayName() {
             return this.display_name;
         }
 
-
+        public Particle.DustOptions getDustOptions() {
+            return dust_options;
+        }
     }
 
 }

@@ -19,7 +19,6 @@ public abstract class BuffEvent extends Event implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();
 
-    public ActiveBuff.BuffType buffData;
     public Player player;
     public WellPlayer wellPlayer;
     private boolean cancelled = false;
@@ -29,7 +28,6 @@ public abstract class BuffEvent extends Event implements Cancellable {
         if (player1 == null)
             setCancelled(true);
         this.player = player1;
-        this.buffData = buffData;
 
         if (!validateEvent()) // This will automatically stop the event from being called,
             // if the passed in variables are invalid.
@@ -42,6 +40,8 @@ public abstract class BuffEvent extends Event implements Cancellable {
         }
         return true;
     }
+
+    public abstract ActiveBuff.BuffType getBuffType();
 
     @Override
     public void setCancelled(boolean b) {

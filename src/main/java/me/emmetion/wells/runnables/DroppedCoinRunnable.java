@@ -69,7 +69,7 @@ public class DroppedCoinRunnable extends BukkitRunnable {
         Player player = Bukkit.getPlayer(wplayer.getPlayerUUID());
 
         if (item == null || item.isDead()) {
-            setComplete(true);
+            this.cancel();
             return;
         }
 
@@ -95,8 +95,6 @@ public class DroppedCoinRunnable extends BukkitRunnable {
                 item.remove();
                 if (playersOnCooldown.containsKey(player)) // removes cooldown located in WellListener object.
                     playersOnCooldown.remove(player);
-                setComplete(true);
-                return;
             } else {
                 Component text = Component.text("You coin wasn't close to a well!")
                         .color(TextColor.color(52, 217, 241))
@@ -104,9 +102,9 @@ public class DroppedCoinRunnable extends BukkitRunnable {
                                 Component.text()
                         );
                 player.sendActionBar(text);
-                setComplete(true);
-                return;
             }
+            setComplete(true);
+            return;
 
         }
 

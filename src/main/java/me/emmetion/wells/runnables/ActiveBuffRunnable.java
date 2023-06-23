@@ -19,6 +19,9 @@ public class ActiveBuffRunnable extends BukkitRunnable {
     public void run() {
         for (Well well : this.plugin.getWellManager().getWells()) {
             for (ActiveBuff activeBuff : well.getBuffs()) {
+                if (activeBuff == null) {
+                    continue;
+                }
                 activeBuff.update();
             }
         }

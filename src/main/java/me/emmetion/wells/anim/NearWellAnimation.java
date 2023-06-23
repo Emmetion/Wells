@@ -36,8 +36,10 @@ public class NearWellAnimation extends Animation {
 
         World world = center.getWorld();
 
+        double y_radius = 0.4;
+
         double x1 = center.getX() + radius * Math.cos(angle);
-        double y1 = center.getY(); // (y_radius * Math.sin(angle));
+        double y1 = center.getY() + (y_radius * Math.sin(angle));
         double z1 = center.getZ() + radius * Math.sin(angle);
         Location location1 = new Location(world, x1, y1, z1);
 
@@ -53,7 +55,7 @@ public class NearWellAnimation extends Animation {
             Player player = Bukkit.getPlayer(playerUUID);
 
             WellPlayer wellPlayer = Wells.plugin.getWellManager().getWellPlayer(player);
-            if (player == null || !wellPlayer.canSeeParticles()) {
+            if (wellPlayer == null || !wellPlayer.canSeeParticles()) {
                 continue;
             }
             int wellLevel = well.getWellLevel();

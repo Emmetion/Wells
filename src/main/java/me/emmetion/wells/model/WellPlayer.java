@@ -72,7 +72,7 @@ public class WellPlayer {
         this.experiencePoints += coinType.getExperience();
         this.coinsDeposited += 1;
 
-        well.depositCoin(this, coinType);
+        well.depositCoin(coinType);
         // add well experiences.
         switch (coinType) {
             case GOLD_COIN:

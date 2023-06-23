@@ -7,7 +7,11 @@ public class FarmBoostEvent extends BuffEvent {
 
     public FarmBoostEvent(WellPlayer wellPlayer) {
         super(wellPlayer);
-        super.buffData = ActiveBuff.BuffType.FARM_BOOST;
+    }
+
+    @Override
+    public ActiveBuff.BuffType getBuffType() {
+        return ActiveBuff.BuffType.FARM_BOOST;
     }
 
 
