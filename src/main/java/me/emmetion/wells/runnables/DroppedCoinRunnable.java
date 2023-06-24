@@ -8,6 +8,7 @@ import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -18,6 +19,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DroppedCoinRunnable extends BukkitRunnable {
@@ -25,30 +27,46 @@ public class DroppedCoinRunnable extends BukkitRunnable {
     private Wells wells;
     private Item item;
     private CoinType coinType;
-    private Player player;
+    private WellPlayer wplayer;
     private WellManager wellManager;
-    private Collection<Player> playersOnCooldown;
 
-    public DroppedCoinRunnable(Wells wells, Item item, Player player, WellManager wellManager, Collection<Player> playersOnCooldown) {
+    private Map<Player, Boolean> playersOnCooldown;
+
+    private boolean isComplete;
+
+
+    public DroppedCoinRunnable(Wells wells, Item item, WellPlayer wplayer, WellManager wellManager,
+                               Map<Player, Boolean> playersOnCooldown) {
         this.wells = wells;
         this.item = item;
         NBTItem nbt = new NBTItem(item.getItemStack());
         String wells_id = nbt.getString("wells_id");
         this.coinType = CoinType.getCoinTypeFromWellsID(wells_id);
-        this.player = player;
+        this.wplayer = wplayer;
         this.wellManager = wellManager;
         this.playersOnCooldown = playersOnCooldown;
 
+        this.isComplete = false;
         item.setCanPlayerPickup(false);
     }
 
-    @Override
-    public void run() {
+    public void setComplete(boolean b) {
+        this.isComplete = b;
+    }
 
-        if (!player.isOnline()) {
+    @Override
+    public void run() { //
+        if (isComplete()) {
             this.cancel();
             return;
         }
+
+        if (!wplayer.isOnline()) {
+            this.cancel();
+            return;
+        }
+
+        Player player = Bukkit.getPlayer(wplayer.getPlayerUUID());
 
         if (item == null || item.isDead()) {
             this.cancel();
@@ -75,10 +93,8 @@ public class DroppedCoinRunnable extends BukkitRunnable {
 
                 wellPlayer.depositCoin(coinType, well);
                 item.remove();
-                if (playersOnCooldown.contains(player)) // removes cooldown located in WellListener object.
+                if (playersOnCooldown.containsKey(player)) // removes cooldown located in WellListener object.
                     playersOnCooldown.remove(player);
-                this.cancel();
-                return;
             } else {
                 Component text = Component.text("You coin wasn't close to a well!")
                         .color(TextColor.color(52, 217, 241))
@@ -86,9 +102,9 @@ public class DroppedCoinRunnable extends BukkitRunnable {
                                 Component.text()
                         );
                 player.sendActionBar(text);
-                this.cancel();
-                return;
             }
+            setComplete(true);
+            return;
 
         }
 
@@ -101,4 +117,9 @@ public class DroppedCoinRunnable extends BukkitRunnable {
                 Color.fromRGB(255,128,0)
                 , 1));
     }
+
+    public boolean isComplete() {
+        return this.isComplete;
+    }
+
 }

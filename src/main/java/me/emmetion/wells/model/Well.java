@@ -1,5 +1,8 @@
 package me.emmetion.wells.model;
 
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.object.Resident;
+import com.palmergames.bukkit.towny.object.Town;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
 import me.emmetion.wells.anim.NearWellAnimation;
@@ -14,8 +17,9 @@ import org.bukkit.entity.Player;
 
 import java.sql.Timestamp;
 import java.util.*;
-import java.sql.Date;
 import java.util.stream.Collectors;
+
+import static me.emmetion.wells.util.Utilities.getColor;
 
 public class Well {
 
@@ -160,8 +164,6 @@ public class Well {
     }
 
     public Hologram updateHologram() {
-        Bukkit.broadcast(Component.text(""));
-
         List<String> lines = Arrays.asList(this.getWellName(), ChatColor.YELLOW + "Level: " + this.getWellLevel(), ChatColor.BLUE + "XP: " + this.experience + "/" + this.experienceRequired);
 
         Hologram hologram;
@@ -222,7 +224,23 @@ public class Well {
         this.well_level -= 1;
     }
 
-    public void depositCoin(WellPlayer wellPlayer, CoinType coinType) {
+    public void depositXP(int xp) {
+        if (experience + xp >= this.experienceRequired) {
+
+            incrementLevel();
+            this.announceLevelUp();
+//            wellPlayer.sendMessage("this.experience = " + ((experience + coinType.getExperience()) % this.experienceRequired));
+            this.experience = ((experience + xp) % this.experienceRequired);
+
+            this.experienceRequired = 100 + (well_level * 5);
+            // coin will increase level
+        } else {
+            experience = experience + xp;
+            // coin won't increase level.
+        }
+    }
+
+    public void depositCoin(CoinType coinType) {
         if (coinType == null)
             return;
 
@@ -235,20 +253,8 @@ public class Well {
         }
 
         this.animation.enqueueDepositedCoinType(coinType);
+        depositXP(coinType.getExperience());
 
-        if (experience + coinType.getExperience() >= this.experienceRequired) {
-
-            wellPlayer.sendMessage("Your well has leveled up!");
-            incrementLevel();
-//            wellPlayer.sendMessage("this.experience = " + ((experience + coinType.getExperience()) % this.experienceRequired));
-            this.experience = ((experience + coinType.getExperience()) % this.experienceRequired);
-
-            this.experienceRequired = 100 + (well_level * 5);
-            // coin will increase level
-        } else {
-            experience = experience + coinType.getExperience();
-            // coin won't increase level.
-        }
 
         updateHologram(); // updates hologram.
     }
@@ -343,6 +349,35 @@ public class Well {
                         Component.text("Buff1: " + this.buff1)).appendNewline().append(
                         Component.text("Buff2: " + this.buff2)
                                 )));
+    }
+
+    private void announceLevelUp() {
+        Town town = TownyAPI.getInstance().getTown(townName);
+        for (Resident r : town.getResidents()) {
+            if (r.isOnline())
+                r.sendMessage(com.palmergames.adventure.text.Component.text(getColor("&aYour well has leveled up! "))
+                        .append(com.palmergames.adventure.text.Component.text(getColor("New Level: " + this.well_level))));
+        }
+
+    }
+
+    // IntelliJ default equals() and hashCode().
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Well well = (Well) o;
+
+        if (!townName.equals(well.townName)) return false;
+        return position.equals(well.position);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = townName.hashCode();
+        result = 31 * result + position.hashCode();
+        return result;
     }
 
     @Override

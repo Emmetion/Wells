@@ -1,6 +1,7 @@
 package me.emmetion.wells.menu;
 
 import me.emmetion.wells.model.WellPlayer;
+import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;

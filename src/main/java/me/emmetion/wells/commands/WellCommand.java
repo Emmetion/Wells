@@ -3,6 +3,11 @@ package me.emmetion.wells.commands;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.Wells;
+import me.emmetion.wells.creature.CreatureType;
+import me.emmetion.wells.creature.Pixie;
+import me.emmetion.wells.creature.SpawnNPC;
+import me.emmetion.wells.creature.WellCreature;
+import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.model.ActiveBuff;
 import me.emmetion.wells.model.Well;
@@ -16,26 +21,28 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Date;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
-import java.time.temporal.TemporalUnit;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
+import static me.emmetion.wells.util.Utilities.getColor;
+
+//TODO Migrate this command to use Utilities.getColor().
 public class WellCommand implements CommandExecutor {
 
-    private WellManager manager;
+    private WellManager wellManager;
+    private CreatureManager creatureManager;
 
-    public WellCommand(WellManager manager) {
-        this.manager = manager;
+    public WellCommand(WellManager wellManager, CreatureManager creatureManager) {
+        this.wellManager = wellManager;
+        this.creatureManager = creatureManager;
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+
         if (!(sender instanceof Player)) {
             sender.sendMessage("You must be a Player to use this command!");
             return true;
@@ -67,22 +74,22 @@ public class WellCommand implements CommandExecutor {
                 player.sendMessage(ChatColor.RED + "You are not part of a town!");
                 return true;
             }
-            Well well = this.manager.getWellByTownName(town.getName());
+            Well well = this.wellManager.getWellByTownName(town.getName());
             if (well == null) {
                 player.sendMessage("No well was found in your town!");
                 return true;
             }
-            this.manager.deleteWell(well);
+            this.wellManager.deleteWell(well);
             player.sendMessage(ChatColor.GREEN + "Deleted well!");
         } else if (arg1.equals("create")) {
-            this.manager.createWell(player, player.getLocation().getBlock());
+            this.wellManager.createWell(player, player.getLocation().getBlock());
         } else if (arg1.equals("print")) {
             player.sendMessage("--- Wells ---");
-            for (Well well : manager.getWells()) {
+            for (Well well : wellManager.getWells()) {
                 player.sendMessage(well.createHoverableTextComponent());
             }
         } else if (arg1.equals("save")) {
-            this.manager.saveAllWells();
+            this.wellManager.updateDatabase();
             player.sendMessage("Saved wells.");
         } else if (arg1.equals("level")) {
             if (args.length < 3) {
@@ -90,7 +97,7 @@ public class WellCommand implements CommandExecutor {
                 return true;
             }
             String townname = args[1];
-            Well well = manager.getWellByTownName(townname);
+            Well well = wellManager.getWellByTownName(townname);
             if (well == null) {
                 player.sendMessage(ChatColor.RED + "No town was found from your input!");
                 return true;
@@ -132,10 +139,10 @@ public class WellCommand implements CommandExecutor {
             Wells.plugin.initWellHolograms();
         } else if (arg1.equals("players")) {
             player.sendMessage("Players");
-            int size = this.manager.getWellPlayers().size();
+            int size = this.wellManager.getWellPlayers().size();
             player.sendMessage("Size " + size);
         } else if (arg1.equals("holo")) {
-            Well well = manager.getWellByTownName(town.getName());
+            Well well = wellManager.getWellByTownName(town.getName());
             if (well == null) {
                 player.sendMessage("You aren't in a town! You cannot use this command!");
                 return true;
@@ -165,7 +172,8 @@ public class WellCommand implements CommandExecutor {
         } else if (arg1.equals("debug")) {
             try {
                 boolean mode = Boolean.valueOf(args[1]);
-                this.manager.setDebug(mode);
+                this.wellManager.setDebug(mode);
+                this.creatureManager.setDebug(mode);
                 player.sendMessage("Toggled debug to " + mode + ".");
             } catch (ArrayIndexOutOfBoundsException e) {
                 player.sendMessage("Syntax: /wells debug <true/false>");
@@ -173,7 +181,7 @@ public class WellCommand implements CommandExecutor {
         } else if (arg1.equals("particle")) {
             try {
                 Boolean aBoolean = Boolean.valueOf(args[1]);
-                this.manager.getWellPlayer(player).setHideParticles(aBoolean);
+                this.wellManager.getWellPlayer(player).setHideParticles(aBoolean);
                 player.sendMessage("Toggled particles to " + aBoolean + ".");
             } catch (ArrayIndexOutOfBoundsException e) {
                 player.sendMessage("Syntax: /wells particle <true/false>");
@@ -182,8 +190,8 @@ public class WellCommand implements CommandExecutor {
             try {
                 String townname = String.valueOf(args[1]);
                 String buff_id = String.valueOf(args[2]);
-                ActiveBuff.BuffData buffData = ActiveBuff.BuffData.valueOf(buff_id);
-                Well well = manager.getWellByTownName(townname);
+                ActiveBuff.BuffType buffData = ActiveBuff.BuffType.valueOf(buff_id);
+                Well well = wellManager.getWellByTownName(townname);
 
                 Timestamp plus_five_min = Timestamp.from(Instant.now().plus(5, ChronoUnit.MINUTES));
 
@@ -192,7 +200,7 @@ public class WellCommand implements CommandExecutor {
                 }
                 switch (buffData) {
                     case FARM_BOOST:
-                        ActiveBuff activebuff = new ActiveBuff(ActiveBuff.BuffData.FARM_BOOST.getBuffID(), plus_five_min);
+                        ActiveBuff activebuff = new ActiveBuff(ActiveBuff.BuffType.FARM_BOOST.getBuffID(), plus_five_min);
                         well.setActiveBuff(activebuff);
                         player.sendMessage("New time: " + plus_five_min.toLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                         break;
@@ -205,8 +213,52 @@ public class WellCommand implements CommandExecutor {
                 }
             } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
                 player.sendMessage("Syntax: /wells buff <townname> <buff_id>");
-
             }
+        } else if (arg1.equals("spawn")) {
+            try {
+                CreatureType type = CreatureType.valueOf(args[1]);
+                if (type == null) {
+                    player.sendMessage("Your creature type was invalid!");
+                    return true;
+                }
+                switch (type) {
+                    // All
+                    case PIXIE:
+                        String townname = args[2];
+                        Well well = wellManager.getWellByTownName(townname);
+                        if (well == null) {
+                            player.sendMessage("Your town name was invalid!");
+                            return true;
+                        }
+
+                        creatureManager.spawnCreature(type.getCreatureClazz(), well);
+                        break;
+                    case SPAWN_NPC:
+                        creatureManager.spawnCreature(type.getCreatureClazz(), null);
+                        break;
+                    default:
+                        break;
+
+                }
+
+            } catch (ArrayIndexOutOfBoundsException e) {
+                player.sendMessage("Syntax: /wells spawn <creature_type> [town_name]");
+            }
+        } else if (arg1.equals("maps")) {
+            player.sendMessage(getColor("&c -- Creature Maps --"));
+            for (Well well : this.creatureManager.getWellsWithCreatures()) {
+                List<WellCreature> creatures = this.creatureManager.getCreaturesAtWell(well);
+                if (creatures == null)
+                    continue;
+                player.sendMessage(well.getWellName());
+                int i = 1;
+                for (WellCreature wc : creatures) {
+                    CreatureType ct = wc.getCreatureType();
+                    player.sendMessage(getColor(" " + i + ":  Type: "  + ct + " UUID: " + wc.getUUID().toString().substring(0, 5)));
+                    i++;
+                }
+            }
+
         }
 
         return true;

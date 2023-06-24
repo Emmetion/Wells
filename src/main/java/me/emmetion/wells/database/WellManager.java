@@ -4,6 +4,7 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
+import me.emmetion.wells.Wells;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.observer.IncrementObserver;
@@ -74,8 +75,6 @@ public class WellManager {
             }
 
             this.wellPlayerHashMap = database.getOnlineWellPlayersFromTable();
-            Bukkit.getServer().sendMessage(Component.text("wphm: "+wellPlayerHashMap.size()));
-
             this.connected = true;
         } catch (SQLException e) {
             this.connected = false;
@@ -231,11 +230,19 @@ public class WellManager {
     public boolean wellExistsByTownName(String townName) {
         if (wellHashMap == null)
             return false;
-        boolean b = wellHashMap.containsKey(townName);
-        System.out.println("townname: " + b);
-        return b;
+        return wellHashMap.containsKey(townName);
     }
 
+    /**
+     * This method checks for the passed location in the
+     * well cache.
+     *
+     * The well cached it developed whenever a well object is created,
+     * or modified when changed.
+     *
+     * @param location
+     * @return
+     */
     public boolean isWell(Location location) {
         if (wellCache.size() == 0)
             return false;
@@ -243,6 +250,13 @@ public class WellManager {
             return wellCache.contains(location);
     }
 
+    /**
+     * Returns the Well from a given location,
+     * otherwise returning null.
+     *
+     * @param location
+     * @return
+     */
     public Well getWellFromLocation(Location location) {
         for (Well w : this.wellHashMap.values()) {
             if (w.getLocation().equals(location))
@@ -256,15 +270,8 @@ public class WellManager {
      * This should be executed every 5 minutes or when a well is deleted.
      */
     public void saveAllWells() {
-        System.out.println("☢ Saving wells...");
-        Player emmetion = Bukkit.getPlayer("Emmetion");
         Collection<Well> wells = this.wellHashMap.values();
-        int count = wells.size();
-        if (debug)
-            emmetion.sendMessage(Component.text("☢ Wells Saved: " + count));
-
         this.database.updateWells(wells);
-        System.out.println("Saved!");
     }
 
     /**
@@ -272,18 +279,17 @@ public class WellManager {
      * This should also be executed every 5 minutes or when a WellPlayer is deleted.
      */
     public void saveAllWellPlayers() {
-        System.out.println("☢ Saving well players...");
-        Player em = Bukkit.getPlayer("Emmetion");
-
         Collection<WellPlayer> wellPlayers = this.wellPlayerHashMap.values();
         int count = wellPlayers.size();
         if (debug)
-            em.sendMessage(Component.text("☢ WellPlayersSize: " + count));
+            System.out.println("☢ WellPlayersSize: " + count);
         this.database.updateWellPlayers(wellPlayers);
 
     }
 
     public WellPlayer getWellPlayer(Player player) {
+        if (player == null)
+            return null;
         UUID uniqueId = player.getUniqueId();
         return this.wellPlayerHashMap.get(uniqueId);
     }
@@ -317,7 +323,6 @@ public class WellManager {
     }
 
     public void loadWellPlayer(Player player) {
-
         if (player == null) {
             Player emmetion = Bukkit.getPlayer("Emmetion");
             if (debug)

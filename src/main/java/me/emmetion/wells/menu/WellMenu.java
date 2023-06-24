@@ -1,7 +1,6 @@
 package me.emmetion.wells.menu;
 
 import me.emmetion.wells.Wells;
-import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.model.ActiveBuff;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
@@ -12,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -120,7 +120,7 @@ public class WellMenu extends Menu {
 
     public ItemStack createBuffItem(ActiveBuff buff, int id) {
         String buffID = buff.getBuffID();
-        ActiveBuff.BuffData b = ActiveBuff.BuffData.valueOf(buffID);
+        ActiveBuff.BuffType b = ActiveBuff.BuffType.valueOf(buffID);
 
         ItemStack item = new ItemStack(Material.WHITE_WOOL);
         ItemMeta itemMeta = item.getItemMeta();
@@ -148,4 +148,12 @@ public class WellMenu extends Menu {
 
         return item;
     }
+
+
+    @Override
+    public int getCurrentPage() {
+        return 1;
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package me.emmetion.wells.model;
 
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,6 +21,7 @@ public class WellPlayer {
     private int experiencePoints;
 
     private boolean hideParticles = false;
+    private boolean hideBossBar = false;
 
     public WellPlayer(UUID uuid) {
         this(uuid, 0, 0, 0, 0, 0);
@@ -70,7 +72,7 @@ public class WellPlayer {
         this.experiencePoints += coinType.getExperience();
         this.coinsDeposited += 1;
 
-        well.depositCoin(this, coinType);
+        well.depositCoin(coinType);
         // add well experiences.
         switch (coinType) {
             case GOLD_COIN:
@@ -111,6 +113,33 @@ public class WellPlayer {
     public boolean toggleParticles() {
         this.hideParticles = this.hideParticles ? false : true;
         return canSeeParticles();
+    }
+
+    public void displayBossBar() {
+        if (this.hideBossBar || !isOnline())
+            return;
+
+        Player player = getBukkitPlayer();
+
+        Well well;
+
+//        BossBar.bossBar(Component.text("Buffs: 0", 100,))
+
+//        player.showBossBar();
+
+
+    }
+
+    public Player getBukkitPlayer() {
+        return Bukkit.getPlayer(this.playerUUID);
+    }
+
+
+    public boolean isOnline() {
+        Player player = Bukkit.getPlayer(this.playerUUID);
+        if (player == null)
+            return false;
+        return true;
     }
 
     @Override

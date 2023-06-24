@@ -4,6 +4,7 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.database.WellManager;
+import me.emmetion.wells.events.CoinTossEvent;
 import me.emmetion.wells.menu.PlayerMenuUtility;
 import me.emmetion.wells.menu.WellMenu;
 import me.emmetion.wells.model.Well;
@@ -26,15 +27,21 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.slf4j.helpers.Util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class WellListener implements Listener {
 
+    /**
+     * Dependency Injection of WellManager.
+     */
     private WellManager manager;
 
-    private Collection<Player> playersOnCooldown = new ArrayList<>();
+
 
     public WellListener(WellManager manager) {
         this.manager = manager;
@@ -99,26 +106,56 @@ public class WellListener implements Listener {
 
     }
 
+
+    //TODO
+    // Change this to a HashMap<Player, Boolean>. Only send the cooldown message once,
+    // then check if the HashMap is true when sending further messages.
+    private Map<Player, Boolean> playersOnCooldown = new HashMap<>();
+
     @EventHandler
-    public void onCoinToss(PlayerDropItemEvent event) {
+    public void onItemThrow(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
         Item itemDrop = event.getItemDrop();
 
-        if (Utilities.isCoin(itemDrop.getItemStack())) {
-            if (playersOnCooldown.contains(player)) {
-                player.sendMessage(Component.text("You are on cooldown!").color(TextColor.color(255, 0, 0)));
-                event.setCancelled(true);
-                return;
-            }
-            player.sendActionBar(Component.text("You have thrown a coin!"));
-            DroppedCoinRunnable droppedCoinRunnable = new DroppedCoinRunnable(Wells.plugin, itemDrop, player, manager, playersOnCooldown);
-            droppedCoinRunnable.runTaskTimer(Wells.plugin, 1, 1);
+        if (!Utilities.isCoin(itemDrop.getItemStack()))
+            return;
 
-            if (!playersOnCooldown.contains(player)) playersOnCooldown.add(player);
-            Bukkit.getScheduler().runTaskLater(Wells.plugin, () -> {
-                this.playersOnCooldown.remove(player);
-            }, 3 * 20);
+        if (playersOnCooldown.containsKey(player)) {
+            if (!playersOnCooldown.get(player)) {
+                player.sendMessage(Component.text("You are on cooldown!").color(TextColor.color(255, 0, 0)));
+                playersOnCooldown.put(player, true);
+            }
+            event.setCancelled(true);
+            return;
         }
+        player.sendActionBar(Component.text("You have thrown a coin!"));
+        // Prepare to call custom event.
+
+        WellPlayer wellPlayer = manager.getWellPlayer(player);
+
+        Bukkit.getPluginManager().callEvent(new CoinTossEvent(wellPlayer, itemDrop));
+
+        if (!playersOnCooldown.containsKey(player))
+            playersOnCooldown.put(player, false);
+
+        Bukkit.getScheduler().runTaskLater(Wells.plugin, () -> {
+            this.playersOnCooldown.remove(player);
+        }, 3 * 20); // Removes a players cooldown after 60 ticks (3seconds).
+
+    }
+
+    @EventHandler
+    public void onCoinTossEvent(CoinTossEvent event) {
+        // Other plugins can now listen in on this event, and determine whether they want to cancel it for themselves
+        // or not.
+
+        DroppedCoinRunnable runnable = new DroppedCoinRunnable(Wells.plugin,
+                event.getDroppedItem(),
+                event.getPlayer(),
+                this.manager,
+                playersOnCooldown);
+        runnable.runTaskTimer(Wells.plugin, 1, 1);
+        event.getPlayer().sendMessage("CoinTossEvent!");
     }
 
     @EventHandler

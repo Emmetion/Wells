@@ -13,10 +13,14 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import static me.emmetion.wells.util.Utilities.getColor;
 
 public abstract class Menu implements InventoryHolder, Listener {
+
+    protected ItemStack nextPage = Utilities.createItemStack(Material.ARROW, 1, Component.text("Next Page"), null);
+    protected ItemStack prevPage = Utilities.createItemStack(Material.ARROW, 1, Component.text("Previous Page"), null);
 
     protected Inventory inventory;
 
@@ -53,7 +57,10 @@ public abstract class Menu implements InventoryHolder, Listener {
     }
 
     @Override
-    public Inventory getInventory(){ return inventory; }
+    public @NotNull Inventory getInventory(){ return inventory; }
 
+    public int getCurrentPage() {
+        return 1;
+    }
 
 }
