@@ -6,6 +6,7 @@ import me.emmetion.wells.creature.*;
 import me.emmetion.wells.model.Well;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 
 import org.bukkit.entity.Entity;
@@ -23,6 +24,7 @@ public class CreatureManager {
     private HashMap<UUID, WellCreature> wellCreatureMap;
     private HashMap<Well, Set<UUID>> wellsWithCreatures;
 
+    private boolean debug = false;
 
     public CreatureManager() {
         wellCreatureMap = new HashMap<>();
@@ -133,20 +135,29 @@ public class CreatureManager {
 
 
         switch (type) {
+
             case PIXIE:
                 if (well == null) {
-                    System.out.println("Well cannot be null when spawning a creature in!");
-                    System.out.println("A creature must be bounded by a well, otherwise we have no anchor for it's spawning location.");
+                    Bukkit.broadcast(Component.text("Well cannot be null when spawning a creature in!"));
+                    Bukkit.broadcast(Component.text("A creature must be bounded by a well, otherwise we have no " +
+                            "anchor for it's spawning location."));
+                    break;
                 }
 
                 wellCreature = new Pixie(well, well.getHologramLocation());
                 break;
+
+            case SPAWN_NPC:
+                wellCreature = new SpawnNPC(new Location(Bukkit.getWorld("world"), 143, 67, -141));
+                break;
+
             default:
                 break;
         }
 
         if (wellCreature == null) {
-            return;
+            Bukkit.broadcast(Component.text("No proper CreatureType was specified."));
+            return; // no proper CreatureType was specified.
         }
 
         // add to manager maps.
@@ -154,7 +165,7 @@ public class CreatureManager {
     }
 
     public WellCreature getWellCreatureFromEntity(Entity entity) {
-//        Player e = Bukkit.getPlayer("Emmetion");
+        Player e = Bukkit.getPlayer("Emmetion");
         if (entity == null) {
             return null;
         }
@@ -165,7 +176,9 @@ public class CreatureManager {
 //        }
 
         UUID uuid = UUID.fromString(creature_uuid);
-//        e.sendMessage(uuid.toString());
+        if (debug) {
+            e.sendMessage(uuid.toString());
+        }
         return wellCreatureMap.get(uuid);
     }
 
@@ -205,10 +218,13 @@ public class CreatureManager {
         return entity.getUUID("creature_uuid");
     }
 
-    public void saveCreatures() {
-        for (UUID uuid : this.wellCreatureMap.keySet()) {
+    public void setDebug(boolean debug) {
+        this.debug = debug;
+    }
 
-        }
+    public void saveCreatures() {
+        this.wellCreatureMap.keySet().stream()
+                .forEach(uuid -> wellCreatureMap.get(uuid).kill());
 
     }
 

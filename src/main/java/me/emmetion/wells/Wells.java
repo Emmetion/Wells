@@ -3,6 +3,7 @@ package me.emmetion.wells;
 import com.palmergames.bukkit.towny.TownyAPI;
 import eu.decentsoftware.holograms.api.DHAPI;
 import me.emmetion.wells.commands.WellCommand;
+import me.emmetion.wells.creature.SpawnNPC;
 import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.listeners.*;
@@ -12,6 +13,7 @@ import me.emmetion.wells.runnables.NearWellRunnable;
 import me.emmetion.wells.runnables.UpdateDatabaseRunnable;
 import me.emmetion.wells.runnables.WellCreatureRunnable;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -64,6 +66,8 @@ public final class Wells extends JavaPlugin {
         initListeners();
         initSchedules();
         initWellHolograms();
+
+
 
         Bukkit.broadcastMessage(getColor("&c&lReload! &fWell's has been reloaded!"));
     }
