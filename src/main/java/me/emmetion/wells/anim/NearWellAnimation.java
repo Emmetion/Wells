@@ -36,7 +36,7 @@ public class NearWellAnimation extends Animation {
 
         World world = center.getWorld();
 
-        double y_radius = 0.4;
+        double y_radius = 0.7;
 
         double x1 = center.getX() + radius * Math.cos(angle);
         double y1 = center.getY() + (y_radius * Math.sin(angle));
@@ -45,7 +45,7 @@ public class NearWellAnimation extends Animation {
 
         // Calculate the position for the second particle
         double x2 = center.getX() + radius * Math.cos(angle + Math.PI);
-        double y2 = center.getY() + (random.nextFloat(1) * .3); // (y_radius * Math.sin(angle + Math.PI));
+        double y2 = center.getY() + (y_radius * Math.sin(angle + Math.PI)); // (y_radius * Math.sin(angle + Math.PI));
         double z2 = center.getZ() + radius * Math.sin(angle + Math.PI);
         Location location2 = new Location(world, x2, y2, z2);
 
