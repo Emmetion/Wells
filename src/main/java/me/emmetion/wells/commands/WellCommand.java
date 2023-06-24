@@ -5,6 +5,7 @@ import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.creature.CreatureType;
 import me.emmetion.wells.creature.Pixie;
+import me.emmetion.wells.creature.SpawnNPC;
 import me.emmetion.wells.creature.WellCreature;
 import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.database.WellManager;
@@ -172,6 +173,7 @@ public class WellCommand implements CommandExecutor {
             try {
                 boolean mode = Boolean.valueOf(args[1]);
                 this.wellManager.setDebug(mode);
+                this.creatureManager.setDebug(mode);
                 player.sendMessage("Toggled debug to " + mode + ".");
             } catch (ArrayIndexOutOfBoundsException e) {
                 player.sendMessage("Syntax: /wells debug <true/false>");
@@ -220,6 +222,7 @@ public class WellCommand implements CommandExecutor {
                     return true;
                 }
                 switch (type) {
+                    // All
                     case PIXIE:
                         String townname = args[2];
                         Well well = wellManager.getWellByTownName(townname);
@@ -228,8 +231,14 @@ public class WellCommand implements CommandExecutor {
                             return true;
                         }
 
-                        creatureManager.spawnCreature(Pixie.class, well);
+                        creatureManager.spawnCreature(type.getCreatureClazz(), well);
                         break;
+                    case SPAWN_NPC:
+                        creatureManager.spawnCreature(type.getCreatureClazz(), null);
+                        break;
+                    default:
+                        break;
+
                 }
 
             } catch (ArrayIndexOutOfBoundsException e) {
