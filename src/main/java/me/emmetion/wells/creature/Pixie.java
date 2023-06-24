@@ -1,6 +1,7 @@
 package me.emmetion.wells.creature;
 
 import me.emmetion.wells.Wells;
+import me.emmetion.wells.anim.PixiePunchAnimation;
 import me.emmetion.wells.model.Well;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
@@ -70,19 +71,22 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
     }
 
     @Override
-    public void handleEntitySpawn(Entity entity) {
+    public Entity handleEntitySpawn(Entity entity) {
         if (!(entity instanceof ArmorStand)) // validates that the entity is of armorstand type.
-            return;
+            return null;
 
         ArmorStand armorStand = (ArmorStand) entity;
 
         armorStand.setInvisible(true);
         armorStand.setSmall(true);
+        armorStand.setInvulnerable(true);
         armorStand.setCustomName("..."); //
         armorStand.setCustomNameVisible(true);
         NamespacedKey nk = new NamespacedKey(Wells.plugin, "creature-uuid");
         armorStand.getPersistentDataContainer().set(nk,
                 PersistentDataType.STRING, this.getUUID().toString());
+
+        return armorStand;
     }
 
     @Override
@@ -115,14 +119,17 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
         handle(entity, player);
     }
 
-    // This method is called above in #handleInteraction.
+    // This method is used in both right and left click.
+    // helper method.
     private void handle(Entity entity, Player player) {
         ArmorStand as = (ArmorStand) entity;
 
         player.sendMessage(getColor("&a&lPixie Punched! &7(+" + this.pixieType.xp + " well xp)"));
 
         well.depositXP(this.pixieType.xp);
-
+        well.updateHologram();
+        PixiePunchAnimation anim = new PixiePunchAnimation(this, player);
+        anim.start();
         kill();
     }
 
@@ -137,6 +144,12 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
             calculateRarity();
             updateName();
         }
+
+        if (this.getEntity() == null) {
+            return;
+        }
+        if (this.getEntity().isVisualFire())
+            this.getEntity().setVisualFire(false);
     }
 
     @Override
@@ -173,6 +186,10 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
         return well;
     }
 
+    public PixieType getPixieType() {
+        return this.pixieType;
+    }
+
     private void calculateRarity() {
         Random random = new Random();
         // Determines rarity of Pixie.
@@ -190,7 +207,7 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
         getEntity().setCustomName(getColor(this.pixieType.getDisplayName()));
     }
 
-    enum PixieType {
+    public enum PixieType {
         COMMON("&7Pixie", new Particle.DustOptions(Color.GRAY, 1), 1),
         RARE("&bPixie", new Particle.DustOptions(Color.BLUE, 1), 3),
         LEGENDARY("&6Pixie", new Particle.DustOptions(Color.ORANGE, 1), 10),
@@ -213,6 +230,10 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
 
         public Particle.DustOptions getDustOptions() {
             return dust_options;
+        }
+
+        public int getXP() {
+            return this.xp;
         }
     }
 

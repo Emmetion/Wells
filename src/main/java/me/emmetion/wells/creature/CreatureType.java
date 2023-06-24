@@ -1,6 +1,7 @@
 package me.emmetion.wells.creature;
 
 public enum CreatureType {
+    SPAWN_NPC(SpawnNPC.class),
     PIXIE(Pixie.class),
     ;
 

@@ -2,8 +2,7 @@ package me.emmetion.wells.creature;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
+import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 
@@ -16,7 +15,7 @@ public abstract class WellCreature {
     // stores the current location, the creature is an entity, particle, or just a hit-box.
     private Location currentLocation;
 
-    private Location spawnLocation;
+    private final Location originalLocation;
 
     private final Class<? extends Entity> defaultEntityClass = ArmorStand.class;
     // Entity of hitbox/monster/trader
@@ -26,8 +25,19 @@ public abstract class WellCreature {
 
     private boolean isKilled = false;
 
+    // Constructor for creating
+    public WellCreature(UUID uuid, Location location) {
+        this.currentLocation = location;
+        this.originalLocation = location;
+        this.uuid = uuid;
+
+        this.entity = spawn();
+    }
+
+    // Constructor for creating a new WellCreature at the provided location.
     public WellCreature(Location location) {
-        currentLocation = location;
+        this.currentLocation = location;
+        this.originalLocation = location;
         this.uuid = UUID.randomUUID();
 
         this.entity = spawn();
@@ -48,25 +58,29 @@ public abstract class WellCreature {
             // if the entity class was null, then we will assume it's an armor-stand and
             // handle entity spawn the same way.
             entity = world.spawn(currentLocation, defaultEntityClass);
+            entity = handleEntitySpawn(entity);
+
+        } else if (entityClassType().equals(EntityType.PLAYER)) { // NPC's handle with CITIZENS. (inside individual
+            // creaturetypes)
+            entity = world.spawn(currentLocation, EntityType.MARKER.getEntityClass());
+            entity = handleEntitySpawn(entity);
         } else {
             entity = world.spawn(currentLocation, entityClassType());
+            entity = handleEntitySpawn(entity);
         }
 
-        handleEntitySpawn(entity);
-
         this.entity = entity;
-        this.spawnLocation = currentLocation;
 
         return entity;
     }
 
-    public abstract void handleEntitySpawn(Entity entity);
+    public abstract Entity handleEntitySpawn(Entity entity);
 
     public abstract void kill();
 
     public void setLocation(Location location) {
-        if (this.currentLocation.distance(location) >= 1) {
-            System.out.println("Cannot move creature one blocks distance from it's current location");
+        if (this.currentLocation.distance(location) >= 3) {
+            System.out.println("Cannot move creature three blocks distance from it's current location");
         }
 
         this.currentLocation = location;
