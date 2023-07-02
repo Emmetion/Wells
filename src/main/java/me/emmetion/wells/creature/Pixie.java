@@ -95,7 +95,7 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
             return;
         // removes the entity in-game. This will change to be updated with NPC's, should maybe make it overridable.
         this.getEntity().remove();
-        Wells.plugin.getCreatureManager().removeCreature(getUUID());
+        Wells.plugin.getCreatureManager().removeCreature(this);
     }
 
     @Override

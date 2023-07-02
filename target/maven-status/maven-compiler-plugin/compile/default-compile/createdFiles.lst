@@ -6,6 +6,7 @@ me\emmetion\wells\observer\Observer.class
 me\emmetion\wells\model\ActiveBuff$BuffType.class
 me\emmetion\wells\events\FarmBoostEvent.class
 me\emmetion\wells\runnables\WellMenuRunnable.class
+me\emmetion\wells\events\CreatureSpawnEvent.class
 me\emmetion\wells\anim\NearWellAnimation.class
 me\emmetion\wells\database\Database.class
 me\emmetion\wells\Wells.class
@@ -25,6 +26,7 @@ me\emmetion\wells\listeners\WellPlayerListener.class
 me\emmetion\wells\util\Utilities.class
 me\emmetion\wells\listeners\WellListener.class
 me\emmetion\wells\menu\WellMenu$1.class
+me\emmetion\wells\creature\SpawnTrait.class
 me\emmetion\wells\listeners\WellBuffListener.class
 me\emmetion\wells\menu\Menu.class
 me\emmetion\wells\commands\WellCommand.class
@@ -37,6 +39,7 @@ me\emmetion\wells\runnables\NearWellRunnable.class
 me\emmetion\wells\creature\CreatureType.class
 me\emmetion\wells\anim\AnimationSettings.class
 me\emmetion\wells\runnables\UpdateDatabaseRunnable.class
+me\emmetion\wells\creature\SpawnNPC.class
 me\emmetion\wells\runnables\ActiveBuffRunnable.class
 me\emmetion\wells\creature\Movable.class
 me\emmetion\wells\events\CreatureEvent.class
@@ -46,5 +49,6 @@ me\emmetion\wells\runnables\WellCreatureRunnable.class
 me\emmetion\wells\commands\WellCommand$1.class
 me\emmetion\wells\creature\WellBound.class
 me\emmetion\wells\model\WellPlayer.class
+me\emmetion\wells\anim\PixiePunchAnimation.class
 me\emmetion\wells\menu\PlayerMenuUtility.class
 me\emmetion\wells\model\CoinType.class

@@ -9,9 +9,11 @@ D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\anim\NearWellAnimation.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\Wells.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\anim\Animation.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\runnables\WellMenuRunnable.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\events\CreatureSpawnEvent.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\PlayerMenuUtility.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\database\CreatureManager.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\Pageable.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\creature\SpawnNPC.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\listeners\WellPlayerListener.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\util\Utilities.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\listeners\WellBuffListener.java
@@ -38,6 +40,7 @@ D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\events\CoinTossEvent.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\events\CreatureKillEvent.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\runnables\UpdateDatabaseRunnable.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\model\Well.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\anim\PixiePunchAnimation.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\events\CreatureClickEvent.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\runnables\NearWellRunnable.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\listeners\MenuListener.java
