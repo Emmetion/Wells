@@ -148,7 +148,7 @@ public class CreatureManager {
                 break;
 
             case SPAWN_NPC:
-                wellCreature = new SpawnNPC(new Location(Bukkit.getWorld("world"), 143, 67, -141));
+                wellCreature = new SpawnNPC(new Location(Bukkit.getWorld("world"), 143, 68, -141));
                 break;
 
             default:
@@ -188,7 +188,7 @@ public class CreatureManager {
         return this.getWellCreatureFromEntity(e).getCreatureType();
     }
 
-    public void removeCreature(UUID uuid) {
+    private void removeCreature(UUID uuid) {
         if (uuid == null)
             return;
 

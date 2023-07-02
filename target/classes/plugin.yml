@@ -1,0 +1,9 @@
+name: Wells
+version: '1.0-BETA'
+main: me.emmetion.wells.Wells
+api-version: 1.19
+
+commands:
+  wells:
+    description: "Well base command."
+    usage: "Debugging purposes"

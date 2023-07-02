@@ -56,10 +56,9 @@ public class Database {
      * @throws SQLException
      */
     public void initializeDatabase() throws SQLException {
+        // Create wells table
         Statement wells = getConnection().createStatement();
-
-        //Create the player_stats table
-        String sql = "CREATE TABLE IF NOT EXISTS wells (" +
+        String wellsSQL = "CREATE TABLE IF NOT EXISTS wells (" +
                 "townname varchar(36) primary key," +
                 " well_level int, experience int," +
                 " xcor int, ycor int, zcor int," +
@@ -69,19 +68,27 @@ public class Database {
                 " buff2_id varchar(36), buff2_endtimestamp timestamp," +
                 " buff3_id varchar(36), buff3_endtimestamp timestamp)";
 
-        wells.execute(sql);
+        wells.execute(wellsSQL);
         wells.close();
 
-
-        Statement wellsplayer = getConnection().createStatement();
-
+        // Create well_players table
+        Statement well_players = getConnection().createStatement();
         String wellsPlayerSQL = "CREATE TABLE IF NOT EXISTS well_players (" +
                 "uuid varchar(36) primary key," +
                 " bronzeCoins int, silverCoins int, goldCoins int," +
                 " coinsDeposited int, experiencePoints int)";
 
-        wellsplayer.execute(wellsPlayerSQL);
-        wellsplayer.close();
+        well_players.execute(wellsPlayerSQL);
+        well_players.close();
+
+        // Create well_creatures table
+        Statement well_creatures = getConnection().createStatement();
+        String wellcreaturesSQL = "CREATE TABLE IF NOT EXISTS well_creatures (" +
+                "uuid varchar(36) primary key," +
+                "data int)";
+
+        well_creatures.execute(wellcreaturesSQL);
+        well_creatures.close();
 
     }
 
