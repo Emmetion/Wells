@@ -188,7 +188,7 @@ public class CreatureManager {
         return this.getWellCreatureFromEntity(e).getCreatureType();
     }
 
-    public void removeCreature(UUID uuid) {
+    private void removeCreature(UUID uuid) {
         if (uuid == null)
             return;
 

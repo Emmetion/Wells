@@ -70,6 +70,8 @@ public final class Wells extends JavaPlugin {
 
 
         Bukkit.broadcastMessage(getColor("&c&lReload! &fWell's has been reloaded!"));
+
+        creatureManager.spawnCreature(SpawnNPC.class, null);
     }
 
     @Override
