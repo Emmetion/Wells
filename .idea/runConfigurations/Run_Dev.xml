@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Wells package" type="MavenRunConfiguration" factoryName="Maven" activateToolWindowBeforeRun="false">
+  <configuration default="false" name="Run Dev" type="MavenRunConfiguration" factoryName="Maven" activateToolWindowBeforeRun="false">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings" />
@@ -10,7 +10,7 @@
           </option>
           <option name="goals">
             <list>
-              <option value="clean:clean" />
+              <option value="clean" />
               <option value="package" />
             </list>
           </option>
