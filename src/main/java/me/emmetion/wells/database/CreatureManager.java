@@ -21,8 +21,8 @@ import static me.emmetion.wells.util.Utilities.getColor;
 
 public class CreatureManager {
 
-    private HashMap<UUID, WellCreature> wellCreatureMap;
-    private HashMap<Well, Set<UUID>> wellsWithCreatures;
+    private final HashMap<UUID, WellCreature> wellCreatureMap;
+    private final HashMap<Well, Set<UUID>> wellsWithCreatures;
 
     private boolean debug = false;
 
