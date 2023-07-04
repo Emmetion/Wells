@@ -45,7 +45,6 @@ public class Database {
         Connection connection = DriverManager.getConnection(url, user, password);
 
         this.connection = connection;
-
         System.out.println("Connected to database.");
 
         return connection;
@@ -85,7 +84,7 @@ public class Database {
         Statement well_creatures = getConnection().createStatement();
         String wellcreaturesSQL = "CREATE TABLE IF NOT EXISTS well_creatures (" +
                 "uuid varchar(36) primary key," +
-                "data int)";
+                "type varchar(36))";
 
         well_creatures.execute(wellcreaturesSQL);
         well_creatures.close();
@@ -128,7 +127,9 @@ public class Database {
                     set.getString("buff2_id"),
                     set.getTimestamp("buff3_endtimestamp"),
                     set.getString("buff3_id"),
-                    set.getTimestamp("buff3_endtimestamp")
+                    set.getTimestamp("buff3_endtimestamp"),
+                    set.getBoolean("is_boosted"),
+                    set.getTimestamp("boost_end")
             );
 
             statement.close();
@@ -147,7 +148,7 @@ public class Database {
         announceWellPlacement(well);
 
         PreparedStatement statement = getConnection()
-                .prepareStatement("INSERT INTO wells(townname, well_level, experience, xcor, ycor, zcor, xholocor, yholocor, zholocor, worldname, buff1_id, buff1_endtimestamp, buff2_id, buff2_endtimestamp, buff3_id, buff3_endtimestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                .prepareStatement("INSERT INTO wells(townname, well_level, experience, xcor, ycor, zcor, xholocor, yholocor, zholocor, worldname, buff1_id, buff1_endtimestamp, buff2_id, buff2_endtimestamp, buff3_id, buff3_endtimestamp, is_boosted, boost_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         statement.setString(1, well.getTownName());
         statement.setInt(2, well.getWellLevel());
         statement.setInt(3, well.getExperience());
@@ -164,6 +165,8 @@ public class Database {
         statement.setTimestamp(14, well.getBuff2().getEndTimestamp());
         statement.setString(15, well.getBuff3().getBuffID());
         statement.setTimestamp(16, well.getBuff3().getEndTimestamp());
+        statement.setBoolean(16, well.isBoosted());
+        statement.setTimestamp(16, well.getBoostEnd());
 
         try {
             statement.executeUpdate();
@@ -229,7 +232,9 @@ public class Database {
                             set.getString("buff2_id"),
                             set.getTimestamp("buff2_endtimestamp"),
                             set.getString("buff3_id"),
-                            set.getTimestamp("buff3_endtimestamp")
+                            set.getTimestamp("buff3_endtimestamp"),
+                            set.getBoolean("is_boosted"),
+                            set.getTimestamp("boost_end")
                     )
             );
         }

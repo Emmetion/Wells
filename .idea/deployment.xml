@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="On explicit save action" serverName="towny_dev" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+  <component name="PublishConfigData" autoUpload="On explicit save action" serverName="Azurius [Towny Dev]" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
-      <paths name="towny_dev">
+      <paths name="Azurius [Towny Dev]">
         <serverdata>
           <mappings>
-            <mapping deploy="/plugins/" local="$PROJECT_DIR$/target/lib" web="/" />
+            <mapping deploy="/plugins" local="$PROJECT_DIR$/target/lib/" web="/" />
           </mappings>
         </serverdata>
       </paths>

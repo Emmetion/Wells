@@ -6,6 +6,7 @@ import me.emmetion.wells.anim.NearWellAnimation;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -28,7 +29,8 @@ public class NearWellRunnable extends BukkitRunnable {
 
     @Override
     public void run() {
-
+        // Temporarily stores current nearby well players.
+        // Later iterated over when removing non-nearby players.
         List<Player> currentWellPlayers = new ArrayList<>();
 
         for (Well w : this.wellManager.getWells()) {
@@ -100,6 +102,15 @@ public class NearWellRunnable extends BukkitRunnable {
         }
     }
 
+    /**
+     * This method creates a well hologram provided at the given well's
+     * location.
+     *
+     * This will not create a new well hologram if one already exists with that name.
+     *
+     * @param well - Well where you want the hologram loaded.
+     * @return
+     */
     private Hologram createWellHologram(Well well) {
         if (DHAPI.getHologram(well.getWellName()) != null) {
             DHAPI.removeHologram(well.getWellName());
@@ -109,7 +120,9 @@ public class NearWellRunnable extends BukkitRunnable {
         String wellName = well.getWellName();
         Location location = well.getHologramLocation();
         boolean saveToFile = false;
-        List<String> lines = Arrays.asList(well.getWellName(), well.prettyPosition(), ChatColor.YELLOW + "Level: " + well.getWellLevel());
+        String levelbar = well.createLevelBar();
+
+        List<String> lines = Arrays.asList(well.getWellName(), well.prettyPosition(), levelbar);
 
         Hologram hologram = DHAPI.createHologram(wellName, location, saveToFile, lines);
         hologram.setDefaultVisibleState(false);

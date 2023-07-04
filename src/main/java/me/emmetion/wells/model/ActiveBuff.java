@@ -91,7 +91,6 @@ public class ActiveBuff {
             return true;
         long compared = endDate.compareTo(new Timestamp(System.currentTimeMillis()));
         // "a value less than 0 if this Timestamp object is before the given argument"
-
         return compared <= 0;
     }
 

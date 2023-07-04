@@ -145,6 +145,8 @@ public final class Wells extends JavaPlugin {
     }
 
     private void deleteCreatures() {
+        if (this.creatureManager == null)
+            return;
         this.creatureManager.saveCreatures();
     }
 

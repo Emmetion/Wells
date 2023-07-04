@@ -44,13 +44,17 @@ public class Well {
     private ActiveBuff buff2;
     private ActiveBuff buff3;
 
+    private boolean isBoosted;
+    private Timestamp boost_end;
+
     private NearWellAnimation animation;
 
     public Well(String townName, Location position, Location hologramPosition,
                 int well_level, int experience,
                 String buff1_id, Timestamp buff1_end,
                 String buff2_id, Timestamp buff2_end,
-                String buff3_id, Timestamp buff3_end) {
+                String buff3_id, Timestamp buff3_end,
+                boolean isBoosted, Timestamp boost_end) {
         this.townName = townName;
         this.position = position;
         this.hologramPosition = hologramPosition;
@@ -78,6 +82,9 @@ public class Well {
             );
         }
 
+        this.isBoosted = isBoosted;
+        this.boost_end = boost_end;
+
         // calculate experience needed for next level.
         this.experienceRequired = 100 + (well_level * 5); // increments experience needed by 5 every level.
 
@@ -86,7 +93,7 @@ public class Well {
     }
 
     public Well(String townName, Location location) {
-        this(townName, location, location, 0, 0, "NONE", null, "NONE", null, "NONE", null);
+        this(townName, location, location, 0, 0, "NONE", null, "NONE", null, "NONE", null, false, null);
 
         this.animation = new NearWellAnimation(this);
         this.animation.start();
@@ -149,7 +156,13 @@ public class Well {
         return !buff3.isNone();
     }
 
+    public boolean isBoosted() {
+        return isBoosted;
+    }
 
+    public Timestamp getBoostEnd() {
+        return boost_end;
+    }
 
     public void setActiveBuff(ActiveBuff activeBuff) {
         if (!hasBuff1()) {
@@ -277,11 +290,15 @@ public class Well {
         }
     }
 
+    /**
+     * Returns a list of ActiveBuffs that are not None.
+     * @return
+     */
     public List<ActiveBuff> getActiveBuffs() {
         List<ActiveBuff> activeBuffs = Arrays.asList(buff1, buff2, buff3);
         ArrayList<ActiveBuff> realBuff = new ArrayList<>();
         for (ActiveBuff ab : activeBuffs) {
-            if (ab.getBuffID().equalsIgnoreCase("none"))
+            if (!ab.getBuffID().equalsIgnoreCase("none") && !ab.hasEnded())
                 realBuff.add(ab);
         }
 
@@ -349,6 +366,31 @@ public class Well {
                         Component.text("Buff1: " + this.buff1)).appendNewline().append(
                         Component.text("Buff2: " + this.buff2)
                                 )));
+    }
+
+
+    /**
+     * Creates a level bar for a well.
+     * This bar represents the amount of 'energy' a well has.
+     * 'Energy' is used as a strength multiplier for ActiveBuffs.
+     * @return
+     */
+    public String createLevelBar() {
+        StringBuilder builder = new StringBuilder();
+
+        // Level
+        int amountOfBars = 10;
+
+        builder.append(getColor("&f["));
+        for (int i = 0; i < amountOfBars; i++) {
+            if (i < well_level)
+                builder.append(getColor("&b|"));
+            else
+                builder.append(getColor("&7|"));
+        }
+        builder.append(getColor("&f]"));
+
+        return builder.toString();
     }
 
     private void announceLevelUp() {
