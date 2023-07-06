@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -325,12 +326,16 @@ public class Well {
         return this.nearbyPlayers;
     }
 
-    public void addNearbyPlayer(WellPlayer wellPlayer) {
+    public void addNearbyPlayer(@NotNull WellPlayer wellPlayer) {
+        if (wellPlayer == null)
+            throw new IllegalArgumentException("WellPlayer cannot be null.");
         if (!this.nearbyPlayers.contains(wellPlayer))
             this.nearbyPlayers.add(wellPlayer);
     }
 
-    public void removeNearbyPlayer(WellPlayer wellPlayer) {
+    public void removeNearbyPlayer(@NotNull WellPlayer wellPlayer) {
+        if (wellPlayer == null)
+            throw new IllegalArgumentException("WellPlayer cannot be null.");
         if (this.nearbyPlayers.contains(wellPlayer))
             this.nearbyPlayers.remove(wellPlayer);
     }

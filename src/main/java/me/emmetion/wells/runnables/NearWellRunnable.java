@@ -52,7 +52,7 @@ public class NearWellRunnable extends BukkitRunnable {
                 }
 
                 currentWellPlayers.add(p); // add the player to the list.
-                playersNearWell.put(p, w.getTownName()); // put the player into our HashMap
+                playersNearWell.put(p, w.getWellName()); // put the player into our HashMap ( THIS CANNOT BE w.getTownName() because it will break the .substring() call down the line in NearWellRunnable.java line 94)
                 w.addNearbyPlayer(wellPlayer); // add nearby player
 
                 Hologram hologram = DHAPI.getHologram(w.getTownName()); // grabs hologram via. well name.
@@ -86,7 +86,9 @@ public class NearWellRunnable extends BukkitRunnable {
 
             if (this.playersNearWell.containsKey(p)) {
                 String wellName = this.playersNearWell.get(p);
-                Hologram h = DHAPI.getHologram(wellName);
+                Well w = wellManager.getWellByWellName(wellName);
+                Hologram h = DHAPI.getHologram(w.getTownName());
+
                 h.removeShowPlayer(p);
 
                 Well wellByWellName = wellManager.getWellByWellName(wellName);

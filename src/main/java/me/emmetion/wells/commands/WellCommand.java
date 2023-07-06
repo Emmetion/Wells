@@ -273,6 +273,9 @@ public class WellCommand implements CommandExecutor {
                     AccountProfile ap = (AccountProfile) profile;
                     double lifetimeEXP = ap.getLifetimeEXP();
                     player.sendMessage("lifetimeEXP=" + lifetimeEXP);
+                    player.sendMessage("armor-multiplier-bonus: " +  ap.getArmorMultiplierBonus());
+                    ap.setArmorMultiplierBonus(ap.getArmorMultiplierBonus() + 0.5f);
+                    player.sendMessage("armor-multiplier-bonus (+0.5f): " +  ap.getArmorMultiplierBonus());
 
                 }
             }
