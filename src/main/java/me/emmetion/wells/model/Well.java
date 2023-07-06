@@ -180,10 +180,10 @@ public class Well {
         List<String> lines = Arrays.asList(this.getWellName(), ChatColor.YELLOW + "Level: " + this.getWellLevel(), ChatColor.BLUE + "XP: " + this.experience + "/" + this.experienceRequired);
 
         Hologram hologram;
-        if (DHAPI.getHologram(this.getWellName()) == null)
-            hologram = DHAPI.createHologram(this.getWellName(), this.getHologramLocation(), false, lines);
+        if (DHAPI.getHologram(this.getTownName()) == null)
+            hologram = DHAPI.createHologram(this.getTownName(), this.getHologramLocation(), false, lines);
         else
-            hologram = DHAPI.getHologram(this.getWellName());
+            hologram = DHAPI.getHologram(this.getTownName());
 
         hologram.setLocation(hologramPosition);
         hologram.realignLines();
