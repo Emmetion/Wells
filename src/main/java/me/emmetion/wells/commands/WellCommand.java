@@ -2,6 +2,10 @@ package me.emmetion.wells.commands;
 
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
+import me.athlaeos.valhallammo.ValhallaMMO;
+import me.athlaeos.valhallammo.dom.Profile;
+import me.athlaeos.valhallammo.managers.ProfileManager;
+import me.athlaeos.valhallammo.skills.account.AccountProfile;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.creature.CreatureType;
 import me.emmetion.wells.creature.Pixie;
@@ -31,6 +35,8 @@ import static me.emmetion.wells.util.Utilities.getColor;
 
 //TODO Migrate this command to use Utilities.getColor().
 public class WellCommand implements CommandExecutor {
+
+    private ValhallaMMO mmo = ValhallaMMO.getPlugin();
 
     private WellManager wellManager;
     private CreatureManager creatureManager;
@@ -256,6 +262,18 @@ public class WellCommand implements CommandExecutor {
                     CreatureType ct = wc.getCreatureType();
                     player.sendMessage(getColor(" " + i + ":  Type: "  + ct + " UUID: " + wc.getUUID().toString().substring(0, 5)));
                     i++;
+                }
+            }
+
+        } else if (arg1.equalsIgnoreCase("val")) {
+            player.sendMessage("ValhallaMMO commands called...");
+            Profile profile = ProfileManager.getManager().getProfile(player, "ACCOUNT");
+            if (profile != null) {
+                if (profile instanceof AccountProfile) {
+                    AccountProfile ap = (AccountProfile) profile;
+                    double lifetimeEXP = ap.getLifetimeEXP();
+                    player.sendMessage("lifetimeEXP=" + lifetimeEXP);
+
                 }
             }
 

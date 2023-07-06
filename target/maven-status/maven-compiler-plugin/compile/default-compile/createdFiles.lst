@@ -20,6 +20,7 @@ me/emmetion/wells/model/Well.class
 me/emmetion/wells/listeners/MenuListener.class
 me/emmetion/wells/observer/Observer.class
 me/emmetion/wells/commands/WellCommand.class
+me/emmetion/wells/events/ResistanceBuffEvent.class
 me/emmetion/wells/database/CreatureManager.class
 me/emmetion/wells/listeners/WellCreatureListener.class
 me/emmetion/wells/runnables/WellMenuRunnable.class

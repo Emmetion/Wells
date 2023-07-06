@@ -60,21 +60,21 @@ public class Well {
         this.hologramPosition = hologramPosition;
         this.well_level = well_level;
         this.experience = experience;
-        if (buff1_id.equals("NONE")) {
+        if (buff1_id.equalsIgnoreCase("NONE")) {
             this.buff1 = ActiveBuff.defaultActiveBuff();
         } else {
             this.buff1 = new ActiveBuff(
                     buff1_id, buff1_end
             );
         }
-        if (buff2_id.equals("NONE")) {
+        if (buff2_id.equalsIgnoreCase("NONE")) {
             this.buff2 = ActiveBuff.defaultActiveBuff();
         } else {
             this.buff2 = new ActiveBuff(
                     buff2_id, buff2_end
             );
         }
-        if (buff3_id.equals("NONE")) {
+        if (buff3_id.equalsIgnoreCase("NONE")) {
             this.buff3 = ActiveBuff.defaultActiveBuff();
         } else {
             this.buff3 = new ActiveBuff(

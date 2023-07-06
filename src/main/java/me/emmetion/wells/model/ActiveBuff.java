@@ -110,7 +110,8 @@ public class ActiveBuff {
 
     public enum BuffType {
         NONE("NONE", null),
-        FARM_BOOST("FARM_BOOST", Particle.VILLAGER_HAPPY);
+        FARM_BOOST("FARM_BOOST", Particle.VILLAGER_HAPPY),
+        RESISTANCE("RESISTANCE", Particle.WAX_OFF);
 
         private String buff_id;
         private Particle anim_particle;

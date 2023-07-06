@@ -44,7 +44,7 @@ public class NearWellRunnable extends BukkitRunnable {
                 WellPlayer wellPlayer = wellManager.getWellPlayer(p);
 
                 if (playersNearWell.containsKey(p)) { // if player was already near a well
-                    if (!playersNearWell.get(p).equals(w.getWellName())) { // and the well the player is currently at is different. (maybe tp, other reasons idk)
+                    if (!playersNearWell.get(p).equals(w.getTownName())) { // and the well the player is currently at is different. (maybe tp, other reasons idk)
 
                         w.removeNearbyPlayer(wellPlayer); // remove from well's collection.
                         this.playersNearWell.remove(p); // remove from the list
@@ -52,10 +52,10 @@ public class NearWellRunnable extends BukkitRunnable {
                 }
 
                 currentWellPlayers.add(p); // add the player to the list.
-                playersNearWell.put(p, w.getWellName()); // put the player into our HashMap
+                playersNearWell.put(p, w.getTownName()); // put the player into our HashMap
                 w.addNearbyPlayer(wellPlayer); // add nearby player
 
-                Hologram hologram = DHAPI.getHologram(w.getWellName()); // grabs hologram via. well name.
+                Hologram hologram = DHAPI.getHologram(w.getTownName()); // grabs hologram via. well name.
                 if (hologram == null) {
                     hologram = createWellHologram(w);
                 }
@@ -69,7 +69,7 @@ public class NearWellRunnable extends BukkitRunnable {
                     }
                 } else {
                     if (wellManager.isDebug())
-                        p.sendMessage("☢ You are near a well! [" + w.getWellName() + "]");
+                        p.sendMessage("☢ You are near a well! [" + w.getTownName() + "]");
                     nearWellMessageCooldown.put(p, 5); // -1 on cooldown each second.
                 }
             }
@@ -112,19 +112,19 @@ public class NearWellRunnable extends BukkitRunnable {
      * @return
      */
     private Hologram createWellHologram(Well well) {
-        if (DHAPI.getHologram(well.getWellName()) != null) {
-            DHAPI.removeHologram(well.getWellName());
+        if (DHAPI.getHologram(well.getTownName()) != null) {
+            DHAPI.removeHologram(well.getTownName());
         }
         // now we create it knowing it doesn't exist.
 
-        String wellName = well.getWellName();
+        String townName = well.getTownName();
         Location location = well.getHologramLocation();
         boolean saveToFile = false;
         String levelbar = well.createLevelBar();
 
         List<String> lines = Arrays.asList(well.getWellName(), well.prettyPosition(), levelbar);
 
-        Hologram hologram = DHAPI.createHologram(wellName, location, saveToFile, lines);
+        Hologram hologram = DHAPI.createHologram(townName, location, saveToFile, lines);
         hologram.setDefaultVisibleState(false);
 
         return hologram;

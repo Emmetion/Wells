@@ -86,6 +86,17 @@
     </repositories>
 
     <dependencies>
+<!--        This is crazy.
+            Somehow I only now figured out how to include jar files via a system path.
+            It compiled, hopefully it actually works in-game.
+            -->
+        <dependency>
+            <groupId>me.athlaeos.valhallammo</groupId>
+            <artifactId>ValhallaMMO_1.jar</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/ValhallaMMO_1.jar</systemPath>
+        </dependency>
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>

@@ -1,14 +1,17 @@
 package me.emmetion.wells.model;
 
+import me.athlaeos.valhallammo.ValhallaMMO;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import scala.Enumeration;
 
 import java.util.UUID;
 
 public class WellPlayer {
+
 
     private UUID playerUUID;
 
@@ -123,17 +126,13 @@ public class WellPlayer {
 
         Well well;
 
-//        BossBar.bossBar(Component.text("Buffs: 0", 100,))
-
-//        player.showBossBar();
-
+// TODO: Create bossbar detailing time remaining on current well-buff.
 
     }
 
     public Player getBukkitPlayer() {
         return Bukkit.getPlayer(this.playerUUID);
     }
-
 
     public boolean isOnline() {
         Player player = Bukkit.getPlayer(this.playerUUID);
