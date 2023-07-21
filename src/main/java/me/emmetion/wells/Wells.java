@@ -37,8 +37,7 @@ public final class Wells extends JavaPlugin {
 
     @Override
     public void onEnable() {
-
-        this.plugin = this;
+        plugin = this;
 
         Logger logger = Logger.getLogger("Wells");
         logger.log(Level.INFO, "Plugin starting...");
@@ -67,8 +66,7 @@ public final class Wells extends JavaPlugin {
         initSchedules();
         initWellHolograms();
 
-
-
+        // Prints into chat.
         Bukkit.broadcastMessage(getColor("&c&lReload! &fWell's has been reloaded!"));
 
         creatureManager.spawnCreature(SpawnNPC.class, null);

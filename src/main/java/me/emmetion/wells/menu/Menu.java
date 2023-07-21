@@ -24,8 +24,8 @@ public abstract class Menu implements InventoryHolder, Listener {
 
     protected Inventory inventory;
 
-    protected PlayerMenuUtility playerMenuUtility;
-    protected Wells wells;
+    protected final PlayerMenuUtility playerMenuUtility;
+    protected final Wells wells;
 
     protected ItemStack FILLER_GLASS = Utilities.createItemStack(Material.BLACK_STAINED_GLASS_PANE, 1, Component.text(""), null);
 
@@ -49,7 +49,7 @@ public abstract class Menu implements InventoryHolder, Listener {
     public abstract void setMenuItems();
 
     public void open(){
-        inventory = Bukkit.createInventory(this, getSlots(), Utilities.getColor(getTitle()));
+        inventory = Bukkit.createInventory(this, getSlots(), Component.text(Utilities.getColor(getTitle())));
 
         this.setMenuItems();
 
@@ -58,9 +58,5 @@ public abstract class Menu implements InventoryHolder, Listener {
 
     @Override
     public @NotNull Inventory getInventory(){ return inventory; }
-
-    public int getCurrentPage() {
-        return 1;
-    }
 
 }

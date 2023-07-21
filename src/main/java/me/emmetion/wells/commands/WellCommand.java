@@ -8,12 +8,11 @@ import me.athlaeos.valhallammo.managers.ProfileManager;
 import me.athlaeos.valhallammo.skills.account.AccountProfile;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.creature.CreatureType;
-import me.emmetion.wells.creature.Pixie;
-import me.emmetion.wells.creature.SpawnNPC;
 import me.emmetion.wells.creature.WellCreature;
 import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.model.ActiveBuff;
+import me.emmetion.wells.model.BuffType;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.util.Utilities;
 import org.bukkit.ChatColor;
@@ -195,8 +194,8 @@ public class WellCommand implements CommandExecutor {
         } else if (arg1.equals("buff")) {
             try {
                 String townname = String.valueOf(args[1]);
-                String buff_id = String.valueOf(args[2]);
-                ActiveBuff.BuffType buffData = ActiveBuff.BuffType.valueOf(buff_id);
+                String buff_id = String.valueOf(args[2]).toUpperCase();
+                BuffType buffType = BuffType.valueOf(buff_id);
                 Well well = wellManager.getWellByTownName(townname);
 
                 Timestamp plus_five_min = Timestamp.from(Instant.now().plus(5, ChronoUnit.MINUTES));
@@ -204,11 +203,16 @@ public class WellCommand implements CommandExecutor {
                 if (well == null) {
                     throw new IllegalArgumentException();
                 }
-                switch (buffData) {
-                    case FARM_BOOST:
-                        ActiveBuff activebuff = new ActiveBuff(ActiveBuff.BuffType.FARM_BOOST.getBuffID(), plus_five_min);
+
+                switch (buffType) {
+                    case GREEN_THUMB:
+                        ActiveBuff activebuff = new ActiveBuff(BuffType.GREEN_THUMB, plus_five_min);
                         well.setActiveBuff(activebuff);
                         player.sendMessage("New time: " + plus_five_min.toLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                        break;
+                    case RESISTANCE:
+                        ActiveBuff activeBuff = new ActiveBuff(BuffType.RESISTANCE, plus_five_min);
+                        well.setActiveBuff(activeBuff);
                         break;
                     case NONE:
                         player.sendMessage("Cannot put buff_id 'NONE' onto well!");

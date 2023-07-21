@@ -3,22 +3,20 @@ package me.emmetion.wells.creature;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.database.WellManager;
+import me.emmetion.wells.events.creature.CreatureKillEvent;
 import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRemoveEvent;
-import net.citizensnpcs.api.event.NPCRightClickEvent;
+import net.citizensnpcs.api.event.NPCSelectEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.persistence.Persist;
 import net.citizensnpcs.api.trait.Trait;
-import net.citizensnpcs.api.trait.TraitFactory;
-import net.citizensnpcs.npc.skin.SkinnableEntity;
+import net.citizensnpcs.api.trait.TraitInfo;
 import net.citizensnpcs.trait.*;
-import net.citizensnpcs.trait.text.Text;
-import net.citizensnpcs.trait.versioned.GoatTrait;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Marker;
@@ -38,7 +36,7 @@ import static me.emmetion.wells.util.Utilities.getColor;
 public class SpawnNPC extends WellCreature {
 
     private NPC npc;
-    private WellManager wellManager = Wells.plugin.getWellManager();
+    private final WellManager wellManager = Wells.plugin.getWellManager();
 
     public SpawnNPC(UUID uuid, Location location) {
         super(uuid, location);
@@ -65,30 +63,37 @@ public class SpawnNPC extends WellCreature {
         tora.addTrait(new LookClose());
         tora.spawn(getLocation());
 
+        npc = tora;
+
         return tora.getEntity();
     }
 
     @Override
     public void kill() {
-        // despawn the NPC.
+        // Despawn the NPC from CitizensAPI.
         NPC npc = CitizensAPI.getNPCRegistry().getNPC(this.getEntity());
-        npc.destroy();
+        npc.despawn();
+
+        // call CreatureKillEvent.
+        CreatureKillEvent killEvent = new CreatureKillEvent(this);
+        killEvent.callEvent();
     }
 
     private Collection<Player> playersChatting = new ArrayList<>();
-
-    private int chatCounter = 0;
 
     @Override
     public void handleLeftClick(EntityDamageByEntityEvent event) {
         Player player = (Player) event.getDamager();
 
+        if (this.npc == null)
+            return;
+
         npc.setAlwaysUseNameHologram(false);
 
-        if (wellManager.wellExistsForPlayer(player)) {
-            player.sendMessage(getColor("&eYour town already has a well! You don't need to build one"));
-            return;
-        }
+//        if (wellManager.wellExistsForPlayer(player)) {
+//            player.sendMessage(getColor("&eYour town already has a well! You don't need to build one"));
+//            return;
+//        }
 
         if (playersChatting.contains(player)) {
             return;
@@ -96,7 +101,6 @@ public class SpawnNPC extends WellCreature {
 
         executeChat(player);
 
-        chatCounter++;
     }
 
     @Override
@@ -111,18 +115,29 @@ public class SpawnNPC extends WellCreature {
         Wells pl = Wells.plugin;
         BukkitScheduler scheduler = Bukkit.getScheduler();
 
-        player.sendMessage(getColor("&e[NPC] Wellbi: &fHi &e" + player.getName() + "&f! I notice your interested in the well that " + "I have next to me this is a hard wrap" + "the well I have next to me..."));
+        SpawnTrait spawnTrait = npc.getTraitNullable(SpawnTrait.class);
+        if (spawnTrait == null)
+            return;
+
+        spawnTrait.incrementChatCounter();
+        player.sendMessage(getColor("int chatCounter: &c" + spawnTrait.getChatCounter()));
+
+        player.sendMessage(Component.text(getColor("&e[NPC] Wellbi: &fHi &e" + player.getName() + "&f! I notice your interested in the well that " + "I have next to me this is a hard wrap" + "the well I have next to me...")).appendNewline());
 
         scheduler.runTaskLater(pl, () -> {
-            player.sendMessage(getColor("&e[NPC] Wellbi: &fWells are small structures craftable inside your town that " + "can help improve the quality of life in your town!"));
+            player.sendMessage(
+                    Component.text(getColor("&e[NPC] Wellbi: &fWells are small structures craftable inside your town that " + "can help improve the quality of life in your town!")).appendNewline());
         }, 60l);
 
         scheduler.runTaskLater(pl, () -> {
-            player.sendMessage(getColor("&e[NPC] Wellbi: &fTo begin, you first need to build a well in your town. " + "Luckily, I can provide you with &cschematics &fto help the building process!"));
+            player.sendMessage(
+                    Component.text(getColor("&e[NPC] Wellbi: &fTo begin, you first need to build a well in your town. " +
+                    "Luckily, I can provide you with some help in the building process")).appendNewline());
         }, 120l);
 
         scheduler.runTaskLater(pl, () -> {
-            player.sendMessage(getColor("&e[NPC] Wellbi: &fCome back to be with the proper supplies and I can craft you a &cSchematic&f!"));
+            player.sendMessage(
+                    Component.text(getColor("&e[NPC] Wellbi: &fCome back to be with the proper supplies and I can lend you one of my &cSchematic&f's!")).appendNewline());
             this.playersChatting.remove(player);
         }, 180l);
 
@@ -142,16 +157,23 @@ public class SpawnNPC extends WellCreature {
 
 class SpawnTrait extends Trait {
 
+    @Persist(value = "chats")
+    private int chatCounter = 0;
 
-    @Persist("chats")
-    int chatCounter = 0;
-
-    @Persist("creature-uuid")
-    String creature_uuid;
+    @Persist(value = "creature-uuid")
+    private String creature_uuid;
 
     protected SpawnTrait(String name, UUID creature_uuid) {
         super(name);
         this.creature_uuid = creature_uuid.toString();
+    }
+
+    public int getChatCounter() {
+        return this.chatCounter;
+    }
+
+    public void incrementChatCounter() {
+        this.chatCounter++;
     }
 
     // Inserts creature-uuid onto NPC.
@@ -168,6 +190,7 @@ class SpawnTrait extends Trait {
         // Bukkit.broadcast(Component.text("had uuid on attach."));
     }
 
+    // handles NPC delete.
     @EventHandler
     public void handleNPCDelete(NPCRemoveEvent event) {
         Entity entity = event.getNPC().getEntity();
@@ -181,7 +204,5 @@ class SpawnTrait extends Trait {
             cm.removeCreature(wc);
         }
     }
-
-
 
 }

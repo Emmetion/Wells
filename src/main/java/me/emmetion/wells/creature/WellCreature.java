@@ -1,5 +1,6 @@
 package me.emmetion.wells.creature;
 
+import me.emmetion.wells.events.creature.CreatureSpawnEvent;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.*;
@@ -18,6 +19,7 @@ public abstract class WellCreature {
     private final Location originalLocation;
 
     private final Class<? extends Entity> defaultEntityClass = ArmorStand.class;
+
     // Entity of hitbox/monster/trader
     private Entity entity;
 
@@ -54,6 +56,9 @@ public abstract class WellCreature {
         World world = this.currentLocation.getWorld();
 
         Entity entity;
+        // TODO: Super-spaghetti code.
+        // Update this code to remove entityClassType() == null, and also
+        // simplify the actions we are taking here.
         if (entityClassType() == null) {
             // if the entity class was null, then we will assume it's an armor-stand and
             // handle entity spawn the same way.
@@ -70,6 +75,9 @@ public abstract class WellCreature {
         }
 
         this.entity = entity;
+
+        CreatureSpawnEvent spawnEvent = new CreatureSpawnEvent(this, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.CUSTOM);
+        spawnEvent.callEvent();
 
         return entity;
     }
@@ -99,10 +107,16 @@ public abstract class WellCreature {
     }
 
 
+    // This method is used whenever a player left-clicks a WellCreature.
+    // After this method is called, a CreatureClickEvent.java is called.
     public abstract void handleLeftClick(EntityDamageByEntityEvent event);
 
+    // This method is used whenever a player right-clicks a WellCreature.
+    // After this method is called, a CreatureClickEvent.java is called.
     public abstract void handleRightClick(PlayerInteractAtEntityEvent event);
 
+    // This stores the entities class type. This is used when spawning in entities in the bukkit world.
+    // If the entityClassType is set to a Player, it will instead spawn an NPC at the location.
     public abstract Class<? extends Entity> entityClassType();
 
     // this can be used to update the creature on a frame-by-frame basis.

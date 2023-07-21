@@ -1,23 +1,38 @@
 package me.emmetion.wells.anim;
 
+import com.destroystokyo.paper.ParticleBuilder;
 import me.emmetion.wells.Wells;
+import me.emmetion.wells.creature.Pixie;
+import me.emmetion.wells.model.ActiveBuff;
 import me.emmetion.wells.model.CoinType;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
+import org.bukkit.entity.Bat;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Random;
-import java.util.UUID;
+import java.awt.*;
+import java.awt.Color;
+import java.awt.geom.Point2D;
+import java.awt.image.ColorModel;
+import java.util.*;
 
 public class NearWellAnimation extends Animation {
 
+    private int frame = 0;
+
     private final Particle particle = Particle.END_ROD;
     private final double radius = 3.0f;
+
+    private Iterator<Color> redToGreen = new ColorGradient(Color.RED, Color.GREEN, 20).iterator();
+
     private Random random = new Random();
     private Queue<CoinType> particleQueue = new LinkedList<>();
 
@@ -79,18 +94,98 @@ public class NearWellAnimation extends Animation {
                 }
             }
 
+            assert player != null;
+
             if (well.hasBuff1()) {
-                if (well.getBuff1().hasWellParticle())
-                    player.spawnParticle(well.getBuff1().getWellParticle(), location1, 1, 0.001, 0, 0.001, 0.01);
+                ActiveBuff buff = well.getBuff1();
+                handleBuffParticleSpawn(buff, location1,
+                        well.getNearbyPlayers().stream()
+                                .map(WellPlayer::getBukkitPlayer)
+                                .toList()
+                );
             }
 
             if (well.hasBuff2()) {
-                if (well.getBuff2().hasWellParticle())
-                    player.spawnParticle(well.getBuff2().getWellParticle(), location2, 1, 0.001, 0, 0.001, 0.01);
+                ActiveBuff buff = well.getBuff2();
+                handleBuffParticleSpawn(buff, location2,
+                        well.getNearbyPlayers().stream()
+                        .map(WellPlayer::getBukkitPlayer)
+                        .toList()
+                );
             }
         }
 
         angle += 0.1;
+    }
+
+    private void handleBuffParticleSpawn(ActiveBuff activeBuff, Location location, Collection<Player> receivers) {
+        if (activeBuff == null || !activeBuff.hasWellParticle() || activeBuff.isNone() || location == null) {
+            return;
+        }
+
+        Particle p = activeBuff.getWellParticle();
+
+        if (p == null) {
+            return;
+        }
+
+        switch (p) {
+            // Theoretically this will create a color gradient alternating through red to green in 20 steps.
+            case NOTE:
+                Color c;
+                if (redToGreen.hasNext()) {
+                    c = redToGreen.next();
+                } else {
+                    redToGreen = new ColorGradient(Color.RED, Color.GREEN).iterator();
+                    c = redToGreen.next();
+                }
+
+                Particle.REDSTONE.builder()
+                        .location(location)
+                        .color(c.getRed(), c.getGreen(), c.getBlue())
+                        .offset(0.001, 0.001,0.001)
+                        .receivers(receivers)
+                        .spawn();
+
+                break;
+            case VILLAGER_HAPPY:
+                // Using AnimationAPI we create a new anonymous object, name it with AnimationSettings then start.
+                World world = location.getWorld();
+                Animation a = new Animation() {
+
+                    Bat bat;
+                    int frame = 0;
+
+                    @Override
+                    public void run() {
+
+                        if (frame == 0) {
+                            bat = world.spawn(location, Bat.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
+                            bat.setInvulnerable(true);
+                            bat.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 10, 1, false, true, false));
+                            bat.setTargetLocation(location.add(0,100,0));
+                        } else if (frame == 5) {
+                            bat.remove();
+                            this.cancel();
+                        }
+
+                        frame++;
+                    }
+
+                    @Override
+                    public AnimationSettings getAnimationSettings() {
+                        return new AnimationSettings("Happy Villager", 1, 1);
+                    }
+                };
+
+                a.start();
+                break;
+            default:
+                //
+                break;
+        }
+
+
     }
 
     @Override
@@ -123,7 +218,58 @@ public class NearWellAnimation extends Animation {
             temp = temp.add(0, 0.3, 0);
             size -= 0.2f;
             location.getWorld().spawnParticle(Particle.REDSTONE, temp, 1, 0, 0, 0,
-                    new Particle.DustOptions(Color.fromRGB(color.red(), color.green(), color.blue()), size));
+                    new Particle.DustOptions(org.bukkit.Color.fromRGB(color.red(), color.green(), color.blue()), size));
+        }
+    }
+
+}
+
+/** ChatGPT'd **/
+class ColorGradient implements Iterable<Color> {
+
+    private final Color startColor;
+    private final Color endColor;
+    private final int steps;
+
+    public ColorGradient(Color startColor, Color endColor, int steps) {
+        this.startColor = startColor;
+        this.endColor = endColor;
+        this.steps = steps;
+    }
+
+    // Default steps = 20;
+    public ColorGradient(Color startColor, Color endColor) {
+        this(startColor, endColor, 20);
+    }
+
+    @Override
+    public Iterator<Color> iterator() {
+        return new ColorGradientIterator();
+    }
+
+    private class ColorGradientIterator implements Iterator<Color> {
+
+        private int currentStep;
+
+        @Override
+        public boolean hasNext() {
+            return currentStep < steps;
+        }
+        @Override
+        public Color next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+
+            float ratio = (float) currentStep / (steps - 1);
+            int red = (int) (startColor.getRed() + ratio * (endColor.getRed() - startColor.getRed()));
+            int green = (int) (startColor.getGreen() + ratio * (endColor.getGreen() - startColor.getGreen()));
+            int blue = (int) (startColor.getBlue() + ratio * (endColor.getBlue() - startColor.getBlue()));
+            int alpha = (int) (startColor.getAlpha() + ratio * (endColor.getAlpha() - startColor.getAlpha()));
+
+            currentStep++;
+
+            return new Color(red, green, blue, alpha);
         }
     }
 

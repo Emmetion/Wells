@@ -2,26 +2,31 @@ package me.emmetion.wells.menu;
 
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.model.ActiveBuff;
+import me.emmetion.wells.model.BuffType;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.time.Duration;
 import java.util.Arrays;
 
 import static me.emmetion.wells.util.Utilities.getColor;
 
-public class WellMenu extends Menu {
+public class WellMenu extends Menu implements AnimatedMenu {
 
-    private Well well;
+    private final Well well;
+
+    private int currentFrame = 1;
+    private final int currentPage = 1;
 
     public WellMenu(Wells wells, Well well, PlayerMenuUtility utility) {
         super(wells, utility);
@@ -46,7 +51,7 @@ public class WellMenu extends Menu {
 
         int rawslot = e.getRawSlot();
 
-        player.sendMessage("clicked slot: "+rawslot);
+        player.sendMessage("clicked slot: " + rawslot);
 
         if (rawslot == 13) {
             player.sendMessage("You have clicked on the middle cauldron!");
@@ -55,9 +60,9 @@ public class WellMenu extends Menu {
             boolean new_option = wellPlayer.toggleParticles();
 
             if (new_option) {
-                player.sendMessage("You have set your particles to: " + ChatColor.GREEN + "ON");
+                player.sendMessage(getColor("You have set your particles to: &aON"));
             } else {
-                player.sendMessage("You have set your particles to: " + ChatColor.RED + "OFF");
+                player.sendMessage(getColor("You have set your particles to: &cOFF"));
             }
 
             setMenuItems();
@@ -78,11 +83,17 @@ public class WellMenu extends Menu {
 
     @Override
     public boolean cancelAllClicks() {
+
         return false;
     }
 
     @Override
     public void setMenuItems() {
+        for (ActiveBuff buff : this.well.getBuffs()) {
+            buff.update();
+        }
+
+
         for (int i = 0; i < 27; i++) {
             this.inventory.setItem(i, FILLER_GLASS);
         }
@@ -103,7 +114,7 @@ public class WellMenu extends Menu {
 
 
         ItemStack cauldron = Utilities.createItemStack(Material.CAULDRON,
-                Component.text(ChatColor.GOLD + well.getWellName()),
+                Component.text(ChatColor.DARK_GREEN + well.getWellName()),
                 Arrays.asList(
                         Component.text(ChatColor.YELLOW + "Level: " + well.getWellLevel()),
                         Component.text(ChatColor.BLUE + "XP: " + well.getExperience()),
@@ -120,21 +131,42 @@ public class WellMenu extends Menu {
 
     public ItemStack createBuffItem(ActiveBuff buff, int id) {
         String buffID = buff.getBuffID();
-        ActiveBuff.BuffType b = ActiveBuff.BuffType.valueOf(buffID);
+        BuffType buffType = buff.getBuffType();
 
-        ItemStack item = new ItemStack(Material.WHITE_WOOL);
+        Material woolColor;
+        Duration duration = buff.getRemainingDuration();
+        String timeRemaining = buff.getEndDateAsString();
+        String durLeft;
+
+        if (duration.isZero() || duration.isNegative()) {
+            woolColor = Material.RED_WOOL;
+            durLeft = "&c" + timeRemaining;
+        }
+        else if (duration.isPositive()) {
+            woolColor = Material.GREEN_WOOL;
+            durLeft = "&a" + timeRemaining;
+        }
+        else {
+            woolColor = Material.ORANGE_WOOL;
+            durLeft = "&cNone.";
+        }
+
+
+        ItemStack item = new ItemStack(woolColor);
         ItemMeta itemMeta = item.getItemMeta();
 
-        switch (b) {
-            case FARM_BOOST:
-                itemMeta.displayName(Component.text(ChatColor.GREEN + "Farm Boost! (id: " + id + ")"));
+        // finally fixed switch statement.
+        switch (buffType) {
+            case RESISTANCE:
+            case GREEN_THUMB:
+                itemMeta.displayName(Component.text(getColor("&a" + StringUtils.capitalize(buffType.getBuffID().toLowerCase()) + " Buff. &e(&ccrop_type&e)")));
                 itemMeta.lore(Arrays.asList(
-                        Component.text(ChatColor.GRAY + "Has Ended: " + ChatColor.RED +  buff.hasEnded()),
-                        Component.text(ChatColor.GRAY + "End Time: " + ChatColor.YELLOW + buff.getEndDateAsString())
+                        Component.text(getColor("&7Duration Left: " + durLeft)),
+                        Component.text(getColor("Level: "))
                 ));
                 break;
             case NONE:
-                itemMeta.displayName(Component.text(ChatColor.GRAY + "No Buff..."));
+                itemMeta.displayName(Component.text("Empty Buff..."));
                 itemMeta.lore(Arrays.asList(
                         Component.text(ChatColor.GRAY + "You have no buff in this slot!"),
                         Component.text(ChatColor.GRAY + "Deposit " + ChatColor.GOLD + "Gold Coins" + ChatColor.GRAY + " for a chance to get a buff!")
@@ -149,11 +181,22 @@ public class WellMenu extends Menu {
         return item;
     }
 
-
     @Override
-    public int getCurrentPage() {
-        return 1;
+    public int getCurrentFrame() {
+        return this.currentFrame;
     }
 
+    @Override
+    public void update() {
 
+        // Every 5 ticks, we perform our update and then continue.
+        if (currentFrame % 5 == 0) {
+            inventory.setItem(11, createBuffItem(well.getBuff1(), 1));
+            inventory.setItem(15, createBuffItem(well.getBuff2(), 2));
+
+            currentFrame = 0;
+        }
+
+        this.currentFrame += 1;
+    }
 }

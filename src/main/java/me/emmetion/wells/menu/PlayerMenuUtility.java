@@ -8,8 +8,7 @@ import org.bukkit.Location;
 
 public class PlayerMenuUtility {
 
-
-    private Player owner;
+    private final Player owner;
     private WellPlayer wellPlayer;
 
     public PlayerMenuUtility(Player owner, WellPlayer playerData){
@@ -19,10 +18,6 @@ public class PlayerMenuUtility {
 
     public Player getOwner() {
         return owner;
-    }
-
-    public void setOwner(Player owner) {
-        this.owner = owner;
     }
 
     public WellPlayer getWellPlayer() {

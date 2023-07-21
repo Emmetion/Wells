@@ -4,13 +4,14 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
-import me.emmetion.wells.Wells;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.observer.IncrementObserver;
 import me.emmetion.wells.util.Utilities;
-import net.kyori.adventure.text.Component;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -101,15 +102,7 @@ public class WellManager {
                 return false;
 
             // Create a new well object, then it will be saved in to database.
-            Well newWell = new Well(
-                    town.getName(),
-                    new Location(
-                            townMember.getWorld(),
-                            wellPosition.getX(),
-                            wellPosition.getY(),
-                            wellPosition.getZ()
-                    )
-            );
+            Well newWell = new Well(town.getName(), new Location(townMember.getWorld(), wellPosition.getX(), wellPosition.getY(), wellPosition.getZ()));
             try {
                 this.wellCache.add(newWell.getLocation());
                 this.wellHashMap.put(newWell.getTownName(), newWell);
@@ -183,6 +176,7 @@ public class WellManager {
     /**
      * Returns whether a well exists by a well object.
      * It checks the wellname of the database and the object passed in.
+     *
      * @param well
      * @return
      */
@@ -208,15 +202,7 @@ public class WellManager {
             return false;
         }
 
-        int size = wellHashMap.size();
-        player.sendMessage("wellHashMap#size(): " + size);
-        for (String s : wellHashMap.keySet()) {
-            player.sendMessage("key: " + s);
-        }
-
         String townname = town.getName();
-
-        player.sendMessage("Town of player: " + townname);
 
         return wellExistsByTownName(townname);
     }
@@ -224,6 +210,7 @@ public class WellManager {
     /**
      * Returns whether a well exists by a townname.
      * Similar to WellManager#wellExists(Well well) but taking townname as param this time.
+     *
      * @param townName
      * @return
      */
@@ -236,7 +223,7 @@ public class WellManager {
     /**
      * This method checks for the passed location in the
      * well cache.
-     *
+     * <p>
      * The well cached it developed whenever a well object is created,
      * or modified when changed.
      *
@@ -296,6 +283,7 @@ public class WellManager {
 
     /**
      * Gets a current list of wells around the world.
+     *
      * @return
      */
     public Collection<Well> getWells() {
@@ -314,12 +302,12 @@ public class WellManager {
         return this.wellPlayerHashMap.values();
     }
 
-    public void setDebug(boolean debug) {
-        this.debug = debug;
-    }
-
     public boolean isDebug() {
         return this.debug;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     public void loadWellPlayer(Player player) {
@@ -357,6 +345,7 @@ public class WellManager {
     /**
      * Returns whether the init() function was successful or not.
      * This is used at the start of the plugin launch, stopping the plugin if no connection was made.
+     *
      * @return
      */
     public boolean isConnected() {
@@ -374,6 +363,7 @@ public class WellManager {
     /**
      * Closes the connection on the database object.
      * Once closed, the database will not save until a new Database object has been created.
+     *
      * @throws SQLException
      */
     public void close() throws SQLException {

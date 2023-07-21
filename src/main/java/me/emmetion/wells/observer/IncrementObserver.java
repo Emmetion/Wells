@@ -7,7 +7,7 @@ import org.bukkit.Server;
 
 public class IncrementObserver implements Observer {
 
-    private Well well;
+    private final Well well;
 
     public IncrementObserver(Well well) {
         this.well = well;

@@ -2,7 +2,7 @@ package me.emmetion.wells.listeners;
 
 import me.emmetion.wells.creature.WellCreature;
 import me.emmetion.wells.database.CreatureManager;
-import me.emmetion.wells.events.CreatureClickEvent;
+import me.emmetion.wells.events.creature.CreatureClickEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -54,5 +54,8 @@ public class WellCreatureListener implements Listener {
         Bukkit.getPluginManager().callEvent(new CreatureClickEvent(player, wc,
                 CreatureClickEvent.ClickType.RIGHT_CLICK));
     }
+
+
+
 
 }

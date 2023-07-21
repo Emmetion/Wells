@@ -1,4 +1,4 @@
-package me.emmetion.wells.events;
+package me.emmetion.wells.events.creature;
 
 import me.emmetion.wells.creature.WellCreature;
 import org.bukkit.event.HandlerList;

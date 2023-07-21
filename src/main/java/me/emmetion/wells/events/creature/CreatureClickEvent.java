@@ -1,8 +1,7 @@
-package me.emmetion.wells.events;
+package me.emmetion.wells.events.creature;
 
 import me.emmetion.wells.creature.WellCreature;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 

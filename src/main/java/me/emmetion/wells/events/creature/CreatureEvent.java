@@ -1,4 +1,4 @@
-package me.emmetion.wells.events;
+package me.emmetion.wells.events.creature;
 
 import me.emmetion.wells.creature.WellCreature;
 import org.bukkit.event.Event;
@@ -15,7 +15,7 @@ public abstract class CreatureEvent extends Event {
     }
 
     public WellCreature getWellCreature() {
-        return wellCreature;
+        return this.wellCreature;
     }
 
 }

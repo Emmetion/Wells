@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class WellPlayerListener implements Listener {
 
-    private WellManager wellManager;
+    private final WellManager wellManager;
 
     public WellPlayerListener(WellManager wellManager) {
         this.wellManager = wellManager;

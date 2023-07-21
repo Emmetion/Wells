@@ -13,7 +13,7 @@ public class AnimationSettings {
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public int getDelay() {

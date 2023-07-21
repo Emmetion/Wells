@@ -14,7 +14,6 @@ import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -27,21 +26,19 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.slf4j.helpers.Util;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static me.emmetion.wells.util.Utilities.getColor;
+
 public class WellListener implements Listener {
 
-    /**
-     * Dependency Injection of WellManager.
-     */
-    private WellManager manager;
-
-
+    private final WellManager manager;
+    private final Map<Player, Boolean> playersOnCooldown = new HashMap<>();
 
     public WellListener(WellManager manager) {
         this.manager = manager;
@@ -61,8 +58,12 @@ public class WellListener implements Listener {
             return;
         }
 
+        player.getName();
+        PlayerInventory inventory = player.getInventory();
+        inventory.removeItemAnySlot();
+
         if (manager.wellExistsForPlayer(player)) {
-            player.sendMessage(ChatColor.RED + "You have a well, you cannot place another.");
+            player.sendMessage(getColor("&cYou have a well, you cannot place another."));
             event.setCancelled(true);
             return;
         }
@@ -70,7 +71,7 @@ public class WellListener implements Listener {
         manager.wellExists(town.getName());
 
         if (!blockAgainst.getType().equals(Material.CAULDRON)) {
-            player.sendMessage(ChatColor.RED + "Not a valid well position! Read item description.");
+            player.sendMessage(getColor("&cNot a valid well position! Read item description."));
             event.setCancelled(true);
             return;
         }
@@ -80,7 +81,7 @@ public class WellListener implements Listener {
         if (waterCount < 5) // Need at least 5 water-blocks from well position.
             return;
 
-        player.sendMessage(ChatColor.GREEN + "Well Criteria Met!...");
+        player.sendMessage(getColor("&aWell Criteria Met!..."));
         // all criteria met, now we create it in database
         manager.createWell(player, blockAgainst);
         Well well = manager.getWellByTownName(town.getName());
@@ -105,12 +106,6 @@ public class WellListener implements Listener {
         }
 
     }
-
-
-    //TODO
-    // Change this to a HashMap<Player, Boolean>. Only send the cooldown message once,
-    // then check if the HashMap is true when sending further messages.
-    private Map<Player, Boolean> playersOnCooldown = new HashMap<>();
 
     @EventHandler
     public void onItemThrow(PlayerDropItemEvent event) {
@@ -149,11 +144,7 @@ public class WellListener implements Listener {
         // Other plugins can now listen in on this event, and determine whether they want to cancel it for themselves
         // or not.
 
-        DroppedCoinRunnable runnable = new DroppedCoinRunnable(Wells.plugin,
-                event.getDroppedItem(),
-                event.getPlayer(),
-                this.manager,
-                playersOnCooldown);
+        DroppedCoinRunnable runnable = new DroppedCoinRunnable(Wells.plugin, event.getDroppedItem(), event.getPlayer(), this.manager, playersOnCooldown);
         runnable.runTaskTimer(Wells.plugin, 1, 1);
         event.getPlayer().sendMessage("CoinTossEvent!");
     }
@@ -163,8 +154,10 @@ public class WellListener implements Listener {
         Player player = e.getPlayer();
         Block clickedBlock = e.getClickedBlock();
         Action action = e.getAction();
+
         if (!action.equals(Action.RIGHT_CLICK_BLOCK))
             return;
+
         if (!manager.isWell(clickedBlock.getLocation()))
             return;
 
@@ -174,8 +167,7 @@ public class WellListener implements Listener {
 
         e.setCancelled(true);
 
-        WellMenu wellMenu = new WellMenu(Wells.plugin, well,
-                new PlayerMenuUtility(player, manager.getWellPlayer(player)));
+        WellMenu wellMenu = new WellMenu(Wells.plugin, well, new PlayerMenuUtility(player, manager.getWellPlayer(player)));
         wellMenu.open();
     }
 }

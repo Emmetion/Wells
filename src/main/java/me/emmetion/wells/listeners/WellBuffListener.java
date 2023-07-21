@@ -2,17 +2,13 @@ package me.emmetion.wells.listeners;
 
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
-import com.palmergames.bukkit.towny.object.TownBlock;
-import me.emmetion.wells.Wells;
 import me.emmetion.wells.anim.CropFarmAnimation;
 import me.emmetion.wells.database.WellManager;
-import me.emmetion.wells.events.FarmBoostEvent;
+import me.emmetion.wells.events.buff.GreenThumbEvent;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Player;
@@ -22,7 +18,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 
 public class WellBuffListener implements Listener {
 
-    private WellManager wellManager;
+    private final WellManager wellManager;
 
     public WellBuffListener(WellManager wellManager) {
         this.wellManager = wellManager;
@@ -33,47 +29,47 @@ public class WellBuffListener implements Listener {
         Player player = e.getPlayer();
         Block block = e.getBlock();
 
-        if (!(block.getBlockData() instanceof Ageable)) {
-            player.sendMessage(Component.text("Block isn't Ageable."));
-            return;
-        }
-
         if (!wellManager.wellExistsForPlayer(player)) {
             player.sendMessage(Component.text("Well does not exist for player."));
             return;
         }
 
-        Town town = TownyAPI.getInstance().getTown(player);
-        if (town == null) {
+        // Filters non-ageable blocks. (non-crops)
+        if (!(block.getBlockData() instanceof Ageable)) {
             return;
         }
 
+        // Player must be in a town to be part of a well
+        Town town = TownyAPI.getInstance().getTown(player);
+
+        if (town == null) // A player must be in a town to receive WellBuffs.
+            return;
+
+        // CropBuff only activates when farming inside your own town.
+        // Maybe add a buff/token to make it temporarily global?
         String town_name = Utilities.getTownFromBlock(block);
-        if (town_name == null) {
+        if (town_name == null || !town.getName().equals(town_name)) {
             player.sendMessage("Block broken was not in town.");
             return;
         }
 
+        player.sendMessage("Player is in their own town. well is placed.");
 
-        if (town.getName().equals(town_name)) {
-            player.sendMessage("Player is in their own tonw. well is placed.");
-            // Check for well buffs.
-            Well well = wellManager.getWellByTownName(town_name);
+        // Check for well buffs.
+        Well well = wellManager.getWellByTownName(town_name);
 
-            well.incrementLevel();
+        well.incrementLevel();
 
-            WellPlayer wellPlayer = wellManager.getWellPlayer(player);
+        WellPlayer wellPlayer = wellManager.getWellPlayer(player);
 
+        // Handle randomness farming crops.
 
-            FarmBoostEvent farmboost = new FarmBoostEvent(wellPlayer);
+        // Call event for API.
+        GreenThumbEvent greenThumbEvent = new GreenThumbEvent(wellPlayer);
+        greenThumbEvent.callEvent();
 
-            CropFarmAnimation animation = new CropFarmAnimation(player, block);
-            animation.start();
-
-
-        } else {
-            player.sendMessage("Not in the correct town.");
-        }
+        CropFarmAnimation animation = new CropFarmAnimation(player, block);
+        animation.start();
     }
 
 }

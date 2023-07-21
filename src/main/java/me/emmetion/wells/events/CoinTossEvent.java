@@ -25,8 +25,6 @@ public class CoinTossEvent extends Event implements Cancellable {
         this.droppedItem = droppedItem;
     }
 
-//    BlockDropItemEvent
-
     @Override
     public boolean isCancelled() {
         return cancelled;

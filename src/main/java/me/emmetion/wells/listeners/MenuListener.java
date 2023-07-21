@@ -10,7 +10,7 @@ import org.bukkit.inventory.InventoryHolder;
 
 public class MenuListener implements Listener {
 
-    private WellManager manager;
+    private final WellManager manager;
 
     public MenuListener(WellManager wellManager) {
         this.manager = wellManager;

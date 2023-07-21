@@ -1,6 +1,6 @@
-package me.emmetion.wells.events;
+package me.emmetion.wells.events.buff;
 
-import me.emmetion.wells.model.ActiveBuff;
+import me.emmetion.wells.model.BuffType;
 import me.emmetion.wells.model.WellPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
 
@@ -14,8 +14,8 @@ public class ResistanceBuffEvent extends BuffEvent {
     }
 
     @Override
-    public ActiveBuff.BuffType getBuffType() {
-        return ActiveBuff.BuffType.RESISTANCE;
+    public BuffType getBuffType() {
+        return BuffType.RESISTANCE;
     }
 
 }

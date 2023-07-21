@@ -1,6 +1,6 @@
-package me.emmetion.wells.events;
+package me.emmetion.wells.events.buff;
 
-import me.emmetion.wells.model.ActiveBuff;
+import me.emmetion.wells.model.BuffType;
 import me.emmetion.wells.model.WellPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -19,8 +19,8 @@ public abstract class BuffEvent extends Event implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();
 
-    public Player player;
-    public WellPlayer wellPlayer;
+    public final Player player;
+    public final WellPlayer wellPlayer;
     private boolean cancelled = false;
 
     public BuffEvent(WellPlayer wellPlayer) {
@@ -28,20 +28,21 @@ public abstract class BuffEvent extends Event implements Cancellable {
         if (player1 == null)
             setCancelled(true);
         this.player = player1;
+        this.wellPlayer = wellPlayer;
 
-        if (!validateEvent()) // This will automatically stop the event from being called,
+        if (!validEvent()) // This will automatically stop the event from being called,
             // if the passed in variables are invalid.
             setCancelled(true);
     }
 
-    private boolean validateEvent() {
+    private boolean validEvent() {
         if (this.player == null || this.wellPlayer == null) {
             return false;
         }
         return true;
     }
 
-    public abstract ActiveBuff.BuffType getBuffType();
+    public abstract BuffType getBuffType();
 
     @Override
     public void setCancelled(boolean b) {

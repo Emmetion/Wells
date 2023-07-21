@@ -208,9 +208,6 @@ public class CreatureManager {
     }
 
     public static UUID getUUIDFromEntity(Entity e) {
-        if (e == null)
-            return null;
-
         NBTEntity entity = new NBTEntity(e);
         if (!entity.hasKey("creature_uuid"))
             return null;
@@ -223,9 +220,18 @@ public class CreatureManager {
     }
 
     public void saveCreatures() {
-        this.wellCreatureMap.keySet().stream()
-                .forEach(uuid -> wellCreatureMap.get(uuid).kill());
+        Set<UUID> creatureUUIDs = wellCreatureMap.keySet();
+        this.wellCreatureMap.keySet()
+                .forEach(uuid -> {
+                    WellCreature wc = wellCreatureMap.get(uuid);
+                    // TODO: Implement saving of WellCreatures.
+                    // wc.save();
+                    wc.kill();
+                });
 
+        for (UUID uuid : creatureUUIDs) {
+            this.wellCreatureMap.remove(uuid);
+        }
     }
 
 }

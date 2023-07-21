@@ -1,6 +1,7 @@
 package me.emmetion.wells.anim;
 
 import me.emmetion.wells.Wells;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -28,7 +29,8 @@ public abstract class Animation extends BukkitRunnable {
             return;
         }
 
-        animationTask = runTaskTimer(Wells.plugin, getAnimationSettings().getDelay(), getAnimationSettings().getPeriod());
+        JavaPlugin plugin = Wells.plugin;
+        animationTask = runTaskTimer(plugin, getAnimationSettings().getDelay(), getAnimationSettings().getPeriod());
         this.hasBegun = true;
     }
 
@@ -40,6 +42,10 @@ public abstract class Animation extends BukkitRunnable {
         return this.hasEnded;
     }
 
+
+    public BukkitTask getAnimationTask() {
+        return this.animationTask;
+    }
 
     /**
      * This will end the animation if it has not already ended.

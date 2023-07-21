@@ -65,21 +65,21 @@ public class Well {
             this.buff1 = ActiveBuff.defaultActiveBuff();
         } else {
             this.buff1 = new ActiveBuff(
-                    buff1_id, buff1_end
+                    BuffType.valueOf(buff1_id), buff1_end
             );
         }
         if (buff2_id.equalsIgnoreCase("NONE")) {
             this.buff2 = ActiveBuff.defaultActiveBuff();
         } else {
             this.buff2 = new ActiveBuff(
-                    buff2_id, buff2_end
+                    BuffType.valueOf(buff1_id), buff2_end
             );
         }
         if (buff3_id.equalsIgnoreCase("NONE")) {
             this.buff3 = ActiveBuff.defaultActiveBuff();
         } else {
             this.buff3 = new ActiveBuff(
-                    buff3_id, buff3_end
+                    BuffType.valueOf(buff1_id), buff3_end
             );
         }
 
@@ -102,6 +102,7 @@ public class Well {
 
     public void handleAllBuffUpdate() {
         this.getActiveBuffs().stream()
+                .filter(ActiveBuff::isNone)
                 .forEach(buff -> buff.update());
     }
 
