@@ -8,7 +8,8 @@ public enum CoinType {
     BRONZE_COIN("BRONZE_COIN", 1, TextColor.color(205, 127, 50)),
     SILVER_COIN("SILVER_COIN", 3, TextColor.color(192, 192, 192)),
     GOLD_COIN("GOLD_COIN", 10, TextColor.color(255, 215, 0)),
-    LEVEL_UP_COIN("LEVEL_UP_COIN", -1, TextColor.color(1, 255, 0));
+    LEVEL_UP_COIN("LEVEL_UP_COIN", -1, TextColor.color(1, 255, 0)),
+    TIME_BONUS("TIME_BONUS_COIN", 0, TextColor.color(1,1,1));
 
     private String wells_id;
     private int experience;

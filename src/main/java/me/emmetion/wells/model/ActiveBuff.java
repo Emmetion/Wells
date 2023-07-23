@@ -4,6 +4,7 @@ import org.bukkit.Particle;
 
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 
 public class ActiveBuff {
 
@@ -49,9 +50,26 @@ public class ActiveBuff {
      * This will update a buff's information about being ended.
      */
     public void update() {
-        if (hasEnded() || this.buffType != BuffType.NONE) {
-            this.buffType = BuffType.NONE;
+        if (this.buffType == null || this.buffType.equals(BuffType.NONE)) {
+            return;
         }
+
+        if (hasEnded() && this.buffType != BuffType.NONE) {
+            this.buffType = ActiveBuff.defaultActiveBuff().buffType;
+        }
+    }
+
+    public void addTwentySeconds() {
+        if (this.buffType == null || this.buffType.equals(BuffType.NONE)) {
+            return;
+        }
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        if (this.endDate == null || this.endDate.toInstant().isBefore(now.toInstant())) {
+            return;
+        }
+
+        Instant minutesAhead = endDate.toInstant().plus(Duration.ofSeconds(20));
+        this.endDate = new Timestamp(minutesAhead.getEpochSecond()); // sets the endDate ahead 5 minutes;
     }
 
     public String getEndDateAsString() {

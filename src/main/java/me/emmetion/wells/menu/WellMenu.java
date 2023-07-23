@@ -79,11 +79,12 @@ public class WellMenu extends Menu implements AnimatedMenu {
         if (e.getReason().equals(InventoryCloseEvent.Reason.PLAYER)) {
             owner.sendMessage(Component.text("You have closed the well menu."));
         }
+
+        setClosed();
     }
 
     @Override
     public boolean cancelAllClicks() {
-
         return false;
     }
 
@@ -190,13 +191,12 @@ public class WellMenu extends Menu implements AnimatedMenu {
     public void update() {
 
         // Every 5 ticks, we perform our update and then continue.
-        if (currentFrame % 5 == 0) {
+        if (currentFrame % 2 == 0) {
             inventory.setItem(11, createBuffItem(well.getBuff1(), 1));
             inventory.setItem(15, createBuffItem(well.getBuff2(), 2));
-
-            currentFrame = 0;
         }
 
         this.currentFrame += 1;
     }
+
 }

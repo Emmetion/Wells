@@ -57,7 +57,7 @@ public class SpawnNPC extends WellCreature {
     public Entity handleEntitySpawn(Entity entity) {
         // Initialized marker.
         entity.getPersistentDataContainer().set(new NamespacedKey(Wells.plugin, "creature-uuid"), PersistentDataType.STRING, getUUID().toString());
-        NPC tora = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "Tora");
+        NPC tora = CitizensAPI.getNPCRegistry().spliterator();
         tora.setProtected(true);
         tora.addTrait(new SpawnTrait("Spawn Trait", getUUID()));
         tora.addTrait(new LookClose());
@@ -70,13 +70,7 @@ public class SpawnNPC extends WellCreature {
 
     @Override
     public void kill() {
-        // Despawn the NPC from CitizensAPI.
-        NPC npc = CitizensAPI.getNPCRegistry().getNPC(this.getEntity());
-        npc.despawn();
 
-        // call CreatureKillEvent.
-        CreatureKillEvent killEvent = new CreatureKillEvent(this);
-        killEvent.callEvent();
     }
 
     private Collection<Player> playersChatting = new ArrayList<>();
@@ -122,24 +116,25 @@ public class SpawnNPC extends WellCreature {
         spawnTrait.incrementChatCounter();
         player.sendMessage(getColor("int chatCounter: &c" + spawnTrait.getChatCounter()));
 
-        player.sendMessage(Component.text(getColor("&e[NPC] Wellbi: &fHi &e" + player.getName() + "&f! I notice your interested in the well that " + "I have next to me this is a hard wrap" + "the well I have next to me...")).appendNewline());
-
-        scheduler.runTaskLater(pl, () -> {
-            player.sendMessage(
-                    Component.text(getColor("&e[NPC] Wellbi: &fWells are small structures craftable inside your town that " + "can help improve the quality of life in your town!")).appendNewline());
-        }, 60l);
-
-        scheduler.runTaskLater(pl, () -> {
-            player.sendMessage(
-                    Component.text(getColor("&e[NPC] Wellbi: &fTo begin, you first need to build a well in your town. " +
-                    "Luckily, I can provide you with some help in the building process")).appendNewline());
-        }, 120l);
-
-        scheduler.runTaskLater(pl, () -> {
-            player.sendMessage(
-                    Component.text(getColor("&e[NPC] Wellbi: &fCome back to be with the proper supplies and I can lend you one of my &cSchematic&f's!")).appendNewline());
+        //
+//        player.sendMessage(Component.text(getColor("&e[NPC] Wellbi: &fHi &e" + player.getName() + "&f! I notice your interested in the well that " + "I have next to me this is a hard wrap" + "the well I have next to me...")).appendNewline());
+//
+//        scheduler.runTaskLater(pl, () -> {
+//            player.sendMessage(
+//                    Component.text(getColor("&e[NPC] Wellbi: &fWells are small structures craftable inside your town that " + "can help improve the quality of life in your town!")).appendNewline());
+//        }, 60l);
+//
+//        scheduler.runTaskLater(pl, () -> {
+//            player.sendMessage(
+//                    Component.text(getColor("&e[NPC] Wellbi: &fTo begin, you first need to build a well in your town. " +
+//                    "Luckily, I can provide you with some help in the building process")).appendNewline());
+//        }, 120l);
+//
+//        scheduler.runTaskLater(pl, () -> {
+//            player.sendMessage(
+//                    Component.text(getColor("&e[NPC] Wellbi: &fCome back to be with the proper supplies and I can lend you one of my &cSchematic&f's!")).appendNewline());
             this.playersChatting.remove(player);
-        }, 180l);
+//        }, 180l);
 
 
     }

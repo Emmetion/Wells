@@ -21,6 +21,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,16 +30,18 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 
+import static me.emmetion.wells.model.BuffType.GREEN_THUMB;
 import static me.emmetion.wells.util.Utilities.getColor;
 
 //TODO Migrate this command to use Utilities.getColor().
 public class WellCommand implements CommandExecutor {
 
-    private ValhallaMMO mmo = ValhallaMMO.getPlugin();
+    private final ValhallaMMO mmo = ValhallaMMO.getPlugin();
 
-    private WellManager wellManager;
-    private CreatureManager creatureManager;
+    private final WellManager wellManager;
+    private final CreatureManager creatureManager;
 
     public WellCommand(WellManager wellManager, CreatureManager creatureManager) {
         this.wellManager = wellManager;
@@ -47,33 +50,35 @@ public class WellCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-
+        
         if (!(sender instanceof Player)) {
             sender.sendMessage("You must be a Player to use this command!");
             return true;
         }
+
         if (args.length < 1) {
             sender.sendMessage("Too few arguments! Syntax: /wells <option>");
             return true;
         }
 
         Player player = (Player) sender;
+
         Town town = TownyAPI.getInstance().getTown(player);
 
         String arg1 = args[0];
         if (arg1.equals("help")) {
             player.sendMessage(ChatColor.BLUE + "-- Well Commands! --");
-            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells delete' deletes your current town.");
-            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells create' creates a well at your location.");
-            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells print' prints every placed well in chat.");
-            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells save' save all changed data to database.");
-            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells level <increase/decrease/reset>' increases/decreases your well level by 1, or resets to 0.");
-            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells give <wells_id>' give yourself a custom wells item.");
-            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells well_req' displays the block requirements of a well underneath you.");
-            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells well_reset' resets all well holograms and animations.");
-            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells players' prints how many players are apart of wellplayers.");
-            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells holo <add/sub> <x> <y> <z>' changes the position of a well hologram, max dist 5.");
-            player.sendMessage(ChatColor.GRAY + " - "+ChatColor.BLUE + "'/wells debug <true/false>' toggles debug messages.");
+            player.sendMessage(ChatColor.GRAY + " - " + ChatColor.BLUE + "'/wells delete' deletes your current town.");
+            player.sendMessage(ChatColor.GRAY + " - " + ChatColor.BLUE + "'/wells create' creates a well at your location.");
+            player.sendMessage(ChatColor.GRAY + " - " + ChatColor.BLUE + "'/wells print' prints every placed well in chat.");
+            player.sendMessage(ChatColor.GRAY + " - " + ChatColor.BLUE + "'/wells save' save all changed data to database.");
+            player.sendMessage(ChatColor.GRAY + " - " + ChatColor.BLUE + "'/wells level <increase/decrease/reset>' increases/decreases your well level by 1, or resets to 0.");
+            player.sendMessage(ChatColor.GRAY + " - " + ChatColor.BLUE + "'/wells give <wells_id>' give yourself a custom wells item.");
+            player.sendMessage(ChatColor.GRAY + " - " + ChatColor.BLUE + "'/wells well_req' displays the block requirements of a well underneath you.");
+            player.sendMessage(ChatColor.GRAY + " - " + ChatColor.BLUE + "'/wells well_reset' resets all well holograms and animations.");
+            player.sendMessage(ChatColor.GRAY + " - " + ChatColor.BLUE + "'/wells players' prints how many players are apart of wellplayers.");
+            player.sendMessage(ChatColor.GRAY + " - " + ChatColor.BLUE + "'/wells holo <add/sub> <x> <y> <z>' changes the position of a well hologram, max dist 5.");
+            player.sendMessage(ChatColor.GRAY + " - " + ChatColor.BLUE + "'/wells debug <true/false>' toggles debug messages.");
         } else if (arg1.equals("delete")) {
             if (town == null) {
                 player.sendMessage(ChatColor.RED + "You are not part of a town!");
@@ -117,7 +122,7 @@ public class WellCommand implements CommandExecutor {
                 player.sendMessage("Incremented level of " + townname + " to " + well.getWellLevel());
                 well.notifyObservers();
             } else if (option.equals("reset")) {
-              well.resetLevel();
+                well.resetLevel();
             } else {
                 player.sendMessage("Syntax: /wells increment <townname> <increase/decrease>");
             }
@@ -128,7 +133,7 @@ public class WellCommand implements CommandExecutor {
             }
             String block_id = args[1];
             if (block_id.equals("WELL_BLOCK")) {
-                player.getInventory().addItem(Utilities.createWellBlockItem(1));
+                player.getInventory().addItem(Objects.requireNonNull(Utilities.createWellBlockItem(1)));
                 player.sendMessage("Gave you a WELL_BLOCK");
             } else if (block_id.endsWith("_COIN")) { // handles things ending with _COIN, ex. BRONZE_COIN, SILVER_COIN, GOLD_COIN
                 player.getInventory().addItem(Utilities.createCoinFromID(block_id));
@@ -191,10 +196,31 @@ public class WellCommand implements CommandExecutor {
             } catch (ArrayIndexOutOfBoundsException e) {
                 player.sendMessage("Syntax: /wells particle <true/false>");
             }
+        } else if (arg1.equals("buff_data")) {
+            try {
+                if (town == null) {
+                    player.sendMessage(getColor("You must be in a town to use this command!"));
+                    return true;
+                }
+                int i = 1;
+                for (ActiveBuff buff : wellManager.getWellByTownName(town.getName()).getBuffs()) {
+                    if (buff.isNone()) {
+                        player.sendMessage("Buff (" + i + getColor("): &cNone"));
+                    } else {
+                        player.sendMessage("Buff (" + i + getColor("): ID: " + buff.getBuffID()));
+                        player.sendMessage("           EndDate: " + getColor(buff.getEndDateAsString()));
+                        player.sendMessage("           Particle: " + buff.getWellParticle());
+                    }
+                }
+
+            } catch (ArrayIndexOutOfBoundsException e) {
+                player.sendMessage("");
+            }
         } else if (arg1.equals("buff")) {
             try {
                 String townname = String.valueOf(args[1]);
                 String buff_id = String.valueOf(args[2]).toUpperCase();
+                int slot = Integer.parseInt(args[3]);
                 BuffType buffType = BuffType.valueOf(buff_id);
                 Well well = wellManager.getWellByTownName(townname);
 
@@ -205,14 +231,12 @@ public class WellCommand implements CommandExecutor {
                 }
 
                 switch (buffType) {
+                    // Here, every normal type of buff we handle the same. Except for NONE types. We also have a null type in-case buff-type did not get sorted out.
                     case GREEN_THUMB:
-                        ActiveBuff activebuff = new ActiveBuff(BuffType.GREEN_THUMB, plus_five_min);
-                        well.setActiveBuff(activebuff);
-                        player.sendMessage("New time: " + plus_five_min.toLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                        break;
                     case RESISTANCE:
-                        ActiveBuff activeBuff = new ActiveBuff(BuffType.RESISTANCE, plus_five_min);
-                        well.setActiveBuff(activeBuff);
+                        ActiveBuff activebuff = new ActiveBuff(buffType, plus_five_min);
+                        well.setActiveBuff(activebuff, slot);
+                        player.sendMessage("New time: " + plus_five_min.toLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                         break;
                     case NONE:
                         player.sendMessage("Cannot put buff_id 'NONE' onto well!");
@@ -222,8 +246,10 @@ public class WellCommand implements CommandExecutor {
                         break;
                 }
             } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
-                player.sendMessage("Syntax: /wells buff <townname> <buff_id>");
+                player.sendMessage("Syntax: /wells buff <townname> <buff_id> <id>");
             }
+        } else if (arg1.equals("buff_details")) {
+
         } else if (arg1.equals("spawn")) {
             try {
                 CreatureType type = CreatureType.valueOf(args[1]);

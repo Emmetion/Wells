@@ -44,7 +44,31 @@
                     </execution>
                 </executions>
             </plugin>
-
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-antrun-plugin</artifactId>-->
+<!--                <version>3.0.0</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>ftp-upload</id>-->
+<!--                        <phase>deploy</phase>-->
+<!--                        <configuration>-->
+<!--                            <target>-->
+<!--                                <echo>Uploading JAR to FTP server...</echo>-->
+<!--                                <ftp action="send" server="mario.bloom.host" userid="emmetion.0330a88d"-->
+<!--                                     password="Wormbox64$$$">-->
+<!--                                    <fileset dir="target">-->
+<!--                                        <include name="your-artifact.jar" />-->
+<!--                                    </fileset>-->
+<!--                                </ftp>-->
+<!--                            </target>-->
+<!--                        </configuration>-->
+<!--                        <goals>-->
+<!--                            <goal>run</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
         </plugins>
         <resources>
             <resource>

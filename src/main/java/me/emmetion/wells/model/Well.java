@@ -5,6 +5,10 @@ import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
+import eu.decentsoftware.holograms.api.holograms.HologramLine;
+import io.papermc.paper.math.FinePosition;
+import me.emmetion.wells.anim.Animation;
+import me.emmetion.wells.anim.AnimationSettings;
 import me.emmetion.wells.anim.NearWellAnimation;
 import me.emmetion.wells.observer.Observer;
 import net.kyori.adventure.text.Component;
@@ -13,7 +17,10 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
@@ -166,16 +173,17 @@ public class Well {
         return boost_end;
     }
 
-    public void setActiveBuff(ActiveBuff activeBuff) {
-        if (!hasBuff1()) {
-            buff1 = activeBuff;
-        } else if (!hasBuff2()) {
-            buff2 = activeBuff;
-        } else if (!hasBuff3()) {
-            buff3 = activeBuff;
-        } else {
-
+    public void setActiveBuff(ActiveBuff activeBuff, int id) {
+        if (id < 1 || id > 3) {
+            return;
         }
+        switch (id) {
+            case 1 -> this.buff1 = activeBuff;
+            case 2 -> this.buff2 = activeBuff;
+            case 3 -> this.buff3 = activeBuff;
+        }
+        String s = activeBuff.toString();
+        Bukkit.broadcastMessage(s);
     }
 
     public Hologram updateHologram() {
@@ -202,8 +210,10 @@ public class Well {
     public boolean addHologramLocation(float x, float y, float z) {
         if (this.hologramPosition == null)
             return false;
+
         Location clone = this.hologramPosition.clone();
         Location subtract = clone.add(x, y, z);
+
         if (subtract.distance(this.position) > 5) {
             return false;
         } else {
@@ -228,6 +238,47 @@ public class Well {
 
     }
 
+    public void spawnTemporaryHologramNearby(String text, int ticksAlive) {
+        World world = getHologramLocation().getWorld();
+
+        // calculate random location around well.
+        Location loc;
+
+        loc = this.getHologramLocation().clone();
+        loc = loc.offset(1.5, 0.5, 1.5).toLocation(world);
+
+        ArmorStand armorstand = world.spawn(loc, ArmorStand.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
+        armorstand.setInvulnerable(true);
+        armorstand.setMarker(true);
+        armorstand.setInvisible(true);
+        armorstand.setGravity(false);
+        armorstand.setCanMove(false);
+
+        // apply invulnerability, invisibility, etc.
+
+        Animation anim = new Animation() {
+
+            private int ticksAlive = 0;
+
+            @Override
+            public void run() {
+
+
+
+                if (ticksAlive == 40) {
+                    armorstand.remove();
+                }
+
+                this.ticksAlive++;
+            }
+
+            @Override
+            public AnimationSettings getAnimationSettings() {
+                return new AnimationSettings("TempWellHologram", 0, 1);
+            }
+        };
+        anim.start();
+    }
 
     public void incrementLevel() {
         notifyObservers();
@@ -265,6 +316,9 @@ public class Well {
             this.experienceRequired = 100 + (well_level * 5);
             updateHologram();
             return;
+        } else if (coinType == CoinType.TIME_BONUS) {
+            getBuffs().stream().forEach(ActiveBuff::addTwentySeconds);
+
         }
 
         this.animation.enqueueDepositedCoinType(coinType);

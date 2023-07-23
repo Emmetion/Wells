@@ -189,7 +189,7 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
     }
 
     private void calculateRarity() {
-        Random random = new Random();
+        final Random random = new Random();
         // Determines rarity of Pixie.
         int i = random.nextInt(100) + 1;
         if (i > 20) { // Commons.

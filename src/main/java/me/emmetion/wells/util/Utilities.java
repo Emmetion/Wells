@@ -6,6 +6,7 @@ import com.palmergames.bukkit.towny.object.TownBlock;
 import de.tr7zw.nbtapi.NBTBlock;
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTItem;
+import de.tr7zw.nbtapi.NBTType;
 import me.emmetion.wells.model.CoinType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -122,6 +123,11 @@ public class Utilities {
         }
 
         NBTItem item = new NBTItem(wellBlock);
+        NBTType wellsId1 = item.getType("wells_id");
+        Bukkit.broadcastMessage("wells_id: " + wellsId1.toString());
+        if (item.getType("wells_id").equals(NBTType.NBTTagString) {
+
+        }
         String wellsId = item.getString("wells_id");
 
         if (wellsId == null) {
