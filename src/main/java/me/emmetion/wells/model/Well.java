@@ -317,8 +317,9 @@ public class Well {
             updateHologram();
             return;
         } else if (coinType == CoinType.TIME_BONUS) {
-            getBuffs().stream().forEach(ActiveBuff::addTwentySeconds);
-
+            // TODO: check if this works.
+            // Add 20 seconds to each ActiveBuff (in theory)
+            getBuffs().forEach(ActiveBuff::addTwentySeconds);
         }
 
         this.animation.enqueueDepositedCoinType(coinType);
@@ -342,7 +343,7 @@ public class Well {
 
     public void notifyObservers() {
         for (Observer observer : observers) {
-            observer.update(this);
+            observer.update();
         }
     }
 
@@ -382,26 +383,25 @@ public class Well {
     }
 
     public void addNearbyPlayer(@NotNull WellPlayer wellPlayer) {
-        if (wellPlayer == null)
-            throw new IllegalArgumentException("WellPlayer cannot be null.");
         if (!this.nearbyPlayers.contains(wellPlayer))
             this.nearbyPlayers.add(wellPlayer);
     }
 
     public void removeNearbyPlayer(@NotNull WellPlayer wellPlayer) {
-        if (wellPlayer == null)
-            throw new IllegalArgumentException("WellPlayer cannot be null.");
         if (this.nearbyPlayers.contains(wellPlayer))
             this.nearbyPlayers.remove(wellPlayer);
     }
 
-    public boolean containsNearbyPlayer(Player player) {
-        if (player == null || player.getUniqueId() == null)
+    public boolean containsNearbyPlayer(@NotNull Player player) {
+        if (player == null) {
             return false;
+        } else {
+            player.getUniqueId();
+        }
 
         return this.nearbyPlayers.stream()
-                .map(wellPlayer -> wellPlayer.getPlayerUUID())
-                .collect(Collectors.toList())
+                .map(WellPlayer::getPlayerUUID)
+                .toList()
                 .contains(player.getUniqueId());
     }
 

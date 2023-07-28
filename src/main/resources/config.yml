@@ -1,3 +1,14 @@
-SQLite:
-  Filename: "wells"
+wells:
+  spawn-npc-uuid: ""
+  spawn-npc-location:
+    world-name: "world"
+    x: 145.5
+    y: 68.5
+    z: -140.5
+  xp-per-online-player: ""
 
+SQL:
+  enabled: true
+  url: "jdbc:mysql://u33061_WQm36YtTvQ:Ri1lKnBTcXFYVz6w0SBNYEfA@mario.bloom.host:3306/s33061_Wells"
+  username: "u33061_WQm36YtTvQ"
+  password: "Ri1lKnBTcXFYVz6w0SBNYEfA"

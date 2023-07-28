@@ -15,6 +15,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Range;
+import scala.PartialFunction;
+import scala.ScalaReflectionException$;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -51,10 +54,10 @@ public class WellMenu extends Menu implements AnimatedMenu {
 
         int rawslot = e.getRawSlot();
 
-        player.sendMessage("clicked slot: " + rawslot);
+        player.sendMessage("clicked_slot: " + rawslot);
 
         if (rawslot == 13) {
-            player.sendMessage("You have clicked on the middle cauldron!");
+            player.sendMessage(getColor("You have clicked on the middle &bcauldron&r!"));
         } else if (rawslot == 8) {
             WellPlayer wellPlayer = this.playerMenuUtility.getWellPlayer();
             boolean new_option = wellPlayer.toggleParticles();
@@ -158,24 +161,15 @@ public class WellMenu extends Menu implements AnimatedMenu {
 
         // finally fixed switch statement.
         switch (buffType) {
-            case RESISTANCE:
-            case GREEN_THUMB:
+            case RESISTANCE, GREEN_THUMB -> {
                 itemMeta.displayName(Component.text(getColor("&a" + StringUtils.capitalize(buffType.getBuffID().toLowerCase()) + " Buff. &e(&ccrop_type&e)")));
-                itemMeta.lore(Arrays.asList(
-                        Component.text(getColor("&7Duration Left: " + durLeft)),
-                        Component.text(getColor("Level: "))
-                ));
-                break;
-            case NONE:
+                itemMeta.lore(Arrays.asList(Component.text(getColor("&7Duration Left: " + durLeft)), Component.text(getColor("Level: "))));
+            }
+            case NONE -> {
                 itemMeta.displayName(Component.text("Empty Buff..."));
-                itemMeta.lore(Arrays.asList(
-                        Component.text(ChatColor.GRAY + "You have no buff in this slot!"),
-                        Component.text(ChatColor.GRAY + "Deposit " + ChatColor.GOLD + "Gold Coins" + ChatColor.GRAY + " for a chance to get a buff!")
-                ));
-                break;
-            default:
-                itemMeta.displayName(Component.text("Unknown buff... '" + buffID + "'"));
-                break;
+                itemMeta.lore(Arrays.asList(Component.text(ChatColor.GRAY + "You have no buff in this slot!"), Component.text(ChatColor.GRAY + "Deposit " + ChatColor.GOLD + "Gold Coins" + ChatColor.GRAY + " for a chance to get a buff!")));
+            }
+            default -> itemMeta.displayName(Component.text("Unknown buff... '" + buffID + "'"));
         }
         item.setItemMeta(itemMeta);
 

@@ -10,6 +10,7 @@ me\emmetion\wells\events\CoinTossEvent.class
 me\emmetion\wells\events\creature\CreatureKillEvent.class
 me\emmetion\wells\database\WellManager.class
 me\emmetion\wells\creature\Pixie$PixieType.class
+me\emmetion\wells\creature\Savable.class
 me\emmetion\wells\anim\ColorGradient$ColorGradientIterator.class
 me\emmetion\wells\menu\WellMenu.class
 me\emmetion\wells\anim\Animation.class
@@ -25,9 +26,9 @@ me\emmetion\wells\model\Well$1.class
 me\emmetion\wells\util\Utilities.class
 me\emmetion\wells\listeners\WellListener.class
 me\emmetion\wells\anim\ColorGradient.class
+me\emmetion\wells\config\Configuration.class
 me\emmetion\wells\menu\WellMenu$1.class
 me\emmetion\wells\events\creature\CreatureClickEvent$ClickType.class
-me\emmetion\wells\creature\SpawnTrait.class
 me\emmetion\wells\events\buff\GreenThumbEvent.class
 me\emmetion\wells\listeners\WellBuffListener.class
 me\emmetion\wells\menu\Menu.class
@@ -43,6 +44,7 @@ me\emmetion\wells\creature\CreatureType.class
 me\emmetion\wells\anim\AnimationSettings.class
 me\emmetion\wells\events\buff\ResistanceBuffEvent.class
 me\emmetion\wells\runnables\UpdateDatabaseRunnable.class
+me\emmetion\wells\creature\SpawnNPC$SpawnTrait.class
 me\emmetion\wells\creature\SpawnNPC.class
 me\emmetion\wells\runnables\ActiveBuffRunnable.class
 me\emmetion\wells\creature\Movable.class

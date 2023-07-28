@@ -4,6 +4,7 @@ import com.palmergames.adventure.text.Component;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
+import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import org.bukkit.Bukkit;
@@ -35,12 +36,19 @@ public class Database {
             return connection;
         }
 
+        Configuration config = Configuration.getInstance();
+
+        String user = config.getSQLUsername();
+        String password = config.getSQLPassword();
+        String url = config.getSQLURL();
+
+
         // Connect to mysql server.
         // these credentials are only temporary.
         // will change it to config in
-        String url = "jdbc:mysql://u33061_WQm36YtTvQ:Ri1lKnBTcXFYVz6w0SBNYEfA@mario.bloom.host:3306/s33061_Wells";
-        String user = "u33061_WQm36YtTvQ";
-        String password = "Ri1lKnBTcXFYVz6w0SBNYEfA";
+//        String url = "jdbc:mysql://u33061_WQm36YtTvQ:Ri1lKnBTcXFYVz6w0SBNYEfA@mario.bloom.host:3306/s33061_Wells";
+//        String user = "u33061_WQm36YtTvQ";
+//        String password = "Ri1lKnBTcXFYVz6w0SBNYEfA";
 
         Connection connection = DriverManager.getConnection(url, user, password);
 

@@ -115,11 +115,11 @@ public class WellCommand implements CommandExecutor {
             String option = args[2];
             if (option.equals("increase")) {
                 well.incrementLevel();
-                player.sendMessage("Incremented level of " + townname + " to " + well.getWellLevel());
+                player.sendMessage("Incremented &cstat.well_level of " + townname + " to " + well.getWellLevel());
                 well.notifyObservers();
             } else if (option.equals("decrease")) {
                 well.decrementLevel();
-                player.sendMessage("Incremented level of " + townname + " to " + well.getWellLevel());
+                player.sendMessage("Decremented &cstat.well_level of " + townname + " to " + well.getWellLevel());
                 well.notifyObservers();
             } else if (option.equals("reset")) {
                 well.resetLevel();
@@ -299,8 +299,7 @@ public class WellCommand implements CommandExecutor {
             player.sendMessage("ValhallaMMO commands called...");
             Profile profile = ProfileManager.getManager().getProfile(player, "ACCOUNT");
             if (profile != null) {
-                if (profile instanceof AccountProfile) {
-                    AccountProfile ap = (AccountProfile) profile;
+                if (profile instanceof AccountProfile ap) {
                     double lifetimeEXP = ap.getLifetimeEXP();
                     player.sendMessage("lifetimeEXP=" + lifetimeEXP);
                     player.sendMessage("armor-multiplier-bonus: " +  ap.getArmorMultiplierBonus());

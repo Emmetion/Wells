@@ -1,5 +1,7 @@
 package me.emmetion.wells.util;
 
+import com.palmergames.adventure.identity.Identity;
+import com.palmergames.adventure.platform.bukkit.BukkitAudiences;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.TownBlock;
@@ -7,14 +9,18 @@ import de.tr7zw.nbtapi.NBTBlock;
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTItem;
 import de.tr7zw.nbtapi.NBTType;
+import me.emmetion.wells.Wells;
 import me.emmetion.wells.model.CoinType;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
@@ -123,11 +129,16 @@ public class Utilities {
         }
 
         NBTItem item = new NBTItem(wellBlock);
+
         NBTType wellsId1 = item.getType("wells_id");
         Bukkit.broadcastMessage("wells_id: " + wellsId1.toString());
-        if (item.getType("wells_id").equals(NBTType.NBTTagString) {
 
+        if (!item.getType("wells_id").equals(NBTType.NBTTagString)) {
+            Bukkit.broadcastMessage("wells_id is not NBTType.NBTTagString");
+            return false;
         }
+
+
         String wellsId = item.getString("wells_id");
 
         if (wellsId == null) {

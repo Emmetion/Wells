@@ -2,8 +2,11 @@ package me.emmetion.wells.database;
 
 import de.tr7zw.nbtapi.NBTEntity;
 import me.emmetion.wells.Wells;
+import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.creature.*;
 import me.emmetion.wells.model.Well;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -14,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 
 import javax.annotation.Nullable;
+import java.io.ObjectInputFilter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -205,6 +209,25 @@ public class CreatureManager {
         if (wellCreature == null)
             return;
         removeCreature(wellCreature.getUUID());
+    }
+
+    public boolean isSpawnNPCSpawned() {
+
+        // TODO: Get entity UUID from database
+
+        Configuration config = Configuration.getInstance();
+        UUID spawnNPCUUID = config.getOrCreateNewSpawnNPCUUID();
+
+        Entity entity = Bukkit.getEntity(spawnNPCUUID);
+        if (entity == null) {
+            return false;
+        }
+        NPC npc = CitizensAPI.getNPCRegistry().getNPC(entity);
+        if (npc == null)
+            return false;
+
+        SpawnNPC.SpawnTrait spawnTrait = npc.getTraitNullable(SpawnNPC.SpawnTrait.class);
+        return true;
     }
 
     public static UUID getUUIDFromEntity(Entity e) {

@@ -3,6 +3,7 @@ package me.emmetion.wells;
 import com.palmergames.bukkit.towny.TownyAPI;
 import eu.decentsoftware.holograms.api.DHAPI;
 import me.emmetion.wells.commands.WellCommand;
+import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.creature.SpawnNPC;
 import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.database.WellManager;
@@ -24,6 +25,8 @@ public final class Wells extends JavaPlugin {
 
     public static Wells plugin;
 
+    private Configuration configuration;
+
     private ActiveBuffRunnable activeBuffRunnable;
     private WellCreatureRunnable wellCreatureRunnable;
     private NearWellRunnable nearWellRunnable;
@@ -35,6 +38,12 @@ public final class Wells extends JavaPlugin {
     @Override
     public void onEnable() {
         plugin = this;
+
+        configuration = Configuration.getInstance();
+
+        // loads config from disc
+        reloadConfig();
+
 
         Logger logger = Logger.getLogger("Wells");
         logger.log(Level.INFO, "Plugin starting...");
@@ -66,7 +75,9 @@ public final class Wells extends JavaPlugin {
         // Prints into chat.
         Bukkit.broadcastMessage(getColor("&c&lReload! &fWell's has been reloaded!"));
 
-        creatureManager.spawnCreature(SpawnNPC.class, null);
+        if (!creatureManager.isSpawnNPCSpawned()) {
+            creatureManager.spawnCreature(SpawnNPC.class, null);
+        }
     }
 
     @Override
@@ -80,6 +91,8 @@ public final class Wells extends JavaPlugin {
 
         deleteWellHolograms();
         deleteCreatures();
+
+        configuration.saveConfigFile();
     }
 
 

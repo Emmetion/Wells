@@ -131,24 +131,26 @@ public class NearWellAnimation extends Animation {
 
         switch (p) {
             // Theoretically this will create a color gradient alternating through red to green in 20 steps.
-            case NOTE:
+            case NOTE -> {
                 Color c;
-                if (redToGreen.hasNext()) {
-                    c = redToGreen.next();
-                } else {
-                    redToGreen = new ColorGradient(Color.RED, Color.GREEN).iterator();
-                    c = redToGreen.next();
+                if (!redToGreen.hasNext()) {
+                    ColorGradient rtg = (ColorGradient) redToGreen;
+                    // alternate between colors.
+                    // could probably make a rainbow here.
+                    Color endColor = rtg.getEndColor();
+                    if (endColor.equals(Color.RED)) {
+                        redToGreen = new ColorGradient(Color.RED, Color.GREEN).iterator();
+                    } else if (endColor.equals(Color.GREEN))  {
+                        redToGreen = new ColorGradient(Color.GREEN, Color.RED).iterator();
+                    } else {
+                        // this should not happen rn.
+                        redToGreen = new ColorGradient(Color.BLACK, Color.BLACK).iterator();
+                    }
                 }
-
-                Particle.REDSTONE.builder()
-                        .location(location)
-                        .color(c.getRed(), c.getGreen(), c.getBlue())
-                        .offset(0.001, 0.001,0.001)
-                        .receivers(receivers)
-                        .spawn();
-
-                break;
-            case VILLAGER_HAPPY:
+                c = redToGreen.next();
+                Particle.REDSTONE.builder().location(location).color(c.getRed(), c.getGreen(), c.getBlue()).offset(0.001, 0.001, 0.001).receivers(receivers).spawn();
+            }
+            case VILLAGER_HAPPY -> {
                 // Using AnimationAPI we create a new anonymous object, name it with AnimationSettings then start.
                 World world = location.getWorld();
                 Animation a = new Animation() {
@@ -163,7 +165,7 @@ public class NearWellAnimation extends Animation {
                             bat = world.spawn(location, Bat.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
                             bat.setInvulnerable(true);
                             bat.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 10, 1, false, true, false));
-                            bat.setTargetLocation(location.add(0,100,0));
+                            bat.setTargetLocation(location.add(0, 100, 0));
                         } else if (frame == 5) {
                             bat.remove();
                             this.cancel();
@@ -177,12 +179,8 @@ public class NearWellAnimation extends Animation {
                         return new AnimationSettings("Happy Villager", 1, 1);
                     }
                 };
-
                 a.start();
-                break;
-            default:
-                //
-                break;
+            }
         }
 
 
@@ -235,6 +233,18 @@ class ColorGradient implements Iterable<Color> {
         this.startColor = startColor;
         this.endColor = endColor;
         this.steps = steps;
+    }
+
+    public Color getStartColor() {
+        return startColor;
+    }
+
+    public Color getEndColor() {
+        return endColor;
+    }
+
+    public int getSteps() {
+        return steps;
     }
 
     // Default steps = 20;

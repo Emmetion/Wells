@@ -1,6 +1,7 @@
 package me.emmetion.wells.creature;
 
 import me.emmetion.wells.Wells;
+import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.events.creature.CreatureKillEvent;
@@ -57,7 +58,14 @@ public class SpawnNPC extends WellCreature {
     public Entity handleEntitySpawn(Entity entity) {
         // Initialized marker.
         entity.getPersistentDataContainer().set(new NamespacedKey(Wells.plugin, "creature-uuid"), PersistentDataType.STRING, getUUID().toString());
-        NPC tora = CitizensAPI.getNPCRegistry().spliterator();
+
+        //TODO: Finish handling NPC spawning.
+        // Current state:
+        // 1. spawns a marker at the NPC's provided location (represents a well-creature)
+        // 2. checks whether or not a spawn_npc is actually present in proximity to it.
+        boolean spawnNPCSpawned = Wells.plugin.getCreatureManager().isSpawnNPCSpawned();
+
+        NPC tora = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "Tora");
         tora.setProtected(true);
         tora.addTrait(new SpawnTrait("Spawn Trait", getUUID()));
         tora.addTrait(new LookClose());
@@ -148,56 +156,61 @@ public class SpawnNPC extends WellCreature {
     public void updateCreature() {
 
     }
+
+    public class SpawnTrait extends Trait {
+
+        @Persist(value = "chats")
+        private int chatCounter = 0;
+
+        @Persist(value = "creature-uuid")
+        private String creature_uuid;
+
+        protected SpawnTrait(String name, UUID creature_uuid) {
+            super(name);
+            this.creature_uuid = creature_uuid.toString();
+        }
+
+        public int getChatCounter() {
+            return this.chatCounter;
+        }
+
+        public void incrementChatCounter() {
+            this.chatCounter++;
+        }
+
+        // Inserts creature-uuid onto NPC.
+        @Override
+        public void onSpawn() {
+            // Attaches creature-uuid on NPC entity
+
+            if (!getNPC().getEntity().getPersistentDataContainer().has(new NamespacedKey(Wells.plugin, "creature-uuid"))) {
+                Bukkit.broadcast(Component.text(getColor("&f&lSpawnNPC doesn't contain creature-uuid, loading.")));
+                // Bukkit.broadcast(Component.text("doesnt have uuid."));
+                getNPC().getEntity().getPersistentDataContainer().set(new NamespacedKey(Wells.plugin, "creature-uuid"), PersistentDataType.STRING, creature_uuid);
+                // Bukkit.broadcast(Component.text("set uuid."));
+
+            } else {
+                Bukkit.broadcast(Component.text(getColor("&f&lAlready contains creature-uuid!")));
+            }
+            // Bukkit.broadcast(Component.text("had uuid on attach."));
+        }
+
+        // handles NPC delete.
+        @EventHandler
+        public void handleNPCDelete(NPCRemoveEvent event) {
+            Entity entity = event.getNPC().getEntity();
+            CreatureManager cm = Wells.plugin.getCreatureManager();
+            WellCreature wc = cm.getWellCreatureFromEntity(entity);
+
+            if (wc == null)
+                return;
+            else if (wc instanceof SpawnNPC) {
+                Bukkit.broadcast(Component.text("NPCRemoveEvent called upon SpawnNPC."));
+                cm.removeCreature(wc);
+            }
+        }
+
+    }
+
 }
 
-class SpawnTrait extends Trait {
-
-    @Persist(value = "chats")
-    private int chatCounter = 0;
-
-    @Persist(value = "creature-uuid")
-    private String creature_uuid;
-
-    protected SpawnTrait(String name, UUID creature_uuid) {
-        super(name);
-        this.creature_uuid = creature_uuid.toString();
-    }
-
-    public int getChatCounter() {
-        return this.chatCounter;
-    }
-
-    public void incrementChatCounter() {
-        this.chatCounter++;
-    }
-
-    // Inserts creature-uuid onto NPC.
-    @Override
-    public void onSpawn() {
-        // Attaches creature-uuid on NPC entity
-
-        if (!getNPC().getEntity().getPersistentDataContainer().has(new NamespacedKey(Wells.plugin, "creature-uuid"))) {
-            // Bukkit.broadcast(Component.text("doesnt have uuid."));
-            getNPC().getEntity().getPersistentDataContainer().set(new NamespacedKey(Wells.plugin, "creature-uuid"), PersistentDataType.STRING, creature_uuid);
-            // Bukkit.broadcast(Component.text("set uuid."));
-
-        }
-        // Bukkit.broadcast(Component.text("had uuid on attach."));
-    }
-
-    // handles NPC delete.
-    @EventHandler
-    public void handleNPCDelete(NPCRemoveEvent event) {
-        Entity entity = event.getNPC().getEntity();
-        CreatureManager cm = Wells.plugin.getCreatureManager();
-        WellCreature wc = cm.getWellCreatureFromEntity(entity);
-
-        if (wc == null)
-            return;
-        else if (wc instanceof SpawnNPC) {
-            Bukkit.broadcast(Component.text("NPCRemoveEvent called upon SpawnNPC."));
-            cm.removeCreature(wc);
-        }
-    }
-
-}

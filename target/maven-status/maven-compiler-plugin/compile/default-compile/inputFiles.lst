@@ -1,4 +1,3 @@
-D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\database\MenuManager.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\creature\ParticleMob.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\AnimatedMenu.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\database\CreatureManager.java
@@ -20,6 +19,7 @@ D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\anim\CropFarmAnimation.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\model\CoinType.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\runnables\UpdateDatabaseRunnable.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\model\Well.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\creature\Savable.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\anim\PixiePunchAnimation.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\runnables\NearWellRunnable.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\runnables\WellCreatureRunnable.java
@@ -40,6 +40,7 @@ D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\WellMenu.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\listeners\WellCreatureListener.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\Menu.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\database\Database.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\config\Configuration.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\creature\CreatureType.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\events\creature\CreatureSpawnEvent.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\events\CoinTossEvent.java
