@@ -6,9 +6,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static me.emmetion.wells.util.Utilities.getColor;
@@ -22,7 +26,11 @@ public class Configuration {
     private final YamlConfiguration yamlConfig = new YamlConfiguration();
     private final File configFile;
 
-    /**  SQL LOGIN CREDENTIALS **/
+    private static UUID spawnNPCUUID;
+
+    /**
+     * SQL LOGIN CREDENTIALS
+     **/
     private static boolean sqlEnabled = false;
     private static String username = "";
     private static String password = "";
@@ -31,8 +39,7 @@ public class Configuration {
     public static Configuration getInstance() {
         if (configuration == null) {
             configuration = new Configuration(Wells.plugin); // hardcoded singleton.
-        }
-        return configuration;
+        } return configuration;
     }
 
     private Configuration(Wells plugin) {
@@ -42,14 +49,11 @@ public class Configuration {
             wells.getDataFolder().mkdirs();
         }
 
-        File configFile = new File(wells.getDataFolder(), "config.yml");
-        if (!configFile.exists()) {
-            wells.saveResource("config.yml", false);
-            wells.getLogger().info("Default config created.");
+        File configFile = new File(wells.getDataFolder(), "config.yml"); if (!configFile.exists()) {
+            wells.saveResource("config.yml", false); wells.getLogger().info("Default config created.");
         }
 
-        this.configFile = configFile;
-        try {
+        this.configFile = configFile; try {
             yamlConfig.load(configFile);
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
@@ -57,17 +61,20 @@ public class Configuration {
 
         // set static variables
 
-        sqlEnabled = yamlConfig.getBoolean("SQL.enabled");
-        username = yamlConfig.getString("SQL.username");
-        password = yamlConfig.getString("SQL.password");
+        sqlEnabled = yamlConfig.getBoolean("SQL.enabled"); username = yamlConfig.getString("SQL.username"); password = yamlConfig.getString("SQL.password");
         url = yamlConfig.getString("SQL.url");
+
+        // TODO: Remove debug.
+
+        System.out.println("SQL Debugging."); System.out.println("sqlEnabled = " + sqlEnabled); System.out.println("username = " + username);
+        System.out.println("password = " + password); System.out.println("url = " + url);
+
     }
 
     public void saveConfigFile() {
         File configFile = new File(wells.getDataFolder(), "config.yml");
         if (!configFile.exists()) {
-            wells.saveResource("config.yml", false);
-            wells.getLogger().info("Default config created.");
+            wells.saveResource("config.yml", false); wells.getLogger().info("Default config created.");
         }
     }
 
@@ -87,21 +94,40 @@ public class Configuration {
         return url;
     }
 
-
-    public UUID getOrCreateNewSpawnNPCUUID() {
-        String s = yamlConfig.getString("wells.spawn-npc-uuid");
-        if (s == null || s.equals("")) {
-            Bukkit.broadcast(Component.text(getColor("&cgetOrCreateNewSpawnNPCUUID creating a new uuid.")));
-
-            return UUID.randomUUID();
+    public boolean hasSpawnNPCUUID() {
+        if (spawnNPCUUID == null) {
+            return false;
         }
-        UUID uuid = UUID.fromString(s);
 
-        return uuid;
+        return true;
+    }
+
+
+
+    public UUID getSpawnNPCUUID() {
+        String s = yamlConfig.getString("wells.spawn-npc-uuid");
+        yamlConfig.set("wells.spawn-npc-uuid", false);
+
+        UUID uuid = null;
+
+        if (hasSpawnNPCUUID()) {
+            return spawnNPCUUID;
+        }
+
+        return null;
+    }
+
+    public void setSpawnNPCUUID(UUID uuid) {
+        this.yamlConfig.setComments("wells.spawn-npc-uuid", Arrays.asList("SpawnNPC's are ", "", ""));
+        this.yamlConfig.set("wells.spawn-npc-uuid", uuid.toString());
+
+        spawnNPCUUID = uuid;
     }
 
     public Location getSpawnNPCLocation() {
-        // TODO: Implement getting location from configuration instead of hard-coded.
+        // TODO: Implement getting location from configuration instead of hard-coded spawn location.
+        Location loc = yamlConfig.getLocation("well.spawn-npc-location");
+
         return new Location(Bukkit.getWorld("world"), 144, 68, -139);
     }
 }

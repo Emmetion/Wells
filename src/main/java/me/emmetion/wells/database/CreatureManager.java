@@ -133,39 +133,43 @@ public class CreatureManager {
         }
     }
 
-    public void spawnCreature(Class<? extends WellCreature> creature, @Nullable Well well) {
+    public WellCreature spawnCreature(Class<? extends WellCreature> creature, @Nullable Well well) {
         CreatureType type = CreatureType.getFromClazz(creature);
         WellCreature wellCreature = null;
 
+        Objects.requireNonNull(type);
 
         switch (type) {
-
-            case PIXIE:
+            case PIXIE -> {
                 if (well == null) {
                     Bukkit.broadcast(Component.text("Well cannot be null when spawning a creature in!"));
-                    Bukkit.broadcast(Component.text("A creature must be bounded by a well, otherwise we have no " +
-                            "anchor for it's spawning location."));
+                    Bukkit.broadcast(Component.text("A creature must be bounded by a well, otherwise we have no " + "anchor for it's spawning location."));
                     break;
                 }
-
                 wellCreature = new Pixie(well, well.getHologramLocation());
-                break;
+            }
+            case SPAWN_NPC -> {
+                Location spawnNPCLocation = Configuration.getInstance().getSpawnNPCLocation();
+                Configuration config = Configuration.getInstance();
+                UUID uuid = config.getSpawnNPCUUID();
+                if (isSpawnNPCSpawned())
+                    return null;
+                wellCreature = new SpawnNPC(spawnNPCLocation);
+            }
+            default -> {
 
-            case SPAWN_NPC:
-                wellCreature = new SpawnNPC(new Location(Bukkit.getWorld("world"), 143, 67, -141));
-                break;
-
-            default:
-                break;
+            }
         }
 
         if (wellCreature == null) {
             Bukkit.broadcast(Component.text("No proper CreatureType was specified."));
-            return; // no proper CreatureType was specified.
+            return null; // no proper CreatureType was specified.
         }
 
         // add to manager maps.
         addToMaps(wellCreature, well);
+
+        return wellCreature;
     }
 
     public WellCreature getWellCreatureFromEntity(Entity entity) {
@@ -179,8 +183,16 @@ public class CreatureManager {
 //            e.sendMessage(key.asString());
 //        }
 
+        if (creature_uuid == null) {
+            // creature does not exist.
+            return null;
+        }
+
+
         UUID uuid = UUID.fromString(creature_uuid);
         if (debug) {
+            // TODO: REMOVE-DEBUG
+            // send debug message
             e.sendMessage(uuid.toString());
         }
         return wellCreatureMap.get(uuid);
@@ -213,11 +225,17 @@ public class CreatureManager {
 
     public boolean isSpawnNPCSpawned() {
 
-        // TODO: Get entity UUID from database
+        // TODO: Get entity UUID from config file.
 
         Configuration config = Configuration.getInstance();
-        UUID spawnNPCUUID = config.getOrCreateNewSpawnNPCUUID();
+        UUID spawnNPCUUID = config.getSpawnNPCUUID();
 
+        // If spawnNPCUUID is null, we assume that it's not spawned, and therefor return false.
+        if (spawnNPCUUID == null) {
+            return false;
+        }
+
+        // The entity
         Entity entity = Bukkit.getEntity(spawnNPCUUID);
         if (entity == null) {
             return false;
@@ -226,7 +244,7 @@ public class CreatureManager {
         if (npc == null)
             return false;
 
-        SpawnNPC.SpawnTrait spawnTrait = npc.getTraitNullable(SpawnNPC.SpawnTrait.class);
+        // SpawnNPC.SpawnTrait spawnTrait = npc.getTraitNullable(SpawnNPC.SpawnTrait.class);
         return true;
     }
 

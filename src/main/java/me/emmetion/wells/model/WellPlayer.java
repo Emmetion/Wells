@@ -114,7 +114,7 @@ public class WellPlayer {
      * @return canSeeParticles.
      */
     public boolean toggleParticles() {
-        this.hideParticles = this.hideParticles ? false : true;
+        this.hideParticles = !this.hideParticles;
         return canSeeParticles();
     }
 
@@ -126,7 +126,7 @@ public class WellPlayer {
 
         Well well;
 
-// TODO: Create bossbar detailing time remaining on current well-buff.
+        // TODO: Create bossbar detailing time remaining on current well-buff.
 
     }
 

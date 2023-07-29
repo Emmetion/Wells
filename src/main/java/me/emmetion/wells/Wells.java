@@ -5,17 +5,20 @@ import eu.decentsoftware.holograms.api.DHAPI;
 import me.emmetion.wells.commands.WellCommand;
 import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.creature.SpawnNPC;
+import me.emmetion.wells.creature.WellCreature;
 import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.listeners.*;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.runnables.*;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -75,8 +78,10 @@ public final class Wells extends JavaPlugin {
         // Prints into chat.
         Bukkit.broadcastMessage(getColor("&c&lReload! &fWell's has been reloaded!"));
 
+
         if (!creatureManager.isSpawnNPCSpawned()) {
             creatureManager.spawnCreature(SpawnNPC.class, null);
+            Bukkit.broadcast(Component.text(getColor("&cSpawned SPAWNNPC.")));
         }
     }
 
@@ -156,6 +161,31 @@ public final class Wells extends JavaPlugin {
         if (this.creatureManager == null)
             return;
         this.creatureManager.saveCreatures();
+    }
+
+    private void handleSpawnNPCSpawning() {
+        Logger logger = getLogger();
+
+        if (this.creatureManager.isSpawnNPCSpawned()) {
+            UUID spawnNPCUUID = configuration.getSpawnNPCUUID();
+            logger.info("NPC Creature is spawned!");
+            if (spawnNPCUUID == null) {
+                logger.info("");
+                Bukkit.broadcast(Component.text(getColor("Creature is already spawned, but SpawnNPCUUID is null from configuration.")));
+                return;
+            }
+
+        } else {
+            // spawn the npc.
+            WellCreature wellCreature = creatureManager.spawnCreature(SpawnNPC.class, null);
+            if (wellCreature == null) {
+                // in the case that something went wrong while spawning it, we ignore it.
+                return;
+            }
+
+            UUID uuid = wellCreature.getUUID(); // get uuid from creature, should already be assigned in the WellCreature.
+            configuration.setSpawnNPCUUID(uuid);
+        }
     }
 
 }
