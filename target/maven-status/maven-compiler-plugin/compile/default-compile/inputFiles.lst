@@ -22,15 +22,16 @@ D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\model\Well.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\creature\Savable.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\anim\PixiePunchAnimation.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\runnables\NearWellRunnable.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\observer\LevelUpObserver.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\runnables\WellCreatureRunnable.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\creature\WellBound.java
-D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\observer\IncrementObserver.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\observer\Observer.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\anim\NearWellAnimation.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\Wells.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\anim\Animation.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\PlayerMenuUtility.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\creature\SpawnNPC.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\observer\XPIncrementObserver.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\model\WellPlayer.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\creature\WellCreature.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\creature\Movable.java

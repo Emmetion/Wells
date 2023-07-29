@@ -6,7 +6,8 @@ import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
-import me.emmetion.wells.observer.IncrementObserver;
+import me.emmetion.wells.observer.LevelUpObserver;
+import me.emmetion.wells.observer.XPIncrementObserver;
 import me.emmetion.wells.util.Utilities;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -38,7 +39,10 @@ public class WellManager {
      */
     private HashSet<Location> wellCache = new HashSet<>();
 
-    private List<IncrementObserver> levelupObserver = new ArrayList<>();
+    private final List<LevelUpObserver> levelupObservers = new ArrayList<>();
+    private final List<XPIncrementObserver> xpincrementObservers = new ArrayList<>();
+
+
 
     private HashMap<UUID, WellPlayer> wellPlayerHashMap = new HashMap<>();
 
@@ -71,8 +75,11 @@ public class WellManager {
             for (Well well : wellHashMap.values()) {
                 Location position = well.getLocation();
                 this.wellCache.add(position);
-                IncrementObserver observer = new IncrementObserver(well);
-                levelupObserver.add(observer);
+                LevelUpObserver observer = new LevelUpObserver(well);
+                levelupObservers.add(observer);
+
+                XPIncrementObserver obsv2 = new XPIncrementObserver(well);
+                xpincrementObservers.add(obsv2);
             }
 
             this.wellPlayerHashMap = database.getOnlineWellPlayersFromTable();

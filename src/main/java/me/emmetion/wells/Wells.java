@@ -14,9 +14,11 @@ import me.emmetion.wells.runnables.*;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -78,11 +80,7 @@ public final class Wells extends JavaPlugin {
         // Prints into chat.
         Bukkit.broadcastMessage(getColor("&c&lReload! &fWell's has been reloaded!"));
 
-
-        if (!creatureManager.isSpawnNPCSpawned()) {
-            creatureManager.spawnCreature(SpawnNPC.class, null);
-            Bukkit.broadcast(Component.text(getColor("&cSpawned SPAWNNPC.")));
-        }
+        handleSpawnNPCSpawning();
     }
 
     @Override
@@ -126,6 +124,8 @@ public final class Wells extends JavaPlugin {
         pluginManager.registerEvents(new WellCreatureListener(creatureManager), this);
     }
 
+    // Runnables are different than animations in the fact they are always running while the server is online.
+    // Animations are endable, while here we run these and never stop them until plugin shutdown.
     private void initSchedules() {
 
         // Locates nearby well players.
@@ -145,6 +145,7 @@ public final class Wells extends JavaPlugin {
         wellCreatureRunnable.runTaskTimer(Wells.plugin, 1, 1);
     }
 
+    // W
     public void initWellHolograms() {
         for (Well w : wellManager.getWells()) {
             w.updateHologram();
@@ -165,15 +166,16 @@ public final class Wells extends JavaPlugin {
 
     private void handleSpawnNPCSpawning() {
         Logger logger = getLogger();
-
+        Player p = Bukkit.getPlayer("Emmetion");
         if (this.creatureManager.isSpawnNPCSpawned()) {
             UUID spawnNPCUUID = configuration.getSpawnNPCUUID();
-            logger.info("NPC Creature is spawned!");
+            p.sendMessage(getColor("&c[NPC:<SpawnNPC>] &fwas not spawned. Spawning..."));
             if (spawnNPCUUID == null) {
-                logger.info("");
+                logger.info("UUID not found in config.");
                 Bukkit.broadcast(Component.text(getColor("Creature is already spawned, but SpawnNPCUUID is null from configuration.")));
                 return;
             }
+
 
         } else {
             // spawn the npc.
@@ -187,5 +189,9 @@ public final class Wells extends JavaPlugin {
             configuration.setSpawnNPCUUID(uuid);
         }
     }
+
+
+
+
 
 }

@@ -11,6 +11,7 @@ import me.emmetion.wells.anim.Animation;
 import me.emmetion.wells.anim.AnimationSettings;
 import me.emmetion.wells.anim.NearWellAnimation;
 import me.emmetion.wells.observer.Observer;
+import me.emmetion.wells.observer.XPIncrementObserver;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
@@ -183,7 +184,7 @@ public class Well {
             case 3 -> this.buff3 = activeBuff;
         }
         String s = activeBuff.toString();
-        Bukkit.broadcastMessage(s);
+        Bukkit.broadcast(Component.text(s));
     }
 
     public Hologram updateHologram() {
@@ -304,6 +305,7 @@ public class Well {
             experience = experience + xp;
             // coin won't increase level.
         }
+        notifyObservers();
     }
 
     public void depositCoin(CoinType coinType) {

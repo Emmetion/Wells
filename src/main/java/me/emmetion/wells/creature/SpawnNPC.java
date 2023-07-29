@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 import static me.emmetion.wells.util.Utilities.getColor;
+import static me.emmetion.wells.util.Utilities.getComponentColor;
 
 public class SpawnNPC extends WellCreature {
 
@@ -65,15 +66,27 @@ public class SpawnNPC extends WellCreature {
         // 2. checks whether or not a spawn_npc is actually present in proximity to it.
         boolean spawnNPCSpawned = Wells.plugin.getCreatureManager().isSpawnNPCSpawned();
 
-        NPC tora = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "Tora");
-        tora.setProtected(true);
-        tora.addTrait(new SpawnTrait("Spawn Trait", getUUID()));
-        tora.addTrait(new LookClose());
-        tora.spawn(getLocation());
+        UUID spawnNPCUUID = Configuration.getInstance().getSpawnNPCUUID();
 
-        npc = tora;
+        if (spawnNPCUUID == null) {
+            NPC tora = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "Tora");
+            tora.setProtected(true);
+            tora.addTrait(new SpawnTrait("Spawn Trait", getUUID()));
+            tora.addTrait(new LookClose());
+            tora.spawn(getLocation());
+            tora.getEntity().getPersistentDataContainer().set(new NamespacedKey(Wells.plugin, "spawn-npc-uuid"), PersistentDataType.STRING, spawnNPCUUID.toString());
 
-        return tora.getEntity();
+            npc = tora;
+        } else {
+            NPC npc = CitizensAPI.getNPCRegistry().getByUniqueId(spawnNPCUUID);
+
+            if (npc == null) {
+                Bukkit.broadcast(getComponentColor("&eNPC was null with provided spawnNPCUUID."))
+            }
+            this.npc = npc;
+        }
+
+        return npc.getEntity();
     }
 
     @Override

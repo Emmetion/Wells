@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static me.emmetion.wells.util.Utilities.getColor;
+import static me.emmetion.wells.util.Utilities.getComponentColor;
 
 public class CreatureManager {
 
@@ -152,8 +153,10 @@ public class CreatureManager {
                 Location spawnNPCLocation = Configuration.getInstance().getSpawnNPCLocation();
                 Configuration config = Configuration.getInstance();
                 UUID uuid = config.getSpawnNPCUUID();
-                if (isSpawnNPCSpawned())
+                if (isSpawnNPCSpawned()) {
+                    Bukkit.broadcast(getComponentColor("&cNPC tried to get spawned but one already existed."));
                     return null;
+                }
                 wellCreature = new SpawnNPC(spawnNPCLocation);
             }
             default -> {

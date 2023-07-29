@@ -250,6 +250,10 @@ public class Utilities {
         return null;
     }
 
+    public static Component getComponentColor(String s) {
+        return Component.text(getColor(s));
+    }
+
     public static String getColor(String string) {
         return ChatColor.translateAlternateColorCodes('&', string);
     }

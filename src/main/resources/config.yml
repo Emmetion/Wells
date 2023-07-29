@@ -12,3 +12,17 @@ SQL:
   url: "jdbc:mysql://u33061_WQm36YtTvQ:Ri1lKnBTcXFYVz6w0SBNYEfA@mario.bloom.host:3306/s33061_Wells"
   username: "u33061_WQm36YtTvQ"
   password: "Ri1lKnBTcXFYVz6w0SBNYEfA"
+
+
+# Placeholders:
+# [WELL PLACEHOLDERS]
+# {well_level} - the current level of the well
+# {old_well_level} - the previous well level
+
+messages:
+  well:
+    level-up-announcement: # TODO: Rename level-up to milestones?
+      # Level-Up-Announcements for when a well levels up.
+      - ""
+      - "      &e&lLevel Up! &f Your &bWell&f is now level &e&n{well_level} &f→ &e&n{well_level}&f!"
+      - ""
