@@ -40,9 +40,13 @@ public abstract class WellCreature {
     public WellCreature(Location location) {
         this.currentLocation = location;
         this.originalLocation = location;
-        this.uuid = UUID.randomUUID();
-
         this.entity = spawn();
+
+        if (entity == null) {
+            this.uuid = null;
+        } else {
+            this.uuid = entity.getUniqueId();
+        }
     }
 
 
@@ -52,7 +56,7 @@ public abstract class WellCreature {
         return this.uuid;
     }
 
-    public Entity spawn() {
+    private Entity spawn() {
         World world = this.currentLocation.getWorld();
 
         Entity entity;

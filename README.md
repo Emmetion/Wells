@@ -3,6 +3,14 @@ What is wells? Well's is a plugin for your minecraft server to increase communit
 
 ## Dependencies
 This project utilizes a few dependencies.
-- MySQL, needs a database to store information onto.
-- Towny (TownyAPI), understand the relationship between towns of players
-- NMSUtil (Maybe removable)
+- MySQL, required. (working on alternatives though)
+- Towny (TownyAPI), required.
+- NMSUtil, required.
+- ValhallaMMO, optional. 
+
+## Feature Breakdown
+
+Here I will describe all currently implemented, and planned features for Wells.
+
+### Creatures
+- Creatures have properties that allow them to be bound to a well.

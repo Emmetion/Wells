@@ -40,10 +40,6 @@ public class SpawnNPC extends WellCreature {
     private NPC npc;
     private final WellManager wellManager = Wells.plugin.getWellManager();
 
-    public SpawnNPC(UUID uuid, Location location) {
-        super(uuid, location);
-    }
-
     public SpawnNPC(Location location) {
         super(location);
     }
@@ -58,7 +54,12 @@ public class SpawnNPC extends WellCreature {
     @Override
     public Entity handleEntitySpawn(Entity entity) {
         // Initialized marker.
-        entity.getPersistentDataContainer().set(new NamespacedKey(Wells.plugin, "creature-uuid"), PersistentDataType.STRING, getUUID().toString());
+
+
+
+        if (getUUID() != null)
+            entity.getPersistentDataContainer().set(new NamespacedKey(Wells.plugin, "creature-uuid"), PersistentDataType.STRING, getUUID().toString());
+        else
 
         //TODO: Finish handling NPC spawning.
         // Current state:
@@ -70,6 +71,7 @@ public class SpawnNPC extends WellCreature {
 
         if (spawnNPCUUID == null) {
             NPC tora = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "Tora");
+
             tora.setProtected(true);
             tora.addTrait(new SpawnTrait("Spawn Trait", getUUID()));
             tora.addTrait(new LookClose());
@@ -81,12 +83,16 @@ public class SpawnNPC extends WellCreature {
             NPC npc = CitizensAPI.getNPCRegistry().getByUniqueId(spawnNPCUUID);
 
             if (npc == null) {
-                Bukkit.broadcast(getComponentColor("&eNPC was null with provided spawnNPCUUID."))
+                Bukkit.broadcast(getComponentColor("&eNPC was null with provided spawnNPCUUID."));
             }
             this.npc = npc;
         }
 
-        return npc.getEntity();
+        if (npc == null) {
+            return null;
+        } else {
+            return npc.getEntity();
+        }
     }
 
     @Override

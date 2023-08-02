@@ -67,8 +67,9 @@ public class WellListener implements Listener {
             event.setCancelled(true);
             return;
         }
+
         Town town = TownyAPI.getInstance().getTown(event.getPlayer());
-        manager.wellExists(town.getName());
+        String townName = town.getName();
 
         if (!blockAgainst.getType().equals(Material.CAULDRON)) {
             player.sendMessage(getColor("&cNot a valid well position! Read item description."));
@@ -77,22 +78,29 @@ public class WellListener implements Listener {
         }
 
         Collection<Block> blocksUnderneathLocation = Utilities.getBlocksUnderneathLocation(blockAgainst.getLocation());
-        long waterCount = blocksUnderneathLocation.stream().filter(block -> block.getType().equals(Material.WATER)).count();
+        long waterCount = blocksUnderneathLocation.stream().filter(b -> b.getType().equals(Material.WATER)).count();
         if (waterCount < 5) // Need at least 5 water-blocks from well position.
             return;
 
         player.sendMessage(getColor("&aWell Criteria Met!..."));
         // all criteria met, now we create it in database
-        manager.createWell(player, blockAgainst);
-        Well well = manager.getWellByTownName(town.getName());
-        well.addHologramLocation(0.5f, 2, 0.5f);
+        boolean successful = manager.createWell(player, blockAgainst);
+
+        if (successful) {
+            Well well = manager.getWellByTownName(townName);
+            well.addHologramLocation(0.5f, 2, 0.5f);
+
+        } else {
+            player.sendMessage(getColor("&cFailed to create well from wellmanager."));
+
+        }
+
         event.setCancelled(true);
     }
 
     /**
      * BlockBreak event. Checks a block in a BlockBreakEvent for being a Well Block. Cancelled if true.
      *
-     * @param event
      */
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {

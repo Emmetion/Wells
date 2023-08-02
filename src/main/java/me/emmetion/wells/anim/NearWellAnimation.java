@@ -265,6 +265,7 @@ class ColorGradient implements Iterable<Color> {
         public boolean hasNext() {
             return currentStep < steps;
         }
+
         @Override
         public Color next() {
             if (!hasNext()) {

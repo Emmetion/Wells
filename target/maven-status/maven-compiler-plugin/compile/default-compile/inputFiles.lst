@@ -2,6 +2,7 @@ D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\creature\ParticleMob.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\AnimatedMenu.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\database\CreatureManager.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\Pageable.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\database\SQLDatabase.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\listeners\WellPlayerListener.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\util\Utilities.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\listeners\WellBuffListener.java
@@ -28,6 +29,7 @@ D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\creature\WellBound.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\observer\Observer.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\anim\NearWellAnimation.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\Wells.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\database\EDatabase.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\anim\Animation.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\PlayerMenuUtility.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\creature\SpawnNPC.java
@@ -40,8 +42,8 @@ D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\listeners\WellListener.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\WellMenu.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\listeners\WellCreatureListener.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\menu\Menu.java
-D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\database\Database.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\config\Configuration.java
+D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\database\YAMLDatabase.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\creature\CreatureType.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\events\creature\CreatureSpawnEvent.java
 D:\Dev\Azurius\Wells\src\main\java\me\emmetion\wells\events\CoinTossEvent.java

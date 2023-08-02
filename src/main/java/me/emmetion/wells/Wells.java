@@ -86,7 +86,8 @@ public final class Wells extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
-            this.wellManager.close();
+            if (this.wellManager != null)
+                this.wellManager.close();
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("There was an error closing the database connection!");

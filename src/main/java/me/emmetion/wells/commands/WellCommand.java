@@ -90,6 +90,7 @@ public class WellCommand implements CommandExecutor {
                 return true;
             }
             this.wellManager.deleteWell(well);
+
             player.sendMessage(ChatColor.GREEN + "Deleted well!");
         } else if (arg1.equals("create")) {
             this.wellManager.createWell(player, player.getLocation().getBlock());

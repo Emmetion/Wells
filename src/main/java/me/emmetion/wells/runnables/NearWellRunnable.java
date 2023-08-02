@@ -89,6 +89,8 @@ public class NearWellRunnable extends BukkitRunnable {
                 Well w = wellManager.getWellByWellName(wellName);
                 Hologram h = DHAPI.getHologram(w.getTownName());
 
+                assert h != null;
+
                 h.removeShowPlayer(p);
 
                 Well wellByWellName = wellManager.getWellByWellName(wellName);

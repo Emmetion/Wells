@@ -62,8 +62,6 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
         setLocation(newLoc);
     }
 
-
-
     @Override
     public CreatureType getCreatureType() {
         return CreatureType.PIXIE;

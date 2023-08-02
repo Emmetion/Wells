@@ -15,10 +15,12 @@ import java.util.UUID;
 public class Configuration {
 
     private static Configuration configuration;
+
     private static UUID spawnNPCUUID;
     private final Wells wells;
     private final YamlConfiguration yamlConfig = new YamlConfiguration();
     private final File configFile;
+
     /**
      * SQL LOGIN CREDENTIALS
      **/
@@ -99,6 +101,10 @@ public class Configuration {
         return url;
     }
 
+    public boolean getSQLEnabled() {
+        return sqlEnabled;
+    }
+
     public List<String> getWellLevelUp() {
         return this.wellLevelUp;
     }
@@ -127,9 +133,9 @@ public class Configuration {
 
     public Location getSpawnNPCLocation() {
         // TODO: Implement getting location from configuration instead of hard-coded spawn location.
-        Location loc = yamlConfig.getLocation("well.spawn-npc-location");
-
-        return new Location(Bukkit.getWorld("world"), 144, 68, -139);
+        Location loc = yamlConfig.getLocation("well.spawn-npc-location", new Location(Bukkit.getWorld("world"), 144, 68, -139));
+        //returns the location in config, or a default one if it's null.
+        return loc;
     }
 
     private void save() {

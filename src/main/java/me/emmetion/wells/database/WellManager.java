@@ -4,45 +4,51 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
+import me.emmetion.wells.Wells;
+import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.observer.LevelUpObserver;
 import me.emmetion.wells.observer.XPIncrementObserver;
 import me.emmetion.wells.util.Utilities;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Logger;
+
+import static me.emmetion.wells.util.Utilities.getColor;
 
 /**
  * WellManager.java, operates as a wrapper for the database class, removing a layer of SQL statements and creating handling operations more efficiently.
  */
 public class WellManager {
 
+    private final Logger logger = Wells.plugin.getLogger();
+
     /**
      * MySQL database connection. This wrapper class uses methods inside database to achieve its goal.
      */
-    private Database database;
+    private EDatabase database;
 
     /**
      * Well Hash Map, contains every well by their respective townname as a key.
      */
+    @NotNull
     private HashMap<String, Well> wellHashMap = new HashMap<>();
 
     /**
      * A set of locations well's currently inhabit, use this to quickly find well blocks.
      */
-    private HashSet<Location> wellCache = new HashSet<>();
+    private final HashSet<Location> wellCache = new HashSet<>();
 
+    // Observers
     private final List<LevelUpObserver> levelupObservers = new ArrayList<>();
     private final List<XPIncrementObserver> xpincrementObservers = new ArrayList<>();
-
-
 
     private HashMap<UUID, WellPlayer> wellPlayerHashMap = new HashMap<>();
 
@@ -67,10 +73,17 @@ public class WellManager {
      * This init function handles creating the new database connection, and getting wells from the database upon startup.
      */
     private void init() {
-        this.database = new Database();
+        Configuration configuration = Configuration.getInstance();
+
+        if (configuration.getSQLEnabled()) {
+            this.database = new SQLDatabase();
+        } else {
+            this.database = new YAMLDatabase();
+        }
+
         try {
             this.database.initializeDatabase();
-            this.wellHashMap = database.getWellsFromTable();
+            this.wellHashMap = database.getWellsFromDatabase();
             // Now fill in cache
             for (Well well : wellHashMap.values()) {
                 Location position = well.getLocation();
@@ -82,7 +95,8 @@ public class WellManager {
                 xpincrementObservers.add(obsv2);
             }
 
-            this.wellPlayerHashMap = database.getOnlineWellPlayersFromTable();
+            this.wellPlayerHashMap = database.getOnlineWellPlayers();
+
             this.connected = true;
         } catch (SQLException e) {
             this.connected = false;
@@ -91,48 +105,44 @@ public class WellManager {
     }
 
     // TODO: Implement pseudocode
-    public boolean createWell(Player townMember, Block wellPosition) {
+
+    /**
+     *
+     * @param townMember - Player who placed the well block.
+     * @param wellPosition - Block at which the well is being placed.
+     * @return - Returns whether a well was created.
+     */
+    public boolean createWell(@NotNull Player townMember, Block wellPosition) {
         Town town = TownyAPI.getInstance().getTown(townMember.getLocation());
         // run various checks before writing it into database.
         if (town != null && town.hasResident(townMember)) {
-            Player player = townMember;
 
             boolean can_place = PlayerCacheUtil.getCachePermission(townMember, wellPosition.getLocation(), wellPosition.getType(), TownyPermission.ActionType.BUILD);
             if (!can_place) {// if you cannot place, return.
-                player.sendMessage(ChatColor.RED + "You cannot place a well in a town you are not part of!");
+                townMember.sendMessage(getColor("You cannot place a well in a town you are not part of!"));
                 return false;
             }
+
             if (wellExistsByTownName(town.getName())) // if well exists, return.
                 return false;
+
             // Check for water blocks.
             if (!Utilities.blockRequirement(wellPosition, Material.WATER, 5)) // requires 5 waterblocks in the highlighted particle area
                 return false;
 
             // Create a new well object, then it will be saved in to database.
             Well newWell = new Well(town.getName(), new Location(townMember.getWorld(), wellPosition.getX(), wellPosition.getY(), wellPosition.getZ()));
-            try {
-                this.wellCache.add(newWell.getLocation());
-                this.wellHashMap.put(newWell.getTownName(), newWell);
 
-                this.database.createWell(newWell); // puts it into mysql server.
-                this.saveAllWells(); // saves all wells.
+            this.wellCache.add(newWell.getLocation());
+            this.wellHashMap.put(newWell.getTownName(), newWell);
 
-                townMember.sendMessage(ChatColor.GREEN + "Successfully created your town well!");
-            } catch (SQLException e) {
-                townMember.sendMessage("Failed to create new well because of SQLException, please check console.");
-                e.printStackTrace();
-            }
+            this.database.createWell(newWell); // puts it into mysql server.
+            this.saveAllWells(); // saves all wells.
+
+            townMember.sendMessage(getColor("&aSuccessfully created your town well!"));
 
             return true;
-
         }
-        // pseudocode
-        // First check whether the player is in their own town.
-        // Then check if a well is placed in that players town
-        // Check the blocks around where a well block was placed for water.
-        // Create well if all checks pass.
-
-        //if (!wellExists())
 
         return false;
     }
@@ -144,40 +154,33 @@ public class WellManager {
      *
      * @param well
      */
-    public boolean deleteWell(Well well) {
+    public void deleteWell(@NotNull Well well) {
         if (!wellExists(well))
-            return false;
+            return;
+        well.endAnimation();
 
-        try {
-            well.endAnimation();
-            this.wellHashMap.remove(well.getTownName());
-            this.wellCache.remove(well.getLocation());
-            this.database.deleteWell(well);
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+        this.wellHashMap.remove(well.getTownName());
+        this.wellCache.remove(well.getLocation());
+
+        this.database.deleteWell(well);
     }
 
 
     /**
      * Returns a well object if a well at the given town exists.
      *
-     * @param townname
      * @return returns null if no well is found.
      */
-    public Well getWellByTownName(String townname) {
-        if (wellHashMap == null)
-            return null;
-        return wellHashMap.get(townname);
+    public Well getWellByTownName(@NotNull String townName) {
+        return wellHashMap.get(townName);
     }
 
-    public Well getWellByWellName(String well_name) {
-        if (wellHashMap == null || well_name == null || well_name.length() <= 7)
-            return null; // 's Well
+    public Well getWellByWellName(@NotNull String wellName) {
+        if (wellName.length() <= 7) // there must be a minimum of 7 characters in the well's name for it to be valid.
+            // "'s Well"
+            return null;
         // Bukkit.broadcast(Component.text("well_name" + well_name.substring(0, well_name.length() - 7)));
-        return wellHashMap.get(well_name.substring(0, well_name.length() - 7));
+        return wellHashMap.get(wellName.substring(0, wellName.length() - 7));
     }
 
     /**
@@ -189,16 +192,12 @@ public class WellManager {
      */
     public boolean wellExists(Well well) {
         String townName = well.getTownName();
-        if (wellHashMap == null)
-            return false;
+
         return wellHashMap.containsKey(townName);
     }
 
-    public boolean wellExists(String townname) {
-        if (wellHashMap == null) {
-            return false;
-        }
-        return wellHashMap.containsKey(townname);
+    public boolean wellExists(@NotNull String townName) {
+        return wellHashMap.containsKey(townName);
     }
 
     public boolean wellExistsForPlayer(Player player) {
@@ -219,11 +218,8 @@ public class WellManager {
      * Similar to WellManager#wellExists(Well well) but taking townname as param this time.
      *
      * @param townName
-     * @return
      */
     public boolean wellExistsByTownName(String townName) {
-        if (wellHashMap == null)
-            return false;
         return wellHashMap.containsKey(townName);
     }
 
@@ -235,7 +231,6 @@ public class WellManager {
      * or modified when changed.
      *
      * @param location
-     * @return
      */
     public boolean isWell(Location location) {
         if (wellCache.size() == 0)
@@ -248,8 +243,6 @@ public class WellManager {
      * Returns the Well from a given location,
      * otherwise returning null.
      *
-     * @param location
-     * @return
      */
     public Well getWellFromLocation(Location location) {
         for (Well w : this.wellHashMap.values()) {
@@ -294,10 +287,6 @@ public class WellManager {
      * @return
      */
     public Collection<Well> getWells() {
-        if (wellHashMap == null) {
-            return null;
-        }
-
         return wellHashMap.values();
     }
 
@@ -317,35 +306,21 @@ public class WellManager {
         this.debug = debug;
     }
 
-    public void loadWellPlayer(Player player) {
-        if (player == null) {
-            Player emmetion = Bukkit.getPlayer("Emmetion");
-            if (debug)
-                emmetion.sendMessage("☢ player is null in loadWellPlayer");
-            return;
-
-        }
-        try {
-            WellPlayer wellPlayer = this.database.getWellPlayerOrNew(player.getUniqueId());
-            this.wellPlayerHashMap.put(wellPlayer.getPlayerUUID(), wellPlayer);
-            if (debug)
-                player.sendMessage("☢ Got well player for load.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public void loadWellPlayer(@NotNull Player player) {
+        WellPlayer wellPlayer = this.database.getWellPlayer(player);
+        this.wellPlayerHashMap.put(wellPlayer.getPlayerUUID(), wellPlayer);
+        if (debug)
+            player.sendMessage("☢ Got well player for load.");
     }
 
-    public void unloadPlayer(Player player) {
+    public void unloadPlayer(@NotNull Player player) {
         UUID uuid = player.getUniqueId();
         if (this.wellPlayerHashMap.containsKey(uuid)) {
 
             WellPlayer wellPlayer = this.wellPlayerHashMap.get(uuid);
-            try {
-                this.database.updateWellPlayer(wellPlayer);
-                this.wellPlayerHashMap.remove(uuid);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+
+            this.database.updateWellPlayer(wellPlayer);
+            this.wellPlayerHashMap.remove(uuid);
         }
     }
 
@@ -375,8 +350,5 @@ public class WellManager {
      */
     public void close() throws SQLException {
         updateDatabase();
-        if (this.database.getConnection().isClosed()) {
-            this.database.getConnection().close();
-        }
     }
 }

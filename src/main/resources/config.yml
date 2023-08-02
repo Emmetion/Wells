@@ -8,6 +8,7 @@ wells:
   xp-per-online-player: ""
 
 SQL:
+  # If enabled is set to false, the plugin will store files in a YAML format inside of the data folder.
   enabled: true
   url: "jdbc:mysql://u33061_WQm36YtTvQ:Ri1lKnBTcXFYVz6w0SBNYEfA@mario.bloom.host:3306/s33061_Wells"
   username: "u33061_WQm36YtTvQ"

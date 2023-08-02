@@ -19,12 +19,15 @@ import org.bukkit.persistence.PersistentDataType;
 import javax.annotation.Nullable;
 import java.io.ObjectInputFilter;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static me.emmetion.wells.util.Utilities.getColor;
 import static me.emmetion.wells.util.Utilities.getComponentColor;
 
 public class CreatureManager {
+
+    private final Logger logger = Wells.plugin.getLogger();
 
     private final HashMap<UUID, WellCreature> wellCreatureMap;
     private final HashMap<Well, Set<UUID>> wellsWithCreatures;
@@ -64,9 +67,7 @@ public class CreatureManager {
         }
 
         // remove creatures that were newly marked killed.
-        for (WellCreature wc : creatures) {
-            this.removeCreature(wc);
-        }
+        creatures.forEach(this::removeCreature);
     }
 
     public WellCreature getWellCreature(UUID uuid) {
