@@ -5,13 +5,10 @@ import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
-import eu.decentsoftware.holograms.api.holograms.HologramLine;
-import io.papermc.paper.math.FinePosition;
 import me.emmetion.wells.anim.Animation;
 import me.emmetion.wells.anim.AnimationSettings;
 import me.emmetion.wells.anim.NearWellAnimation;
 import me.emmetion.wells.observer.Observer;
-import me.emmetion.wells.observer.XPIncrementObserver;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
@@ -26,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static me.emmetion.wells.util.Utilities.getColor;
 
@@ -58,37 +54,27 @@ public class Well {
 
     private NearWellAnimation animation;
 
-    public Well(String townName, Location position, Location hologramPosition,
-                int well_level, int experience,
-                String buff1_id, Timestamp buff1_end,
-                String buff2_id, Timestamp buff2_end,
-                String buff3_id, Timestamp buff3_end,
-                boolean isBoosted, Timestamp boost_end) {
+    public Well(String townName, Location position, Location hologramPosition, int well_level, int experience, String buff1_id, Timestamp buff1_end, String buff2_id, Timestamp buff2_end, String buff3_id, Timestamp buff3_end, boolean isBoosted, Timestamp boost_end) {
         this.townName = townName;
         this.position = position;
         this.hologramPosition = hologramPosition;
         this.well_level = well_level;
         this.experience = experience;
+        // Converts saved database BUFF_ID string into real ActiveBuff class.
         if (buff1_id.equalsIgnoreCase("NONE")) {
             this.buff1 = ActiveBuff.defaultActiveBuff();
         } else {
-            this.buff1 = new ActiveBuff(
-                    BuffType.valueOf(buff1_id), buff1_end
-            );
+            this.buff1 = new ActiveBuff(BuffType.valueOf(buff1_id), buff1_end);
         }
         if (buff2_id.equalsIgnoreCase("NONE")) {
             this.buff2 = ActiveBuff.defaultActiveBuff();
         } else {
-            this.buff2 = new ActiveBuff(
-                    BuffType.valueOf(buff1_id), buff2_end
-            );
+            this.buff2 = new ActiveBuff(BuffType.valueOf(buff1_id), buff2_end);
         }
         if (buff3_id.equalsIgnoreCase("NONE")) {
             this.buff3 = ActiveBuff.defaultActiveBuff();
         } else {
-            this.buff3 = new ActiveBuff(
-                    BuffType.valueOf(buff1_id), buff3_end
-            );
+            this.buff3 = new ActiveBuff(BuffType.valueOf(buff1_id), buff3_end);
         }
 
         this.isBoosted = isBoosted;
@@ -109,9 +95,7 @@ public class Well {
     }
 
     public void handleAllBuffUpdate() {
-        this.getActiveBuffs().stream()
-                .filter(ActiveBuff::isNone)
-                .forEach(buff -> buff.update());
+        this.getActiveBuffs().stream().filter(ActiveBuff::isNone).forEach(buff -> buff.update());
     }
 
     public String getTownName() {
@@ -265,7 +249,6 @@ public class Well {
             public void run() {
 
 
-
                 if (ticksAlive == 40) {
                     armorstand.remove();
                 }
@@ -351,6 +334,7 @@ public class Well {
 
     /**
      * Returns a list of ActiveBuffs that are not None.
+     *
      * @return
      */
     public List<ActiveBuff> getActiveBuffs() {
@@ -366,6 +350,7 @@ public class Well {
 
     /**
      * Get buffs regardless of being none or ended duration.
+     *
      * @return
      */
     public List<ActiveBuff> getBuffs() {
@@ -380,6 +365,7 @@ public class Well {
         return this.getLocation().toVector().toString();
     }
 
+    @NotNull
     public List<WellPlayer> getNearbyPlayers() {
         return this.nearbyPlayers;
     }
@@ -401,10 +387,7 @@ public class Well {
             player.getUniqueId();
         }
 
-        return this.nearbyPlayers.stream()
-                .map(WellPlayer::getPlayerUUID)
-                .toList()
-                .contains(player.getUniqueId());
+        return this.nearbyPlayers.stream().map(WellPlayer::getPlayerUUID).toList().contains(player.getUniqueId());
     }
 
     public void resetLevel() {
@@ -421,13 +404,7 @@ public class Well {
     }
 
     public TextComponent createHoverableTextComponent() {
-        return Component.text(this.getWellName(), TextColor.color(255,170,0))
-                .hoverEvent(
-                        Component.text("Town: " + this.getTownName()).appendNewline().append(
-                        Component.text("Experience: " + this.experience + "/" + this.experienceRequired).appendNewline().append(
-                        Component.text("Buff1: " + this.buff1)).appendNewline().append(
-                        Component.text("Buff2: " + this.buff2)
-                                )));
+        return Component.text(this.getWellName(), TextColor.color(255, 170, 0)).hoverEvent(Component.text("Town: " + this.getTownName()).appendNewline().append(Component.text("Experience: " + this.experience + "/" + this.experienceRequired).appendNewline().append(Component.text("Buff1: " + this.buff1)).appendNewline().append(Component.text("Buff2: " + this.buff2))));
     }
 
 
@@ -435,6 +412,7 @@ public class Well {
      * Creates a level bar for a well.
      * This bar represents the amount of 'energy' a well has.
      * 'Energy' is used as a strength multiplier for ActiveBuffs.
+     *
      * @return
      */
     public String createLevelBar() {
@@ -459,8 +437,7 @@ public class Well {
         Town town = TownyAPI.getInstance().getTown(townName);
         for (Resident r : town.getResidents()) {
             if (r.isOnline())
-                r.sendMessage(com.palmergames.adventure.text.Component.text(getColor("&aYour well has leveled up! "))
-                        .append(com.palmergames.adventure.text.Component.text(getColor("New Level: " + this.well_level))));
+                r.sendMessage(com.palmergames.adventure.text.Component.text(getColor("&aYour well has leveled up! ")).append(com.palmergames.adventure.text.Component.text(getColor("New Level: " + this.well_level))));
         }
 
     }
@@ -468,12 +445,15 @@ public class Well {
     // IntelliJ default equals() and hashCode().
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         Well well = (Well) o;
 
-        if (!townName.equals(well.townName)) return false;
+        if (!townName.equals(well.townName))
+            return false;
         return position.equals(well.position);
     }
 
@@ -486,16 +466,6 @@ public class Well {
 
     @Override
     public String toString() {
-        return "Well{" +
-                "observers=" + observers +
-                ", townName='" + townName + '\'' +
-                ", position=" + position +
-                ", hologramPosition=" + hologramPosition +
-                ", well_level=" + well_level +
-                ", experience=" + experience +
-                ", buff1=" + buff1 +
-                ", buff2=" + buff2 +
-                ", buff3=" + buff3 +
-                '}';
+        return "Well{" + "observers=" + observers + ", townName='" + townName + '\'' + ", position=" + position + ", hologramPosition=" + hologramPosition + ", well_level=" + well_level + ", experience=" + experience + ", buff1=" + buff1 + ", buff2=" + buff2 + ", buff3=" + buff3 + '}';
     }
 }

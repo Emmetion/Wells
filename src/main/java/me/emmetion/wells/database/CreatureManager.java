@@ -11,13 +11,12 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
-
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.io.ObjectInputFilter;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -83,9 +82,7 @@ public class CreatureManager {
         }
 
         // maps UUID's to WellCreature, then collects them as a List.
-        List<WellCreature> creatures = this.wellsWithCreatures.get(well).stream()
-                .map(uuid -> this.wellCreatureMap.get(uuid))
-                .collect(Collectors.toList());
+        List<WellCreature> creatures = this.wellsWithCreatures.get(well).stream().map(uuid -> this.wellCreatureMap.get(uuid)).collect(Collectors.toList());
 
         return creatures;
     }
@@ -205,13 +202,11 @@ public class CreatureManager {
     public CreatureType getCreatureTypeFromEntity(Entity e) {
         if (this.getWellCreatureFromEntity(e) == null)
             return null;
+
         return this.getWellCreatureFromEntity(e).getCreatureType();
     }
 
-    private void removeCreature(UUID uuid) {
-        if (uuid == null)
-            return;
-
+    private void removeCreature(@NotNull UUID uuid) {
         WellCreature wellCreature = this.wellCreatureMap.get(uuid);
         if (wellCreature == null)
             return;
@@ -220,10 +215,7 @@ public class CreatureManager {
     }
 
 
-
-    public void removeCreature(WellCreature wellCreature) {
-        if (wellCreature == null)
-            return;
+    public void removeCreature(@NotNull WellCreature wellCreature) {
         removeCreature(wellCreature.getUUID());
     }
 
@@ -231,25 +223,21 @@ public class CreatureManager {
 
         // TODO: Get entity UUID from config file.
 
+        return getSpawnNPC() == null;
+    }
+
+    public NPC getSpawnNPC() {
+
         Configuration config = Configuration.getInstance();
-        UUID spawnNPCUUID = config.getSpawnNPCUUID();
+        Location spawnNPCLocation = config.getSpawnNPCLocation();
 
-        // If spawnNPCUUID is null, we assume that it's not spawned, and therefor return false.
-        if (spawnNPCUUID == null) {
-            return false;
-        }
+        return spawnNPCLocation.getNearbyEntities(1, 1, 1).stream()
+                .filter(entity -> entity.hasMetadata("NPC"))
+                .map(CitizensAPI.getNPCRegistry()::getNPC)
+                .filter(npc1 -> npc1.hasTrait(SpawnNPC.SpawnTrait.class))
+                .findFirst()
+                .orElse(null);
 
-        // The entity
-        Entity entity = Bukkit.getEntity(spawnNPCUUID);
-        if (entity == null) {
-            return false;
-        }
-        NPC npc = CitizensAPI.getNPCRegistry().getNPC(entity);
-        if (npc == null)
-            return false;
-
-        // SpawnNPC.SpawnTrait spawnTrait = npc.getTraitNullable(SpawnNPC.SpawnTrait.class);
-        return true;
     }
 
     public static UUID getUUIDFromEntity(Entity e) {
@@ -266,17 +254,18 @@ public class CreatureManager {
 
     public void saveCreatures() {
         Set<UUID> creatureUUIDs = wellCreatureMap.keySet();
-        this.wellCreatureMap.keySet()
-                .forEach(uuid -> {
-                    WellCreature wc = wellCreatureMap.get(uuid);
-                    // TODO: Implement saving of WellCreatures.
-                    // wc.save();
-                    wc.kill();
-                });
+        this.wellCreatureMap.keySet().forEach(uuid -> {
+            WellCreature wc = wellCreatureMap.get(uuid);
+            // TODO: Implement saving of WellCreatures.
+            // wc.save();
+            wc.kill();
+        });
 
         for (UUID uuid : creatureUUIDs) {
             this.wellCreatureMap.remove(uuid);
         }
     }
+
+
 
 }

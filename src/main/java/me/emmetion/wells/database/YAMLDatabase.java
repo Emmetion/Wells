@@ -3,19 +3,13 @@ package me.emmetion.wells.database;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.UUID;
 
 public class YAMLDatabase extends EDatabase {
@@ -34,8 +28,8 @@ public class YAMLDatabase extends EDatabase {
         File dataFolder = wells.getDataFolder();
         String absolutePath = dataFolder.getAbsolutePath();
 
-        wellPlayersPath = absolutePath + "db/well_players/";
-        wellsPath = absolutePath + "db/wells/";
+        wellPlayersPath = absolutePath + "/db/well_players/";
+        wellsPath = absolutePath + "/db/wells/";
 
     }
 

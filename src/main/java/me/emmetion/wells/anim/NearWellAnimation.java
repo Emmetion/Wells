@@ -1,27 +1,23 @@
 package me.emmetion.wells.anim;
 
-import com.destroystokyo.paper.ParticleBuilder;
-import me.emmetion.wells.Wells;
-import me.emmetion.wells.creature.Pixie;
 import me.emmetion.wells.model.ActiveBuff;
 import me.emmetion.wells.model.CoinType;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.entity.Bat;
-import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
-import java.awt.Color;
-import java.awt.geom.Point2D;
-import java.awt.image.ColorModel;
+import java.util.List;
+import java.util.Queue;
 import java.util.*;
 
 public class NearWellAnimation extends Animation {
@@ -56,74 +52,58 @@ public class NearWellAnimation extends Animation {
         double x1 = center.getX() + radius * Math.cos(angle);
         double y1 = center.getY() + (y_radius * Math.sin(angle));
         double z1 = center.getZ() + radius * Math.sin(angle);
+
         Location location1 = new Location(world, x1, y1, z1);
 
         // Calculate the position for the second particle
         double x2 = center.getX() + radius * Math.cos(angle + Math.PI);
         double y2 = center.getY() + (y_radius * Math.sin(angle + Math.PI)); // (y_radius * Math.sin(angle + Math.PI));
         double z2 = center.getZ() + radius * Math.sin(angle + Math.PI);
+
         Location location2 = new Location(world, x2, y2, z2);
 
         // Spawn the particles at the calculated positions
-        for (WellPlayer wp : well.getNearbyPlayers()) {
-            UUID playerUUID = wp.getPlayerUUID();
-            Player player = Bukkit.getPlayer(playerUUID);
 
-            WellPlayer wellPlayer = Wells.plugin.getWellManager().getWellPlayer(player);
-            if (wellPlayer == null || !wellPlayer.canSeeParticles()) {
-                continue;
-            }
-            int wellLevel = well.getWellLevel();
 
-            if (wellLevel > 0) {
-                player.spawnParticle(particle, location1, 1, 0.001, 0, 0.001, 0.01);
-                // this is written twice, each with different locations. (2 spiraling trails).
-                if (!particleQueue.isEmpty()) {
-                    player.sendMessage("Polling Cointype...");
-                    CoinType cointype = particleQueue.poll();
-                    spawnTrailByCoinType(location1, cointype);
-                }
-            }
+        well.getNearbyPlayers().stream()
+                .filter(WellPlayer::canSeeParticles)
+                .forEach(wellPlayer -> {
+                    Player player = wellPlayer.getBukkitPlayer();
+                    List<WellPlayer> nearbyWellPlayers = well.getNearbyPlayers();
 
-            if (wellLevel > 1) {
-                player.spawnParticle(particle, location2, 1, 0.001, 0, 0.001, 0.01);
-                if (!particleQueue.isEmpty()) {
-                    player.sendMessage("Polling Cointype...");
-                    CoinType cointype = particleQueue.poll();
-                    spawnTrailByCoinType(location2, cointype);
-                }
-            }
+                    int wellLevel = well.getWellLevel();
 
-            assert player != null;
+                    if (wellLevel >= 1) {
+                        player.spawnParticle(particle, location1, 1, 0.001, 0, 0.001, 0.01);
+                        // this is written twice, each with different locations. (2 spiraling trails).
+                        if (!particleQueue.isEmpty()) {
+                            CoinType cointype = particleQueue.poll();
+                            spawnTrailByCoinType(location1, cointype);
+                        }
+                    }
 
-            if (well.hasBuff1()) {
-                ActiveBuff buff = well.getBuff1();
-                handleBuffParticleSpawn(buff, location1,
-                        well.getNearbyPlayers().stream()
-                                .map(WellPlayer::getBukkitPlayer)
-                                .toList()
-                );
-            }
+                    if (wellLevel >= 2) {
+                        player.spawnParticle(particle, location2, 1, 0.001, 0, 0.001, 0.01);
+                        if (!particleQueue.isEmpty()) {
+                            CoinType cointype = particleQueue.poll();
+                            spawnTrailByCoinType(location2, cointype);
+                        }
+                    }
 
-            if (well.hasBuff2()) {
-                ActiveBuff buff = well.getBuff2();
-                handleBuffParticleSpawn(buff, location2,
-                        well.getNearbyPlayers().stream()
-                        .map(WellPlayer::getBukkitPlayer)
-                        .toList()
-                );
-            }
-        }
+                    handleActiveBuffParticleSpawn(well.getBuff1(), location1, nearbyWellPlayers);
+                    handleActiveBuffParticleSpawn(well.getBuff2(), location2, nearbyWellPlayers);
+                });
+
 
         angle += 0.1;
     }
 
-    private void handleBuffParticleSpawn(ActiveBuff activeBuff, Location location, Collection<Player> receivers) {
-        if (activeBuff == null || !activeBuff.hasWellParticle() || activeBuff.isNone() || location == null) {
+    private void handleActiveBuffParticleSpawn(@NotNull ActiveBuff buff, @NotNull Location particleLoc, Collection<WellPlayer> receivers) {
+        if (buff.isNone()) {
             return;
         }
 
-        Particle p = activeBuff.getWellParticle();
+        Particle p = buff.getWellParticle();
 
         if (p == null) {
             return;
@@ -148,11 +128,18 @@ public class NearWellAnimation extends Animation {
                     }
                 }
                 c = redToGreen.next();
-                Particle.REDSTONE.builder().location(location).color(c.getRed(), c.getGreen(), c.getBlue()).offset(0.001, 0.001, 0.001).receivers(receivers).spawn();
+                Particle.REDSTONE.builder()
+                        .location(particleLoc)
+                        .color(c.getRed(), c.getGreen(), c.getBlue())
+                        .offset(0.001, 0.001, 0.001)
+                        .receivers(receivers.stream()
+                                        .map(WellPlayer::getBukkitPlayer)
+                                        .toList())
+                        .spawn();
             }
             case VILLAGER_HAPPY -> {
                 // Using AnimationAPI we create a new anonymous object, name it with AnimationSettings then start.
-                World world = location.getWorld();
+                World world = particleLoc.getWorld();
                 Animation a = new Animation() {
 
                     Bat bat;
@@ -162,10 +149,10 @@ public class NearWellAnimation extends Animation {
                     public void run() {
 
                         if (frame == 0) {
-                            bat = world.spawn(location, Bat.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
+                            bat = world.spawn(particleLoc, Bat.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
                             bat.setInvulnerable(true);
                             bat.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 10, 1, false, true, false));
-                            bat.setTargetLocation(location.add(0, 100, 0));
+                            bat.setTargetLocation(particleLoc.add(0, 100, 0));
                         } else if (frame == 5) {
                             bat.remove();
                             this.cancel();

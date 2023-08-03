@@ -3,6 +3,7 @@ package me.emmetion.wells.config;
 import me.emmetion.wells.Wells;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -16,11 +17,15 @@ public class Configuration {
 
     private static Configuration configuration;
 
-    private static UUID spawnNPCUUID;
+    public static final NamespacedKey creatureUUIDKey = new NamespacedKey(Wells.plugin, "creature-uuid");
+
     private final Wells wells;
     private final YamlConfiguration yamlConfig = new YamlConfiguration();
     private final File configFile;
 
+
+    // SpawnNPC Data.
+    private UUID spawnNPCUUID;
     /**
      * SQL LOGIN CREDENTIALS
      **/
@@ -122,7 +127,7 @@ public class Configuration {
         return spawnNPCUUID;
     }
 
-    public void setSpawnNPCUUID(UUID uuid)  {
+    public void setSpawnNPCUUID(UUID uuid) {
         yamlConfig.setComments("wells.spawn-npc-uuid", Arrays.asList("Do not modify these values.", "Instead use the in-game commands via. /wells spawnnpc"));
         yamlConfig.set("wells.spawn-npc-uuid", uuid.toString());
 

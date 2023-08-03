@@ -2,13 +2,13 @@ package me.emmetion.wells.creature;
 
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.anim.PixiePunchAnimation;
+import me.emmetion.wells.events.creature.CreatureClickEvent;
 import me.emmetion.wells.model.Well;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Random;
@@ -21,10 +21,7 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
 
     private Well well;
 
-    private int id;
-
     // --- Position Information ---
-    private int max_pixies;
     private boolean upwards = true;
 
     private PixieType pixieType = PixieType.NONE;
@@ -34,18 +31,6 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
         super(location);
 
         this.well = well;
-        // max_pixies is calculated through the total amount of buffs from a well.
-        this.max_pixies = well.getBuffs().size();
-        // then we calculate the id of the current pixie, will be used in the message.
-        if (this.max_pixies <= well.getActiveBuffs().size()) {
-            // the first id is 0, then 1, then 2.
-            this.id = well.getBuffs().size();
-        }
-
-        this.id = well.getActiveBuffs().size();
-        this.setLocation(location);
-
-        // creates a new random.
 
         // Determines location of Pixie.
         int angle = random.nextInt(360) + 1;
@@ -69,9 +54,6 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
 
     @Override
     public Entity handleEntitySpawn(Entity entity) {
-        if (!(entity instanceof ArmorStand)) // validates that the entity is of armorstand type.
-            return null;
-
         ArmorStand armorStand = (ArmorStand) entity;
 
         armorStand.setInvisible(true);
@@ -80,8 +62,7 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
         armorStand.setCustomName("..."); // Temporarily sets name to '...'. This then gets updated to the pixie's name on the next frame.
         armorStand.setCustomNameVisible(true);
         NamespacedKey nk = new NamespacedKey(Wells.plugin, "creature-uuid");
-        armorStand.getPersistentDataContainer().set(nk,
-                PersistentDataType.STRING, this.getUUID().toString());
+        armorStand.getPersistentDataContainer().set(nk, PersistentDataType.STRING, this.getUUID().toString());
 
         return armorStand;
     }
@@ -96,28 +77,22 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
     }
 
     @Override
-    public void handleLeftClick(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Player)) {
-            return;
-        }
-        Entity entity = event.getEntity();
-        Player player = (Player) event.getDamager();
-
-        handle(entity, player);
-        event.setCancelled(true);
-    }
-
-    @Override
-    public void handleRightClick(PlayerInteractAtEntityEvent event) {
-
-        Entity entity = event.getRightClicked();
+    public void handleLeftClick(CreatureClickEvent event) {
+        Entity entity = event.getWellCreature().getEntity();
         Player player = event.getPlayer();
 
         handle(entity, player);
     }
 
-    // This method is used in both right and left click.
-    // helper method.
+    @Override
+    public void handleRightClick(CreatureClickEvent event) {
+        Entity entity = event.getWellCreature().getEntity();
+        Player player = event.getPlayer();
+
+        handle(entity, player);
+    }
+
+    // Helper method.
     private void handle(Entity entity, Player player) {
         ArmorStand as = (ArmorStand) entity;
 
@@ -131,12 +106,13 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
     }
 
     @Override
-    public Class<? extends Entity> entityClassType() {
-        return ArmorStand.class;
+    public EntityType creatureEntityType() {
+        return EntityType.ARMOR_STAND;
     }
 
     @Override
     public void updateCreature() {
+        // This if-statement is called only once.
         if (pixieType.equals(PixieType.NONE)) {
             calculateRarity();
             updateName();
@@ -145,6 +121,8 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
         if (this.getEntity() == null) {
             return;
         }
+
+        // Disables fire effect is present.
         if (this.getEntity().isVisualFire())
             this.getEntity().setVisualFire(false);
     }
@@ -158,8 +136,7 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
     public void move() {
         World world = getLocation().getWorld();
         // Spawn a particle at the Pixie's location.
-        world.spawnParticle(particle(), getLocation().clone().add(0,0.3,0), 2, 0.1, 0.1, 0.1,
-                pixieType.getDustOptions());
+        world.spawnParticle(particle(), getLocation().clone().add(0, 0.3, 0), 2, 0.1, 0.1, 0.1, pixieType.getDustOptions());
 
         // If the pixie has been moving upwards/downwards for 20ticks, it will swap directions.
         if (getFrame() % 20 == 0) { // Flip between up and down movements.
@@ -171,9 +148,9 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
 
         // Here we handle movement for upwards/downwards cases.
         if (upwards) {
-            setLocation(getLocation().clone().add(0,0.1,0));
+            setLocation(getLocation().clone().add(0, 0.1, 0));
         } else {
-            setLocation(getLocation().clone().subtract(0,0.1,0));
+            setLocation(getLocation().clone().subtract(0, 0.1, 0));
         }
     }
 
@@ -206,10 +183,7 @@ public class Pixie extends WellCreature implements ParticleMob, Movable, WellBou
     }
 
     public enum PixieType {
-        COMMON("&7Pixie", new Particle.DustOptions(Color.GRAY, 1), 1),
-        RARE("&bPixie", new Particle.DustOptions(Color.BLUE, 1), 3),
-        LEGENDARY("&6Pixie", new Particle.DustOptions(Color.ORANGE, 1), 10),
-        NONE("&fNONE", new Particle.DustOptions(Color.WHITE, 1), 0);
+        COMMON("&7Pixie", new Particle.DustOptions(Color.GRAY, 1), 1), RARE("&bPixie", new Particle.DustOptions(Color.BLUE, 1), 3), LEGENDARY("&6Pixie", new Particle.DustOptions(Color.ORANGE, 1), 10), NONE("&fNONE", new Particle.DustOptions(Color.WHITE, 1), 0);
 
         private final String displayName;
         private final Particle.DustOptions dustOptions;

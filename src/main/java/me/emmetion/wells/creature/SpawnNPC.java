@@ -4,41 +4,42 @@ import me.emmetion.wells.Wells;
 import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.database.WellManager;
-import me.emmetion.wells.events.creature.CreatureKillEvent;
+import me.emmetion.wells.events.creature.CreatureClickEvent;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.NPCRemoveEvent;
-import net.citizensnpcs.api.event.NPCSelectEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.persistence.Persist;
 import net.citizensnpcs.api.trait.Trait;
-import net.citizensnpcs.api.trait.TraitInfo;
-import net.citizensnpcs.trait.*;
+import net.citizensnpcs.trait.LookClose;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Marker;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.UUID;
+import java.util.logging.Logger;
 
 import static me.emmetion.wells.util.Utilities.getColor;
-import static me.emmetion.wells.util.Utilities.getComponentColor;
 
 public class SpawnNPC extends WellCreature {
 
+    private final String npcName = "Wellbi";
+
+    private Marker marker;
     private NPC npc;
+
+    private final Collection<Player> playersChatting = new ArrayList<>();
+
     private final WellManager wellManager = Wells.plugin.getWellManager();
+
 
     public SpawnNPC(Location location) {
         super(location);
@@ -48,85 +49,107 @@ public class SpawnNPC extends WellCreature {
     public CreatureType getCreatureType() {
         return CreatureType.SPAWN_NPC;
     }
-
     // When SpawnNPC is called, the handle methohd does not pass in an entity. This is because here we use logic from
     // other languages
+
+    // Called upon entitySpawn.
+    // Handles outside events like NPC's getting spawned.
     @Override
     public Entity handleEntitySpawn(Entity entity) {
-        // Initialized marker.
+
+        // We are passed information about the Marker entity that represents the position of the NPC.
+
+        Marker marker = (Marker) entity;
+
+        Location npcLocation = marker.getLocation();
 
 
+        Logger logger = Wells.plugin.getLogger();
 
-        if (getUUID() != null)
-            entity.getPersistentDataContainer().set(new NamespacedKey(Wells.plugin, "creature-uuid"), PersistentDataType.STRING, getUUID().toString());
-        else
+        // Similar to CreatureManager#isSpawnNPCSpawned.
+        npcLocation.getNearbyEntities(1, 1, 1).stream()
+                .filter(e -> e.hasMetadata("NPC"))
+                .map(e -> CitizensAPI.getNPCRegistry().getNPC(e))
+                .filter(npc1 -> npc1.getName().equals(npcName))
+                .findFirst()
+                .ifPresentOrElse(spawnNPC -> {
+                            // Verify that it's actually the SpawnNPC.
+                            // Check for SpawnTrait.
 
-        //TODO: Finish handling NPC spawning.
-        // Current state:
-        // 1. spawns a marker at the NPC's provided location (represents a well-creature)
-        // 2. checks whether or not a spawn_npc is actually present in proximity to it.
-        boolean spawnNPCSpawned = Wells.plugin.getCreatureManager().isSpawnNPCSpawned();
+                            SpawnTrait trait = spawnNPC.getTraitNullable(SpawnTrait.class);
+                            if (trait == null) {
+                                // This is not a spawnNPC.
 
-        UUID spawnNPCUUID = Configuration.getInstance().getSpawnNPCUUID();
+                                logger.info("Found NPC near SpawnNPC location, but it didn't contain a spawnTrait.");
+                                return;
+                            } else {
+                                // SpawnNPC Exists!
 
-        if (spawnNPCUUID == null) {
-            NPC tora = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "Tora");
+                                npc = spawnNPC;
+                            }
 
-            tora.setProtected(true);
-            tora.addTrait(new SpawnTrait("Spawn Trait", getUUID()));
-            tora.addTrait(new LookClose());
-            tora.spawn(getLocation());
-            tora.getEntity().getPersistentDataContainer().set(new NamespacedKey(Wells.plugin, "spawn-npc-uuid"), PersistentDataType.STRING, spawnNPCUUID.toString());
+                        },
+                        () -> {
+                            // SpawnNPC doesn't exist.
+                            logger.info("Failed to find spawnNPC, now we can create our own.");
 
-            npc = tora;
-        } else {
-            NPC npc = CitizensAPI.getNPCRegistry().getByUniqueId(spawnNPCUUID);
+                            npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, npcName, npcLocation);
+                            // Add traits.
 
-            if (npc == null) {
-                Bukkit.broadcast(getComponentColor("&eNPC was null with provided spawnNPCUUID."));
-            }
-            this.npc = npc;
-        }
+                            npc.addTrait(new SpawnTrait());
+                            npc.addTrait(new LookClose());
 
-        if (npc == null) {
-            return null;
-        } else {
-            return npc.getEntity();
-        }
+                            Entity npcEntity = npc.getEntity();
+                            npcEntity.getPersistentDataContainer().set(Configuration.creatureUUIDKey, PersistentDataType.STRING, this.getUUID().toString());
+
+                        });
+
+        
+        return this.marker;
     }
 
     @Override
     public void kill() {
+        if (marker != null && !marker.isDead())
+            marker.remove();
 
+        // Effectively removes the marker at the spawnNPC's location, then repeats this process over again when the plugin launches.
     }
 
-    private Collection<Player> playersChatting = new ArrayList<>();
-
     @Override
-    public void handleLeftClick(EntityDamageByEntityEvent event) {
-        Player player = (Player) event.getDamager();
-
-        if (this.npc == null)
-            return;
+    public void handleLeftClick(CreatureClickEvent event) {
+        Player player = event.getPlayer();
 
         npc.setAlwaysUseNameHologram(false);
 
-//        if (wellManager.wellExistsForPlayer(player)) {
-//            player.sendMessage(getColor("&eYour town already has a well! You don't need to build one"));
-//            return;
-//        }
+        if (wellManager.wellExistsForPlayer(player)) {
+            player.sendMessage(getColor("&eYour town already has a well, try building something else."));
+            return;
+        }
 
         if (playersChatting.contains(player)) {
             return;
         }
 
         executeChat(player);
-
     }
 
     @Override
-    public void handleRightClick(PlayerInteractAtEntityEvent event) {
-        // Use Citizens handling instead.
+    public void handleRightClick(CreatureClickEvent event) {
+
+        npc.setAlwaysUseNameHologram(false);
+
+        Player clicker = event.getPlayer();
+        if (wellManager.wellExistsForPlayer(clicker)) {
+            clicker.sendMessage(getColor("&eYour town already has a well, try building something else."));
+            return;
+        }
+
+        if (playersChatting.contains(clicker)) {
+            return;
+        }
+
+        executeChat(clicker);
     }
 
 
@@ -141,34 +164,47 @@ public class SpawnNPC extends WellCreature {
             return;
 
         spawnTrait.incrementChatCounter();
-        player.sendMessage(getColor("int chatCounter: &c" + spawnTrait.getChatCounter()));
+        player.sendMessage(getColor("Chats: &c" + spawnTrait.getChatCount()));
 
-        //
-//        player.sendMessage(Component.text(getColor("&e[NPC] Wellbi: &fHi &e" + player.getName() + "&f! I notice your interested in the well that " + "I have next to me this is a hard wrap" + "the well I have next to me...")).appendNewline());
-//
-//        scheduler.runTaskLater(pl, () -> {
-//            player.sendMessage(
-//                    Component.text(getColor("&e[NPC] Wellbi: &fWells are small structures craftable inside your town that " + "can help improve the quality of life in your town!")).appendNewline());
-//        }, 60l);
-//
-//        scheduler.runTaskLater(pl, () -> {
-//            player.sendMessage(
-//                    Component.text(getColor("&e[NPC] Wellbi: &fTo begin, you first need to build a well in your town. " +
-//                    "Luckily, I can provide you with some help in the building process")).appendNewline());
-//        }, 120l);
-//
-//        scheduler.runTaskLater(pl, () -> {
-//            player.sendMessage(
-//                    Component.text(getColor("&e[NPC] Wellbi: &fCome back to be with the proper supplies and I can lend you one of my &cSchematic&f's!")).appendNewline());
+
+
+
+        scheduleMessage(player,
+                getColor("&e[NPC] Wellbi: &fHi &e" + player.getName() + "&f! I notice your interested in the well that the well I have next to me..."),
+                0L);
+
+        scheduleMessage(player,
+                getColor("&e[NPC] Wellbi: &fWells are small structures craftable inside your town that can help improve the quality of life in your town!"),
+                60L);
+
+        scheduleMessage(player, getColor("&e[NPC] Wellbi: &fTo begin, you first need to build a well in your town. " +
+                "Luckily, I can provide you with some help in the building process"),
+                120L);
+
+
+        scheduleMessage(player,
+                getColor("&e[NPC] Wellbi: &fCome back to be with the proper supplies and I can lend you one of my &cSchematic&f's!"),
+                180L);
+
+
+        scheduler.runTaskLater(pl, task -> {
+            player.sendMessage(Component.text().appendNewline());
             this.playersChatting.remove(player);
-//        }, 180l);
+            task.cancel();
+        }, 180L);
+    }
 
+    private void scheduleMessage(@NotNull Player player, @NotNull String message, @NotNull long delay) {
+        BukkitScheduler scheduler = Bukkit.getScheduler();
 
+        scheduler.runTaskLater(Wells.plugin, () -> {
+            player.sendMessage(Component.text(message).appendNewline().appendNewline());
+        }, delay);
     }
 
     @Override
-    public Class<? extends Entity> entityClassType() {
-        return Marker.class;
+    public EntityType creatureEntityType() {
+        return EntityType.PLAYER;
     }
 
     @Override
@@ -176,47 +212,38 @@ public class SpawnNPC extends WellCreature {
 
     }
 
-    public class SpawnTrait extends Trait {
+    public static class SpawnTrait extends Trait {
 
         @Persist(value = "chats")
         private int chatCounter = 0;
 
-        @Persist(value = "creature-uuid")
-        private String creature_uuid;
+        @Persist(value = "wellsCrafted")
+        private int wellsCrafted = 0;
 
-        protected SpawnTrait(String name, UUID creature_uuid) {
-            super(name);
-            this.creature_uuid = creature_uuid.toString();
+        protected SpawnTrait() {
+            super("SpawnTrait");
         }
 
-        public int getChatCounter() {
-            return this.chatCounter;
+
+
+        public int getChatCount() {
+            return chatCounter;
         }
 
         public void incrementChatCounter() {
-            this.chatCounter++;
+            chatCounter++;
         }
 
-        // Inserts creature-uuid onto NPC.
-        @Override
-        public void onSpawn() {
-            // Attaches creature-uuid on NPC entity
-
-            if (!getNPC().getEntity().getPersistentDataContainer().has(new NamespacedKey(Wells.plugin, "creature-uuid"))) {
-                Bukkit.broadcast(Component.text(getColor("&f&lSpawnNPC doesn't contain creature-uuid, loading.")));
-                // Bukkit.broadcast(Component.text("doesnt have uuid."));
-                getNPC().getEntity().getPersistentDataContainer().set(new NamespacedKey(Wells.plugin, "creature-uuid"), PersistentDataType.STRING, creature_uuid);
-                // Bukkit.broadcast(Component.text("set uuid."));
-
-            } else {
-                Bukkit.broadcast(Component.text(getColor("&f&lAlready contains creature-uuid!")));
-            }
-            // Bukkit.broadcast(Component.text("had uuid on attach."));
+        public int getWellsCrafted() {
+            return wellsCrafted;
         }
 
-        // handles NPC delete.
+        public void craftWellBlock() {
+            wellsCrafted++;
+        }
+
         @EventHandler
-        public void handleNPCDelete(NPCRemoveEvent event) {
+        public void onNPCDelete(NPCRemoveEvent event) {
             Entity entity = event.getNPC().getEntity();
             CreatureManager cm = Wells.plugin.getCreatureManager();
             WellCreature wc = cm.getWellCreatureFromEntity(entity);
@@ -224,7 +251,7 @@ public class SpawnNPC extends WellCreature {
             if (wc == null)
                 return;
             else if (wc instanceof SpawnNPC) {
-                Bukkit.broadcast(Component.text("NPCRemoveEvent called upon SpawnNPC."));
+                Bukkit.broadcast(Component.text("Avoid deleting the spawnNPC, as it can cause problems with the database."));
                 cm.removeCreature(wc);
             }
         }

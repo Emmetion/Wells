@@ -16,6 +16,7 @@ me\emmetion\wells\menu\WellMenu.class
 me\emmetion\wells\anim\Animation.class
 me\emmetion\wells\model\Well.class
 me\emmetion\wells\creature\ParticleMob.class
+me\emmetion\wells\creature\WellCreature$1.class
 me\emmetion\wells\database\EDatabase.class
 me\emmetion\wells\model\WellPlayer$1.class
 me\emmetion\wells\model\BuffType.class

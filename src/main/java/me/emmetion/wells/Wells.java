@@ -10,15 +10,16 @@ import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.listeners.*;
 import me.emmetion.wells.model.Well;
-import me.emmetion.wells.runnables.*;
+import me.emmetion.wells.runnables.ActiveBuffRunnable;
+import me.emmetion.wells.runnables.NearWellRunnable;
+import me.emmetion.wells.runnables.UpdateDatabaseRunnable;
+import me.emmetion.wells.runnables.WellCreatureRunnable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -155,8 +156,7 @@ public final class Wells extends JavaPlugin {
 
 
     private void deleteWellHolograms() {
-        this.wellManager.getWells().stream()
-                .forEach(well -> DHAPI.removeHologram(well.getWellName()));
+        this.wellManager.getWells().stream().forEach(well -> DHAPI.removeHologram(well.getWellName()));
     }
 
     private void deleteCreatures() {
@@ -190,9 +190,6 @@ public final class Wells extends JavaPlugin {
             configuration.setSpawnNPCUUID(uuid);
         }
     }
-
-
-
 
 
 }

@@ -10,9 +10,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.UUID;
 
-import static me.emmetion.wells.util.Utilities.getColor;
 import static me.emmetion.wells.util.Utilities.getComponentColor;
 
 public abstract class EDatabase {

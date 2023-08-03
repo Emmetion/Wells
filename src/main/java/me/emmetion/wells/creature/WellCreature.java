@@ -1,13 +1,17 @@
 package me.emmetion.wells.creature;
 
+import me.emmetion.wells.events.creature.CreatureClickEvent;
 import me.emmetion.wells.events.creature.CreatureSpawnEvent;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.*;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.event.EventHandler;
 
 import java.util.UUID;
+
+import static org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.CUSTOM;
 
 public abstract class WellCreature {
 
@@ -21,7 +25,7 @@ public abstract class WellCreature {
     private final Class<? extends Entity> defaultEntityClass = ArmorStand.class;
 
     // Entity of hitbox/monster/trader
-    private Entity entity;
+    private final Entity entity;
 
     private int frame = 0;
 
@@ -49,7 +53,6 @@ public abstract class WellCreature {
         }
     }
 
-
     public abstract CreatureType getCreatureType();
 
     public UUID getUUID() {
@@ -60,27 +63,19 @@ public abstract class WellCreature {
         World world = this.currentLocation.getWorld();
 
         Entity entity;
-        // TODO: Super-spaghetti code.
-        // Update this code to remove entityClassType() == null, and also
-        // simplify the actions we are taking here.
-        if (entityClassType() == null) {
-            // if the entity class was null, then we will assume it's an armor-stand and
-            // handle entity spawn the same way.
-            entity = world.spawn(currentLocation, defaultEntityClass);
-            entity = handleEntitySpawn(entity);
 
-        } else if (entityClassType().equals(EntityType.PLAYER)) { // NPC's handle with CITIZENS. (inside individual
-            // creaturetypes)
-            entity = world.spawn(currentLocation, EntityType.MARKER.getEntityClass());
-            entity = handleEntitySpawn(entity);
-        } else {
-            entity = world.spawn(currentLocation, entityClassType());
-            entity = handleEntitySpawn(entity);
+        switch (creatureEntityType()) {
+            case PLAYER -> {
+                entity = world.spawn(currentLocation, EntityType.MARKER.getEntityClass());
+                entity = handleEntitySpawn(entity);
+            }
+            default -> {
+                entity = world.spawn(currentLocation, creatureEntityType().getEntityClass());
+                entity = handleEntitySpawn(entity);
+            }
         }
 
-        this.entity = entity;
-
-        CreatureSpawnEvent spawnEvent = new CreatureSpawnEvent(this, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.CUSTOM);
+        CreatureSpawnEvent spawnEvent = new CreatureSpawnEvent(this, CUSTOM);
         spawnEvent.callEvent();
 
         return entity;
@@ -113,15 +108,18 @@ public abstract class WellCreature {
 
     // This method is used whenever a player left-clicks a WellCreature.
     // After this method is called, a CreatureClickEvent.java is called.
-    public abstract void handleLeftClick(EntityDamageByEntityEvent event);
+    @EventHandler
+    public abstract void handleLeftClick(CreatureClickEvent event);
 
     // This method is used whenever a player right-clicks a WellCreature.
     // After this method is called, a CreatureClickEvent.java is called.
-    public abstract void handleRightClick(PlayerInteractAtEntityEvent event);
+    @EventHandler
+    public abstract void handleRightClick(CreatureClickEvent event);
 
     // This stores the entities class type. This is used when spawning in entities in the bukkit world.
+    @EventHandler
     // If the entityClassType is set to a Player, it will instead spawn an NPC at the location.
-    public abstract Class<? extends Entity> entityClassType();
+    public abstract EntityType creatureEntityType();
 
     // this can be used to update the creature on a frame-by-frame basis.
     // could check its potion

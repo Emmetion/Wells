@@ -26,7 +26,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.util.Collection;
@@ -152,7 +151,7 @@ public class WellListener implements Listener {
         // Other plugins can now listen in on this event, and determine whether they want to cancel it for themselves
         // or not.
 
-        DroppedCoinRunnable runnable = new DroppedCoinRunnable(Wells.plugin, event.getDroppedItem(), event.getPlayer(), this.manager, playersOnCooldown);
+        DroppedCoinRunnable runnable = new DroppedCoinRunnable(Wells.plugin, event.getDroppedItem(), event.getPlayer(), manager, playersOnCooldown);
         runnable.runTaskTimer(Wells.plugin, 1, 1);
         event.getPlayer().sendMessage("CoinTossEvent!");
     }
@@ -163,18 +162,21 @@ public class WellListener implements Listener {
         Block clickedBlock = e.getClickedBlock();
         Action action = e.getAction();
 
-        if (!action.equals(Action.RIGHT_CLICK_BLOCK))
+        if (clickedBlock == null || !action.equals(Action.RIGHT_CLICK_BLOCK))
             return;
 
-        if (!manager.isWell(clickedBlock.getLocation()))
+        Location blockLocation = clickedBlock.getLocation();
+
+        if (!manager.isWell(blockLocation))
             return;
 
-        Well well = manager.getWellFromLocation(clickedBlock.getLocation());
+        Well well = manager.getWellFromLocation(blockLocation);
         if (well == null)
             return;
 
         e.setCancelled(true);
 
+        // Open a new WellMenu, as the player has clicked on a wellblock.
         WellMenu wellMenu = new WellMenu(Wells.plugin, well, new PlayerMenuUtility(player, manager.getWellPlayer(player)));
         wellMenu.open();
     }

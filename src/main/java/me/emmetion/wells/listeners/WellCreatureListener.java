@@ -19,6 +19,7 @@ public class WellCreatureListener implements Listener {
         this.creatureManager = manager;
     }
 
+    // Uses Spigot events to call custom events. Custom events are then handled by individual
     @EventHandler
     public void leftClickListener(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player)) {
@@ -32,9 +33,10 @@ public class WellCreatureListener implements Listener {
         if (wc == null)
             return;
 
-        wc.handleLeftClick(event);
-        Bukkit.getPluginManager().callEvent(new CreatureClickEvent(player, wc,
-                CreatureClickEvent.ClickType.LEFT_CLICK));
+        CreatureClickEvent creatureClickEvent = new CreatureClickEvent(player, wc, CreatureClickEvent.ClickType.LEFT_CLICK);
+
+        Bukkit.getPluginManager().callEvent(creatureClickEvent);
+        wc.handleLeftClick(creatureClickEvent);
     }
 
     @EventHandler
@@ -50,9 +52,13 @@ public class WellCreatureListener implements Listener {
             return;
         }
 
-        wc.handleRightClick(e);
-        Bukkit.getPluginManager().callEvent(new CreatureClickEvent(player, wc,
-                CreatureClickEvent.ClickType.RIGHT_CLICK));
+
+
+        CreatureClickEvent creatureClickEvent = new CreatureClickEvent(player, wc, CreatureClickEvent.ClickType.RIGHT_CLICK);
+
+        // This lets the other developers access CreatureClickEvents, and I can modify values that occur inside the event.
+        Bukkit.getPluginManager().callEvent(creatureClickEvent);
+        wc.handleRightClick(creatureClickEvent);
     }
 
 
