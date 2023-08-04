@@ -4,7 +4,6 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
-import me.emmetion.wells.Wells;
 import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
@@ -19,16 +18,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.*;
-import java.util.logging.Logger;
 
 import static me.emmetion.wells.util.Utilities.getColor;
 
 /**
- * WellManager.java, operates as a wrapper for the database class, removing a layer of SQL statements and creating handling operations more efficiently.
+ * WellManager.java, operates as a wrapper for EDatabase's and removes a layer of commands we otherwise would have to code.
  */
-public class WellManager {
-
-    private final Logger logger = Wells.plugin.getLogger();
+public final class WellManager {
 
     /**
      * MySQL database connection. This wrapper class uses methods inside database to achieve its goal.
@@ -200,7 +196,7 @@ public class WellManager {
         return wellHashMap.containsKey(townName);
     }
 
-    public boolean wellExistsForPlayer(Player player) {
+    public boolean wellExistsForPlayer(@NotNull Player player) {
         Town town = TownyAPI.getInstance().getTown(player);
         if (town == null) { // not part of a town.
             if (debug)
@@ -219,7 +215,7 @@ public class WellManager {
      *
      * @param townName
      */
-    public boolean wellExistsByTownName(String townName) {
+    public boolean wellExistsByTownName(@NotNull String townName) {
         return wellHashMap.containsKey(townName);
     }
 
@@ -232,7 +228,7 @@ public class WellManager {
      *
      * @param location
      */
-    public boolean isWell(Location location) {
+    public boolean isWell(@NotNull Location location) {
         if (wellCache.size() == 0)
             return false;
         else
@@ -244,7 +240,7 @@ public class WellManager {
      * otherwise returning null.
      *
      */
-    public Well getWellFromLocation(Location location) {
+    public Well getWellFromLocation(@NotNull Location location) {
         for (Well w : this.wellHashMap.values()) {
             if (w.getLocation().equals(location))
                 return w;
@@ -267,17 +263,16 @@ public class WellManager {
      */
     public void saveAllWellPlayers() {
         Collection<WellPlayer> wellPlayers = this.wellPlayerHashMap.values();
-        int count = wellPlayers.size();
-        if (debug)
-            System.out.println("☢ WellPlayersSize: " + count);
-        this.database.updateWellPlayers(wellPlayers);
 
+        if (debug)
+            System.out.println("☢ WellPlayersSize: " + wellPlayers.size());
+
+        this.database.updateWellPlayers(wellPlayers);
     }
 
-    public WellPlayer getWellPlayer(Player player) {
-        if (player == null)
-            return null;
+    public WellPlayer getWellPlayer(@NotNull Player player) {
         UUID uniqueId = player.getUniqueId();
+
         return this.wellPlayerHashMap.get(uniqueId);
     }
 
@@ -350,5 +345,12 @@ public class WellManager {
      */
     public void close() throws SQLException {
         updateDatabase();
+    }
+
+    public EDatabase.DatabaseType getDatabaseType() {
+        if (database == null)
+            return null;
+
+        return database.databaseType();
     }
 }

@@ -9,6 +9,8 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.entity.Bat;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.potion.PotionEffect;
@@ -22,28 +24,46 @@ import java.util.*;
 
 public class NearWellAnimation extends Animation {
 
-    private int frame = 0;
+    private final Well well;
 
     private final Particle particle = Particle.END_ROD;
     private final double radius = 3.0f;
 
+    private int frame = 0;
+
+
     private Iterator<Color> redToGreen = new ColorGradient(Color.RED, Color.GREEN, 20).iterator();
 
+    // For coin drops.
     private Random random = new Random();
-    private Queue<CoinType> particleQueue = new LinkedList<>();
+    private final Queue<CoinType> particleQueue = new LinkedList<>();
 
+    // Relative location and information about the current animation.
     private Location center;
     private float angle = 0.0f;
-    private Well well;
+
+    // ItemDisplays, will be used to indicate which buff's are currently applied.
+    private final ItemDisplay item1;
+    private final ItemDisplay item2;
 
     public NearWellAnimation(Well well) {
         this.well = well;
+
+        this.center = well.getHologramLocation().clone().subtract(0, 1, 0); // this causes the particle animation to move when "/wells holo add/sub x y z" is used.
+
+        World world = center.getWorld();
+
+        item1 = (ItemDisplay) world.spawnEntity(center, EntityType.ITEM_DISPLAY, false);
+        item1.setVisibleByDefault(true);
+
+        item2 = (ItemDisplay) world.spawnEntity(center, EntityType.ITEM_DISPLAY, false);
+        item2.setVisibleByDefault(true);
+
     }
 
 
     @Override
     public void run() {
-        center = well.getHologramLocation().clone().subtract(0, 1, 0); // this causes the particle animation to move when "/wells holo add/sub x y z" is used.
 
         World world = center.getWorld();
 
@@ -72,6 +92,7 @@ public class NearWellAnimation extends Animation {
                     List<WellPlayer> nearbyWellPlayers = well.getNearbyPlayers();
 
                     int wellLevel = well.getWellLevel();
+
 
                     if (wellLevel >= 1) {
                         player.spawnParticle(particle, location1, 1, 0.001, 0, 0.001, 0.01);
@@ -171,6 +192,18 @@ public class NearWellAnimation extends Animation {
         }
 
 
+    }
+
+    public Location getCenter() {
+        return center;
+    }
+
+    public ItemDisplay getItem1() {
+        return item1;
+    }
+
+    public ItemDisplay getItem2() {
+        return item2;
     }
 
     @Override

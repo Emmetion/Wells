@@ -38,7 +38,7 @@ public class Well {
 
     public String townName;
     public Location position;
-    private Location hologramPosition;
+    private Location hologramLocation;
 
     private int well_level;
     private int experience;
@@ -54,10 +54,10 @@ public class Well {
 
     private NearWellAnimation animation;
 
-    public Well(String townName, Location position, Location hologramPosition, int well_level, int experience, String buff1_id, Timestamp buff1_end, String buff2_id, Timestamp buff2_end, String buff3_id, Timestamp buff3_end, boolean isBoosted, Timestamp boost_end) {
+    public Well(String townName, Location position, Location hologramLocation, int well_level, int experience, String buff1_id, Timestamp buff1_end, String buff2_id, Timestamp buff2_end, String buff3_id, Timestamp buff3_end, boolean isBoosted, Timestamp boost_end) {
         this.townName = townName;
         this.position = position;
-        this.hologramPosition = hologramPosition;
+        this.hologramLocation = hologramLocation;
         this.well_level = well_level;
         this.experience = experience;
         // Converts saved database BUFF_ID string into real ActiveBuff class.
@@ -131,7 +131,11 @@ public class Well {
     }
 
     public Location getHologramLocation() {
-        return this.hologramPosition;
+        return hologramLocation;
+    }
+
+    public NearWellAnimation getNearWellAnimation() {
+        return animation;
     }
 
     public void setLocation(Location position) {
@@ -180,7 +184,7 @@ public class Well {
         else
             hologram = DHAPI.getHologram(this.getTownName());
 
-        hologram.setLocation(hologramPosition);
+        hologram.setLocation(hologramLocation);
         hologram.realignLines();
 
         DHAPI.setHologramLine(hologram, 1, ChatColor.YELLOW + "Level: " + this.getWellLevel());
@@ -193,30 +197,30 @@ public class Well {
     }
 
     public boolean addHologramLocation(float x, float y, float z) {
-        if (this.hologramPosition == null)
+        if (this.hologramLocation == null)
             return false;
 
-        Location clone = this.hologramPosition.clone();
+        Location clone = this.hologramLocation.clone();
         Location subtract = clone.add(x, y, z);
 
         if (subtract.distance(this.position) > 5) {
             return false;
         } else {
-            this.hologramPosition = subtract;
+            this.hologramLocation = subtract;
             updateHologram();
             return true;
         }
     }
 
     public boolean subtractHologramLocation(float x, float y, float z) {
-        if (this.hologramPosition == null)
+        if (this.hologramLocation == null)
             return false;
-        Location clone = this.hologramPosition.clone();
+        Location clone = this.hologramLocation.clone();
         Location subtract = clone.subtract(x, y, z);
         if (subtract.distance(this.position) > 5) {
             return false;
         } else {
-            this.hologramPosition = subtract;
+            this.hologramLocation = subtract;
             updateHologram();
             return true;
         }
@@ -261,6 +265,7 @@ public class Well {
                 return new AnimationSettings("TempWellHologram", 0, 1);
             }
         };
+
         anim.start();
     }
 
@@ -466,6 +471,6 @@ public class Well {
 
     @Override
     public String toString() {
-        return "Well{" + "observers=" + observers + ", townName='" + townName + '\'' + ", position=" + position + ", hologramPosition=" + hologramPosition + ", well_level=" + well_level + ", experience=" + experience + ", buff1=" + buff1 + ", buff2=" + buff2 + ", buff3=" + buff3 + '}';
+        return "Well{" + "observers=" + observers + ", townName='" + townName + '\'' + ", position=" + position + ", hologramPosition=" + hologramLocation + ", well_level=" + well_level + ", experience=" + experience + ", buff1=" + buff1 + ", buff2=" + buff2 + ", buff3=" + buff3 + '}';
     }
 }

@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -127,7 +128,7 @@ public class Configuration {
         return spawnNPCUUID;
     }
 
-    public void setSpawnNPCUUID(UUID uuid) {
+    public void setSpawnNPCUUID(@NotNull UUID uuid) {
         yamlConfig.setComments("wells.spawn-npc-uuid", Arrays.asList("Do not modify these values.", "Instead use the in-game commands via. /wells spawnnpc"));
         yamlConfig.set("wells.spawn-npc-uuid", uuid.toString());
 

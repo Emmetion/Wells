@@ -18,15 +18,12 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static me.emmetion.wells.util.Utilities.getColor;
 import static me.emmetion.wells.util.Utilities.getComponentColor;
 
-public class CreatureManager {
-
-    private final Logger logger = Wells.plugin.getLogger();
+public final class CreatureManager {
 
     private final HashMap<UUID, WellCreature> wellCreatureMap;
     private final HashMap<Well, Set<UUID>> wellsWithCreatures;
@@ -147,10 +144,12 @@ public class CreatureManager {
                 }
                 wellCreature = new Pixie(well, well.getHologramLocation());
             }
+            // We do not perform any checks on whether a spawn in
             case SPAWN_NPC -> {
                 Location spawnNPCLocation = Configuration.getInstance().getSpawnNPCLocation();
                 Configuration config = Configuration.getInstance();
                 UUID uuid = config.getSpawnNPCUUID();
+
                 if (isSpawnNPCSpawned()) {
                     Bukkit.broadcast(getComponentColor("&cNPC tried to get spawned but one already existed."));
                     return null;
@@ -220,23 +219,30 @@ public class CreatureManager {
     }
 
     public boolean isSpawnNPCSpawned() {
-
-        // TODO: Get entity UUID from config file.
-
-        return getSpawnNPC() == null;
+        return (getSpawnNPC() != null);
     }
 
+    @Nullable
     public NPC getSpawnNPC() {
 
         Configuration config = Configuration.getInstance();
         Location spawnNPCLocation = config.getSpawnNPCLocation();
 
-        return spawnNPCLocation.getNearbyEntities(1, 1, 1).stream()
-                .filter(entity -> entity.hasMetadata("NPC"))
-                .map(CitizensAPI.getNPCRegistry()::getNPC)
-                .filter(npc1 -> npc1.hasTrait(SpawnNPC.SpawnTrait.class))
-                .findFirst()
-                .orElse(null);
+        List<NPC> npcList = spawnNPCLocation.getNearbyEntities(1, 1, 1).stream()
+                .filter(CitizensAPI.getNPCRegistry()::isNPC)
+                .map(entity -> CitizensAPI.getNPCRegistry().getNPC(entity))
+                .toList();
+
+        if (npcList.size() == 0) {
+            return null;
+        } else {
+            for (NPC npc : npcList) {
+                if (npc.hasTrait(SpawnNPC.SpawnTrait.class))
+                    return npc;
+            }
+        }
+
+        return null;
 
     }
 

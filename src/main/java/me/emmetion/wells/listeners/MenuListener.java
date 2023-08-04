@@ -23,7 +23,6 @@ public class MenuListener implements Listener {
         if (holder instanceof Menu menu) {
             menu.handleClick(e);
         }
-
     }
 
 
@@ -34,7 +33,8 @@ public class MenuListener implements Listener {
         if (holder instanceof Menu menu) {
             menu.handleClose(e);
         }
-
     }
+
+
 
 }

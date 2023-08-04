@@ -2,21 +2,17 @@ package me.emmetion.wells.events;
 
 import me.emmetion.wells.model.WellPlayer;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockDamageEvent;
-import org.bukkit.event.block.BlockDropItemEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class CoinTossEvent extends Event implements Cancellable {
+public final class CoinTossEvent extends Event implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();
 
-    private Item droppedItem;
-    private WellPlayer player;
+    private final Item droppedItem;
+    private final WellPlayer player;
 
     private boolean cancelled = false;
 

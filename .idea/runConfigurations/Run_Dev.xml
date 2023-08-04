@@ -12,7 +12,6 @@
             <list>
               <option value="clean" />
               <option value="package" />
-              <option value="antrun:run@ftp-upload" />
             </list>
           </option>
           <option name="pomFileName" />

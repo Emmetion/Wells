@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-public class YAMLDatabase extends EDatabase {
+public final class YAMLDatabase extends EDatabase {
 
     private final String wellsPath;
     private final String wellPlayersPath;
@@ -179,20 +179,7 @@ public class YAMLDatabase extends EDatabase {
         if (file.exists())
             return;
 
-        try {
-            YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
-
-            yml.set("wellplayer.uuid", uuid.toString());
-            yml.set("wellplayer.bronzeCoins", wellPlayer.getBronzeCoins());
-            yml.set("wellplayer.silverCoins", wellPlayer.getSilverCoins());
-            yml.set("wellplayer.goldCoins", wellPlayer.getGoldCoins());
-            yml.set("wellplayer.coinsDeposited", wellPlayer.getCoinsDeposited());
-            yml.set("wellplayer.experiencePoints", wellPlayer.getExperiencePoints());
-
-            yml.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        assignWellPlayerValues(wellPlayer, uuid, file);
     }
 
     @Override
@@ -206,16 +193,20 @@ public class YAMLDatabase extends EDatabase {
 
         YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
 
-        WellPlayer wellPlayer = new WellPlayer(
-                UUID.fromString(yml.getString("wellplayer.uuid")),
+
+        String uuidString = yml.getString("wellplayer.uuid");
+        if (uuidString == null) {
+            return null;
+        }
+
+        return new WellPlayer(
+                UUID.fromString(uuidString),
                 yml.getInt("wellplayer.bronzeCoins"),
                 yml.getInt("wellplayer.silverCoins"),
                 yml.getInt("wellplayer.goldCoins"),
                 yml.getInt("wellplayer.coinsDeposited"),
                 yml.getInt("wellplayer.experiencePoints")
         );
-
-        return wellPlayer;
     }
 
     @Override
@@ -225,8 +216,12 @@ public class YAMLDatabase extends EDatabase {
         File file = new File(wellPlayersPath + uuid.toString() + ".yml");
 
         if (!file.exists())
-            return;
+            throw new RuntimeException("Cannot update this well player, as they have no file.");
 
+        assignWellPlayerValues(wellPlayer, uuid, file);
+    }
+
+    private void assignWellPlayerValues(@NotNull WellPlayer wellPlayer, UUID uuid, File file) {
         try {
             YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
 

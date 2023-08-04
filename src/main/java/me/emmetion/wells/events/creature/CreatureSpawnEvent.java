@@ -7,10 +7,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
-public class CreatureSpawnEvent extends CreatureEvent {
+public final class CreatureSpawnEvent extends CreatureEvent {
+
+    private final org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason spawnReason;
 
     public CreatureSpawnEvent(WellCreature wellCreature, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason spawnReason) {
         super(wellCreature);
+
+        this.spawnReason = spawnReason;
 
         handle();
     }

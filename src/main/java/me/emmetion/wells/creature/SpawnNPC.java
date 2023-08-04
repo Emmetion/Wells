@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 
 import static me.emmetion.wells.util.Utilities.getColor;
 
-public class SpawnNPC extends WellCreature {
+public final class SpawnNPC extends WellCreature {
 
     private final String npcName = "Wellbi";
 
@@ -72,7 +72,8 @@ public class SpawnNPC extends WellCreature {
                 .map(e -> CitizensAPI.getNPCRegistry().getNPC(e))
                 .filter(npc1 -> npc1.getName().equals(npcName))
                 .findFirst()
-                .ifPresentOrElse(spawnNPC -> {
+                .ifPresentOrElse(
+                        spawnNPC -> {
                             // Verify that it's actually the SpawnNPC.
                             // Check for SpawnTrait.
 
@@ -86,6 +87,9 @@ public class SpawnNPC extends WellCreature {
                                 // SpawnNPC Exists!
 
                                 npc = spawnNPC;
+                                // Apply this new creature-uuid regardless.
+                                spawnNPC.getEntity().getPersistentDataContainer().set(Configuration.creatureUUIDKey, PersistentDataType.STRING, getUUID().toString());
+                                Wells.plugin.getCreatureManager().get
                             }
 
                         },
@@ -164,7 +168,7 @@ public class SpawnNPC extends WellCreature {
             return;
 
         spawnTrait.incrementChatCounter();
-        player.sendMessage(getColor("Chats: &c" + spawnTrait.getChatCount()));
+        player.sendMessage(getColor("Chats: &c" + spawnTrait.getChatCounter()));
 
 
 
@@ -220,13 +224,23 @@ public class SpawnNPC extends WellCreature {
         @Persist(value = "wellsCrafted")
         private int wellsCrafted = 0;
 
+        @Persist(value = "timesSpawnedOnLoad")
+        private int timesSpawnedOnLoad = 0;
+
         protected SpawnTrait() {
             super("SpawnTrait");
         }
 
 
+        public void incrementSpawnLoadIn() {
+            this.timesSpawnedOnLoad++;
+        }
 
-        public int getChatCount() {
+        public int getTimesSpawnedOnLoad() {
+            return timesSpawnedOnLoad;
+        }
+
+        public int getChatCounter() {
             return chatCounter;
         }
 

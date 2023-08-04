@@ -4,9 +4,9 @@ import me.emmetion.wells.model.BuffType;
 import me.emmetion.wells.model.WellPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
 
-public class ResistanceBuffEvent extends BuffEvent {
+public final class ResistanceBuffEvent extends BuffEvent {
 
-    private EntityDamageEvent.DamageCause cause;
+    private final EntityDamageEvent.DamageCause cause;
 
     public ResistanceBuffEvent(WellPlayer wellPlayer, EntityDamageEvent.DamageCause cause) {
         super(wellPlayer);

@@ -1,7 +1,5 @@
 package me.emmetion.wells.database;
 
-import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
@@ -11,11 +9,9 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
-public class SQLDatabase extends EDatabase {
+public final class SQLDatabase extends EDatabase {
 
     private Connection connection;
 

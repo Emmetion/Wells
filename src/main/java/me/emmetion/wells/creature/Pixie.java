@@ -15,7 +15,7 @@ import java.util.Random;
 
 import static me.emmetion.wells.util.Utilities.getColor;
 
-public class Pixie extends WellCreature implements ParticleMob, Movable, WellBound {
+public final class Pixie extends WellCreature implements ParticleMob, Movable, WellBound {
 
     private final Random random = new Random();
 

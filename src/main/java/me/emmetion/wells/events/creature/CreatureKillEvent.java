@@ -4,7 +4,7 @@ import me.emmetion.wells.creature.WellCreature;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public class CreatureKillEvent extends CreatureEvent {
+public final class CreatureKillEvent extends CreatureEvent {
 
     public CreatureKillEvent(WellCreature wellCreature) {
         super(wellCreature);

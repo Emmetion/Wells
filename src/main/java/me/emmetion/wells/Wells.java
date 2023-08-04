@@ -14,11 +14,12 @@ import me.emmetion.wells.runnables.ActiveBuffRunnable;
 import me.emmetion.wells.runnables.NearWellRunnable;
 import me.emmetion.wells.runnables.UpdateDatabaseRunnable;
 import me.emmetion.wells.runnables.WellCreatureRunnable;
-import net.kyori.adventure.text.Component;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.UUID;
@@ -31,15 +32,20 @@ public final class Wells extends JavaPlugin {
 
     public static Wells plugin;
 
+    private final Logger logger = Logger.getLogger("Wells");
+
     private Configuration configuration;
 
-    private ActiveBuffRunnable activeBuffRunnable;
     private WellCreatureRunnable wellCreatureRunnable;
     private NearWellRunnable nearWellRunnable;
     private UpdateDatabaseRunnable updateDatabaseRunnable;
 
+
     private WellManager wellManager;
+
     private CreatureManager creatureManager;
+
+
 
     @Override
     public void onEnable() {
@@ -50,28 +56,27 @@ public final class Wells extends JavaPlugin {
         // loads config from disc
         reloadConfig();
 
-
-        Logger logger = Logger.getLogger("Wells");
         logger.log(Level.INFO, "Plugin starting...");
+
+
+        creatureManager = new CreatureManager();
 
         // Checks whether TownyAPI instance was found and if not, turns off plugin.
         TownyAPI instance = TownyAPI.getInstance();
         if (instance == null) {
-            System.out.println("Disabling because townyapi was not found.");
+            logger.info("Failed to find TownyAPI, disabling Wells.");
             this.setEnabled(false);
             return;
         }
-        System.out.println("DEBUG: townyapi was found... continuing...");
 
         // Checks whether MySQL connection was successful and if not, turns off plugin.
-        this.wellManager = new WellManager();
+        wellManager = new WellManager();
         if (!wellManager.isConnected()) {
+            logger.info("Failed to connect to " + wellManager.getDatabaseType() + ", disabling Wells.");
             System.out.println("Failed connection to the wellmanager.");
             this.setEnabled(false);
             return;
         }
-
-        this.creatureManager = new CreatureManager();
 
         initCommands();
         initListeners();
@@ -86,25 +91,32 @@ public final class Wells extends JavaPlugin {
 
     @Override
     public void onDisable() {
+
+        deleteWellHolograms();
+        deleteCreatures();
+
         try {
             if (this.wellManager != null)
                 this.wellManager.close();
+
+
+            // We assign the wellManager to null, preventing any other edits of the WellManager until the plugin is loaded again.
+            this.wellManager = null;
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("There was an error closing the database connection!");
         }
 
-        deleteWellHolograms();
-        deleteCreatures();
 
         configuration.saveConfigFile();
     }
 
-
+    @NotNull
     public WellManager getWellManager() {
         return this.wellManager;
     }
 
+    @NotNull
     public CreatureManager getCreatureManager() {
         return this.creatureManager;
     }
@@ -139,7 +151,7 @@ public final class Wells extends JavaPlugin {
         updateDatabaseRunnable.runTaskTimer(Wells.plugin, 1, 3000);
 
         // Creates the ActiveBuffRunnable.
-        activeBuffRunnable = new ActiveBuffRunnable(this);
+        ActiveBuffRunnable activeBuffRunnable = new ActiveBuffRunnable(this);
         activeBuffRunnable.runTaskTimer(Wells.plugin, 1, 1);
 
         // Creatres the WellCreatureRunnable
@@ -156,28 +168,26 @@ public final class Wells extends JavaPlugin {
 
 
     private void deleteWellHolograms() {
+        if (this.wellManager == null)
+            return;
+
         this.wellManager.getWells().stream().forEach(well -> DHAPI.removeHologram(well.getWellName()));
     }
 
     private void deleteCreatures() {
-        if (this.creatureManager == null)
-            return;
         this.creatureManager.saveCreatures();
     }
 
     private void handleSpawnNPCSpawning() {
         Logger logger = getLogger();
         Player p = Bukkit.getPlayer("Emmetion");
-        if (this.creatureManager.isSpawnNPCSpawned()) {
-            UUID spawnNPCUUID = configuration.getSpawnNPCUUID();
-            p.sendMessage(getColor("&c[NPC:<SpawnNPC>] &fwas not spawned. Spawning..."));
-            if (spawnNPCUUID == null) {
-                logger.info("UUID not found in config.");
-                Bukkit.broadcast(Component.text(getColor("Creature is already spawned, but SpawnNPCUUID is null from configuration.")));
-                return;
-            }
+        if (creatureManager.isSpawnNPCSpawned()) {
+            NPC npc = creatureManager.getSpawnNPC();
+            assert npc != null;
 
-
+            SpawnNPC.SpawnTrait spawntrait = npc.getTraitNullable(SpawnNPC.SpawnTrait.class);
+            spawntrait.incrementSpawnLoadIn();
+            logger.info("Incremented SpawnTrait spawn-loadin-counter: " + spawntrait.getTimesSpawnedOnLoad());
         } else {
             // spawn the npc.
             WellCreature wellCreature = creatureManager.spawnCreature(SpawnNPC.class, null);
@@ -187,7 +197,9 @@ public final class Wells extends JavaPlugin {
             }
 
             UUID uuid = wellCreature.getUUID(); // get uuid from creature, should already be assigned in the WellCreature.
-            configuration.setSpawnNPCUUID(uuid);
+            if (uuid == null) {
+                configuration.setSpawnNPCUUID(uuid);
+            }
         }
     }
 

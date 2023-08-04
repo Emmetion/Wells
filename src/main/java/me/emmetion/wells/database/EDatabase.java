@@ -82,7 +82,6 @@ public abstract class EDatabase {
         return wells;
     }
 
-
     /**
      * Iterate saving a list of wells into a MySQL Server.
      * Uses updateWell(Well well) on each

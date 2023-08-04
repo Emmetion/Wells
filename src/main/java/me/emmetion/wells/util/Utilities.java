@@ -1,29 +1,22 @@
 package me.emmetion.wells.util;
 
-import com.palmergames.adventure.identity.Identity;
-import com.palmergames.adventure.platform.bukkit.BukkitAudiences;
 import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import de.tr7zw.nbtapi.NBTBlock;
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTItem;
 import de.tr7zw.nbtapi.NBTType;
-import me.emmetion.wells.Wells;
 import me.emmetion.wells.model.CoinType;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -31,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Utilities {
 
@@ -225,21 +217,26 @@ public class Utilities {
         return false;
     }
 
-    public static ItemStack createCoinFromID(String id) {
-        if (id == null || CoinType.valueOf(id) == null)
-            return null;
-
+    public static ItemStack createCoinFromID(@NotNull String id) {
         ItemStack item = new ItemStack(Material.SUNFLOWER);
         ItemMeta meta = item.getItemMeta();
-        CoinType cointype = CoinType.valueOf(id);
-        String name = StringUtils.capitalize(id.replace("_", " ").toLowerCase());
-        meta.displayName(Component.text(name).style(Style.style(cointype.getColor(), TextDecoration.BOLD)));
-        item.setItemMeta(meta);
 
-        NBTItem nbtitem = new NBTItem(item);
-        nbtitem.setString("wells_id", id);
+        try {
+            CoinType cointype = CoinType.valueOf(id);
+            String name = StringUtils.capitalize(id.replace("_", " ").toLowerCase());
+            meta.displayName(Component.text(name).style(Style.style(cointype.getColor(), TextDecoration.BOLD)));
+            item.setItemMeta(meta);
 
-        return nbtitem.getItem();
+            NBTItem nbtitem = new NBTItem(item);
+            nbtitem.setString("wells_id", id);
+
+            return nbtitem.getItem();
+
+        } catch (IllegalArgumentException ex) {
+            System.out.println("Failed to create coin from ID. No Cointype was found.");
+        }
+
+        return null;
     }
 
     public static String getTownFromBlock(Block block) {
