@@ -1,15 +1,22 @@
 package me.emmetion.wells.listeners;
 
+import me.emmetion.wells.Wells;
 import me.emmetion.wells.creature.WellCreature;
 import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.events.creature.CreatureClickEvent;
+import me.emmetion.wells.events.creature.CreatureSpawnEvent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.logging.Logger;
 
 public class WellCreatureListener implements Listener {
 
@@ -61,6 +68,21 @@ public class WellCreatureListener implements Listener {
         wc.handleRightClick(creatureClickEvent);
     }
 
+
+
+    @EventHandler
+    public void handleCreatureSpawn(CreatureSpawnEvent event) {
+        WellCreature creature = event.getWellCreature();
+        EntityType entityType = creature.creatureEntityType();
+        Logger logger = Wells.plugin.getLogger();
+
+        Bukkit.broadcast(Component.text("Spawned WellCreature: " + wellCreatureSimplified(creature)));
+    }
+
+    @NotNull
+    private String wellCreatureSimplified(@NotNull WellCreature creature) {
+        return creature.getCreatureType() + "{loc= " + creature.getLocation().toVector().toString() + "}";
+    }
 
 
 

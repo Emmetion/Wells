@@ -1,10 +1,13 @@
 package me.emmetion.wells.creature;
 
-import me.emmetion.wells.Wells;
 import me.emmetion.wells.anim.PixiePunchAnimation;
+import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.events.creature.CreatureClickEvent;
 import me.emmetion.wells.model.Well;
-import org.bukkit.*;
+import org.bukkit.Color;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -61,8 +64,8 @@ public final class Pixie extends WellCreature implements ParticleMob, Movable, W
         armorStand.setInvulnerable(true);
         armorStand.setCustomName("..."); // Temporarily sets name to '...'. This then gets updated to the pixie's name on the next frame.
         armorStand.setCustomNameVisible(true);
-        NamespacedKey nk = new NamespacedKey(Wells.plugin, "creature-uuid");
-        armorStand.getPersistentDataContainer().set(nk, PersistentDataType.STRING, this.getUUID().toString());
+
+        armorStand.getPersistentDataContainer().set(Configuration.creatureUUIDKey, PersistentDataType.STRING, this.getUUID().toString());
 
         return armorStand;
     }

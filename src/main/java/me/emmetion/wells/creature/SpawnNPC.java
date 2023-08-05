@@ -19,6 +19,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Marker;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +29,7 @@ import java.util.Collection;
 import java.util.logging.Logger;
 
 import static me.emmetion.wells.util.Utilities.getColor;
+import static me.emmetion.wells.util.Utilities.getComponentColor;
 
 public final class SpawnNPC extends WellCreature {
 
@@ -60,9 +62,9 @@ public final class SpawnNPC extends WellCreature {
         // We are passed information about the Marker entity that represents the position of the NPC.
 
         Marker marker = (Marker) entity;
+        this.marker = marker;
 
         Location npcLocation = marker.getLocation();
-
 
         Logger logger = Wells.plugin.getLogger();
 
@@ -88,8 +90,12 @@ public final class SpawnNPC extends WellCreature {
 
                                 npc = spawnNPC;
                                 // Apply this new creature-uuid regardless.
-                                spawnNPC.getEntity().getPersistentDataContainer().set(Configuration.creatureUUIDKey, PersistentDataType.STRING, getUUID().toString());
-                                Wells.plugin.getCreatureManager().get
+                                Entity entity1 = npc.getEntity();
+
+                                PersistentDataContainer pdc = entity1.getPersistentDataContainer();
+                                pdc.set(Configuration.creatureUUIDKey, PersistentDataType.STRING, getUUID().toString());
+
+                                entity1.setPersistent(true);
                             }
 
                         },
@@ -109,7 +115,7 @@ public final class SpawnNPC extends WellCreature {
                         });
 
         
-        return this.marker;
+        return npc.getEntity();
     }
 
     @Override
@@ -132,6 +138,7 @@ public final class SpawnNPC extends WellCreature {
         }
 
         if (playersChatting.contains(player)) {
+            player.sendActionBar(getComponentColor("&cYou are already chatting with this npc."));
             return;
         }
 
@@ -150,6 +157,7 @@ public final class SpawnNPC extends WellCreature {
         }
 
         if (playersChatting.contains(clicker)) {
+            clicker.sendActionBar(getComponentColor("&cYou are already chatting with this npc."));
             return;
         }
 

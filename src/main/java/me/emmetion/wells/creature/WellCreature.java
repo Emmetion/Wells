@@ -10,7 +10,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
 import java.util.UUID;
 
 import static org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.CUSTOM;
@@ -65,22 +64,27 @@ public abstract class WellCreature {
 
         if (creatureEntityType().getEntityClass() == null || creatureEntityType().equals(EntityType.PLAYER)) {
             entity = world.spawn(currentLocation, EntityType.MARKER.getEntityClass());
-            Objects.requireNonNull(entity);
         } else {
             entity = world.spawn(currentLocation, creatureEntityType().getEntityClass());
-            Objects.requireNonNull(entity);
         }
 
+        // This entity will transform into an NPC entity if the creature type was PLAYER.
         entity = handleEntitySpawn(entity);
+
+
 
         CreatureSpawnEvent spawnEvent = new CreatureSpawnEvent(this, CUSTOM);
         spawnEvent.callEvent();
 
-        Objects.requireNonNull(entity);
-
         return entity;
     }
 
+
+    /**
+     * This method is different for other
+     * @param entity The entity that was spawned.
+     * @return The entity to apply creature-uuid to.
+     */
     public abstract Entity handleEntitySpawn(Entity entity);
 
     public abstract void kill();

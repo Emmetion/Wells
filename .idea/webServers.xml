@@ -5,9 +5,10 @@
       <webServer id="15043699-cdb9-4b69-afd4-355416281cb1" name="Azurius [Towny Dev]" url="">
         <fileTransfer accessType="SFTP" host="mario.bloom.host" port="2022" sshConfigId="da834411-6bcd-446a-b05d-078960f43938" sshConfig="Azurius [Towny Dev]">
           <advancedOptions>
-            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+            <advancedOptions dataProtectionLevel="Private" connections="9" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
         </fileTransfer>
+        <option name="numberOfConnections" value="9" />
       </webServer>
     </option>
   </component>

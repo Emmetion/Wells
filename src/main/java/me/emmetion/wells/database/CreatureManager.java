@@ -129,11 +129,13 @@ public final class CreatureManager {
         }
     }
 
-    public WellCreature spawnCreature(Class<? extends WellCreature> creature, @Nullable Well well) {
+    public WellCreature spawnCreature(@NotNull Class<? extends WellCreature> creature, @Nullable Well well) {
         CreatureType type = CreatureType.getFromClazz(creature);
         WellCreature wellCreature = null;
 
         Objects.requireNonNull(type);
+
+
 
         switch (type) {
             case PIXIE -> {
@@ -159,11 +161,6 @@ public final class CreatureManager {
             default -> {
 
             }
-        }
-
-        if (wellCreature == null) {
-            Bukkit.broadcast(Component.text("No proper CreatureType was specified."));
-            return null; // no proper CreatureType was specified.
         }
 
         // add to manager maps.
