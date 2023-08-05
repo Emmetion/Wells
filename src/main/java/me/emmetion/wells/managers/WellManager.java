@@ -347,7 +347,7 @@ public final class WellManager {
         updateDatabase();
     }
 
-    public EDatabase.DatabaseType getDatabaseType() {
+    public DatabaseType getDatabaseType() {
         if (database == null)
             return null;
 
