@@ -1,6 +1,6 @@
 package me.emmetion.wells.runnables;
 
-import me.emmetion.wells.database.WellManager;
+import me.emmetion.wells.managers.WellManager;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class UpdateDatabaseRunnable extends BukkitRunnable {

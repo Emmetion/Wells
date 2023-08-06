@@ -18,11 +18,10 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class Menu implements InventoryHolder, Listener {
 
-    protected ItemStack nextPage = Utilities.createItemStack(Material.ARROW, 1, Component.text("Next Page"), null);
-    protected ItemStack prevPage = Utilities.createItemStack(Material.ARROW, 1, Component.text("Previous Page"), null);
-
     protected final PlayerMenuUtility playerMenuUtility;
     protected final Wells wells;
+    protected ItemStack nextPage = Utilities.createItemStack(Material.ARROW, 1, Component.text("Next Page"), null);
+    protected ItemStack prevPage = Utilities.createItemStack(Material.ARROW, 1, Component.text("Previous Page"), null);
     protected Inventory inventory;
     protected ItemStack FILLER_GLASS = Utilities.createItemStack(Material.BLACK_STAINED_GLASS_PANE, 1, Component.text(""), null);
     private boolean isClosed = false;
@@ -49,22 +48,31 @@ public abstract class Menu implements InventoryHolder, Listener {
     public void open() {
         this.isClosed = false;
 
-        inventory = Bukkit.createInventory(this, getSlots(), Component.text(Utilities.getColor(getTitle()))); Menu menu = this; this.setMenuItems();
+        inventory = Bukkit.createInventory(this, getSlots(), Component.text(Utilities.getColor(getTitle())));
+        Menu menu = this;
+        this.setMenuItems();
 
         playerMenuUtility.getOwner().openInventory(inventory);
 
         // does this work? well find out.
         if (!(this instanceof AnimatedMenu)) {
-            playerMenuUtility.getWellPlayer().getBukkitPlayer().sendMessage("Not an animated menu."); return;
+            //TODO: remvoe this debug message
+            playerMenuUtility.getWellPlayer().getBukkitPlayer().sendMessage("Not an animated menu.");
+            return;
         }
 
         // Handle AnimatedMenu's update methods.
         Bukkit.getScheduler().runTaskTimer(wells, bukkitTask -> {
-            AnimatedMenu animatedMenu = (AnimatedMenu) menu; Player player = menu.playerMenuUtility.getOwner(); if (isClosed) {
-                player.sendMessage("Animated task has been cancelled."); bukkitTask.cancel(); return;
+            AnimatedMenu animatedMenu = (AnimatedMenu) menu;
+            Player player = menu.playerMenuUtility.getOwner();
+            if (isClosed) {
+                player.sendMessage("Animated task has been cancelled.");
+                bukkitTask.cancel();
+                return;
             }
 
-            player.sendMessage("Animation task called."); animatedMenu.update();
+            player.sendMessage("Animation task called.");
+            animatedMenu.update();
         }, 20L, 20L);
     }
 

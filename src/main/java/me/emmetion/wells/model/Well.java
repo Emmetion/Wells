@@ -4,7 +4,11 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import eu.decentsoftware.holograms.api.DHAPI;
+import eu.decentsoftware.holograms.api.actions.Action;
+import eu.decentsoftware.holograms.api.actions.ActionType;
+import eu.decentsoftware.holograms.api.actions.ClickType;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
+import eu.decentsoftware.holograms.api.holograms.HologramPage;
 import me.emmetion.wells.anim.Animation;
 import me.emmetion.wells.anim.AnimationSettings;
 import me.emmetion.wells.anim.NearWellAnimation;
@@ -189,6 +193,12 @@ public class Well {
 
         DHAPI.setHologramLine(hologram, 1, ChatColor.YELLOW + "Level: " + this.getWellLevel());
         DHAPI.setHologramLine(hologram, 2, ChatColor.BLUE + "XP: " + this.experience + "/" + this.experienceRequired);
+
+
+        HologramPage page1 = hologram.getPage(0);
+        page1.addAction(ClickType.RIGHT, new Action(ActionType.MESSAGE, "Hello!"));
+
+
 
         hologram.setDefaultVisibleState(false);
 

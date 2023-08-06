@@ -4,7 +4,7 @@ import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.anim.NearWellAnimation;
-import me.emmetion.wells.database.WellManager;
+import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import org.bukkit.Bukkit;

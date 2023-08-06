@@ -1,2 +1,6 @@
-package me.emmetion.wells.database;public class DatabaseType {
+package me.emmetion.wells.database;
+
+public enum DatabaseType {
+    MYSQL,
+    YAML
 }

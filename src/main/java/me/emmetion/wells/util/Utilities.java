@@ -123,10 +123,10 @@ public class Utilities {
         NBTItem item = new NBTItem(wellBlock);
 
         NBTType wellsId1 = item.getType("wells_id");
-        Bukkit.broadcast(Component.text("wells_id: " + wellsId1.toString()));
+
 
         if (!item.getType("wells_id").equals(NBTType.NBTTagString)) {
-            Bukkit.broadcast(Component.text("wells_id is not NBTType.NBTTagString"));
+            // not a wells_id
             return false;
         }
 

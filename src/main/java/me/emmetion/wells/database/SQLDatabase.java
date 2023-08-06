@@ -38,7 +38,6 @@ public final class SQLDatabase extends EDatabase {
         Connection connection = DriverManager.getConnection(url, user, password);
 
         this.connection = connection;
-        System.out.println("Connected to database.");
 
         return connection;
     }
@@ -349,7 +348,7 @@ public final class SQLDatabase extends EDatabase {
     }
 
     @Override
-    DatabaseType databaseType() {
+    public DatabaseType databaseType() {
         return DatabaseType.YAML;
     }
 

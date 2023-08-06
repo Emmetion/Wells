@@ -3,8 +3,8 @@ package me.emmetion.wells.listeners;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.anim.CropFarmAnimation;
-import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.events.buff.GreenThumbEvent;
+import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.util.Utilities;
@@ -15,12 +15,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.jetbrains.annotations.NotNull;
 
 public class WellBuffListener implements Listener {
 
+    @NotNull
     private final WellManager wellManager;
 
-    public WellBuffListener(WellManager wellManager) {
+    public WellBuffListener(@NotNull WellManager wellManager) {
         this.wellManager = wellManager;
     }
 

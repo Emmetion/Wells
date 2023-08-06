@@ -9,8 +9,8 @@ import me.athlaeos.valhallammo.skills.account.AccountProfile;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.creature.CreatureType;
 import me.emmetion.wells.creature.WellCreature;
-import me.emmetion.wells.database.CreatureManager;
-import me.emmetion.wells.database.WellManager;
+import me.emmetion.wells.managers.CreatureManager;
+import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.model.ActiveBuff;
 import me.emmetion.wells.model.BuffType;
 import me.emmetion.wells.model.Well;
@@ -21,7 +21,6 @@ import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +31,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
-import static me.emmetion.wells.model.BuffType.GREEN_THUMB;
 import static me.emmetion.wells.util.Utilities.getColor;
 
 //TODO Migrate this command to use Utilities.getColor().

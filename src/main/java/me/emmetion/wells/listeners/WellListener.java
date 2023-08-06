@@ -3,8 +3,8 @@ package me.emmetion.wells.listeners;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.Wells;
-import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.events.CoinTossEvent;
+import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.menu.PlayerMenuUtility;
 import me.emmetion.wells.menu.WellMenu;
 import me.emmetion.wells.model.Well;
@@ -57,7 +57,6 @@ public class WellListener implements Listener {
             return;
         }
 
-        player.getName();
         PlayerInventory inventory = player.getInventory();
         inventory.removeItemAnySlot();
 

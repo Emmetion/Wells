@@ -9,9 +9,7 @@ public interface AnimatedMenu {
     int getCurrentFrame();
 
     // The interval (in server-ticks) of how long each frame should be between updates.
-    default int updateInterval() {
-        return 1;
-    }
+    int updateInterval();
 
     // A void method to update the menu.
     void update();

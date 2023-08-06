@@ -1,8 +1,8 @@
 package me.emmetion.wells.runnables;
 
 import me.emmetion.wells.Wells;
-import me.emmetion.wells.database.CreatureManager;
-import me.emmetion.wells.database.WellManager;
+import me.emmetion.wells.managers.CreatureManager;
+import me.emmetion.wells.managers.WellManager;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class WellCreatureRunnable extends BukkitRunnable {

@@ -1,15 +1,16 @@
 package me.emmetion.wells.creature;
 
+import eu.decentsoftware.holograms.api.DHAPI;
+import eu.decentsoftware.holograms.api.actions.Action;
+import eu.decentsoftware.holograms.api.actions.ClickType;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
+import eu.decentsoftware.holograms.api.holograms.HologramPage;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.config.Configuration;
-import me.emmetion.wells.database.CreatureManager;
-import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.events.creature.CreatureClickEvent;
+import me.emmetion.wells.managers.WellManager;
 import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.event.NPCRemoveEvent;
 import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.persistence.Persist;
-import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.trait.LookClose;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -18,13 +19,12 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Marker;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.logging.Logger;
 
@@ -32,6 +32,8 @@ import static me.emmetion.wells.util.Utilities.getColor;
 import static me.emmetion.wells.util.Utilities.getComponentColor;
 
 public final class SpawnNPC extends WellCreature {
+
+    public static final Location anvilLocation = new Location(Bukkit.getWorld("world"), 144, 68, -136);
 
     private final String npcName = "Wellbi";
 
@@ -41,6 +43,8 @@ public final class SpawnNPC extends WellCreature {
     private final Collection<Player> playersChatting = new ArrayList<>();
 
     private final WellManager wellManager = Wells.plugin.getWellManager();
+
+    private Hologram nearbyHologram;
 
 
     public SpawnNPC(Location location) {
@@ -73,48 +77,74 @@ public final class SpawnNPC extends WellCreature {
                 .filter(e -> e.hasMetadata("NPC"))
                 .map(e -> CitizensAPI.getNPCRegistry().getNPC(e))
                 .filter(npc1 -> npc1.getName().equals(npcName))
-                .findFirst()
-                .ifPresentOrElse(
-                        spawnNPC -> {
-                            // Verify that it's actually the SpawnNPC.
-                            // Check for SpawnTrait.
+                .forEach(spawnNPC -> {
+                        // Verify that it's actually the SpawnNPC.
+                        // Check for SpawnTrait.
 
-                            SpawnTrait trait = spawnNPC.getTraitNullable(SpawnTrait.class);
-                            if (trait == null) {
-                                // This is not a spawnNPC.
+                    Bukkit.broadcast(Component.text("Deleted SpawnNPC, preparing to spawn a new one."));
+                    spawnNPC.destroy();
+                });
 
-                                logger.info("Found NPC near SpawnNPC location, but it didn't contain a spawnTrait.");
-                                return;
-                            } else {
-                                // SpawnNPC Exists!
+        npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, npcName, npcLocation);
+        // Add traits.
 
-                                npc = spawnNPC;
-                                // Apply this new creature-uuid regardless.
-                                Entity entity1 = npc.getEntity();
+        npc.addTrait(new LookClose());
 
-                                PersistentDataContainer pdc = entity1.getPersistentDataContainer();
-                                pdc.set(Configuration.creatureUUIDKey, PersistentDataType.STRING, getUUID().toString());
+        Entity npcEntity = npc.getEntity();
+        npcEntity.getPersistentDataContainer().set(Configuration.creatureUUIDKey, PersistentDataType.STRING, this.getUUID().toString());
 
-                                entity1.setPersistent(true);
-                            }
 
-                        },
-                        () -> {
-                            // SpawnNPC doesn't exist.
-                            logger.info("Failed to find spawnNPC, now we can create our own.");
+        // Here we will also initialize the hologram information.
+        // The hologram will help guide the NPC into knowing which building they want to build.
 
-                            npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, npcName, npcLocation);
-                            // Add traits.
 
-                            npc.addTrait(new SpawnTrait());
-                            npc.addTrait(new LookClose());
+        Location loc = npc.getEntity().getLocation().clone().add(0, 3, 3);
 
-                            Entity npcEntity = npc.getEntity();
-                            npcEntity.getPersistentDataContainer().set(Configuration.creatureUUIDKey, PersistentDataType.STRING, this.getUUID().toString());
+        nearbyHologram = DHAPI.createHologram("SpawnNPCHologram", loc, false);
 
-                        });
+        HologramPage page1 = nearbyHologram.getPage(0);
+        DHAPI.setHologramLines(nearbyHologram, Arrays.asList(
+                "&cSchematic Crafting Station",
+                "&7Here you can craft &cSchematic&7's that can be used",
+                "&7inside your town claim!"
+        ));
 
-        
+        // page1.addAction(ClickType.RIGHT, new Action("PREV_PAGE"));
+        page1.addAction(ClickType.LEFT, new Action("NEXT_PAGE"));
+
+//
+//        Map<ClickType, List<Action>> actions = page1.getActions();
+//        for (Map.Entry<ClickType, List<Action>> entry : actions.entrySet()) {
+//
+//            player.sendMessage("ClickType: " + entry.getKey());
+//            for (Action action : entry.getValue()) {
+//                player.sendMessage("ActionType: " + action.getType().getName() + " ActionData: " + action.getData());
+//            }
+//        }
+//        boolean b = page1.hasActions();
+//        if (b)
+//            Bukkit.broadcastMessage(getColor("page 1 has actions!"));
+
+        HologramPage page2 = DHAPI.addHologramPage(nearbyHologram, Arrays.asList(
+                getColor("&bWell Schematic"),
+                getColor(""),
+                getColor("Materials Required:"),
+                getColor(" &7- &c1 Reinforced Cauldron"),
+                getColor(" &7- &c124 Oak Logs")
+        ));
+
+         page2.addAction(ClickType.RIGHT, new Action("PREV_PAGE"));
+//        page2.addAction(ClickType.LEFT, new Action("NEXT_PAGE"));
+//         The nearby hologram should be able to alternate between pages.
+
+
+        nearbyHologram.realignLines();
+        nearbyHologram.setLocation(loc);
+        nearbyHologram.showAll();
+        nearbyHologram.updateAll();
+
+        // Set pages
+
         return npc.getEntity();
     }
 
@@ -122,7 +152,10 @@ public final class SpawnNPC extends WellCreature {
     public void kill() {
         if (marker != null && !marker.isDead())
             marker.remove();
+        npc.destroy();
 
+
+        nearbyHologram.destroy();
         // Effectively removes the marker at the spawnNPC's location, then repeats this process over again when the plugin launches.
     }
 
@@ -171,32 +204,14 @@ public final class SpawnNPC extends WellCreature {
         Wells pl = Wells.plugin;
         BukkitScheduler scheduler = Bukkit.getScheduler();
 
-        SpawnTrait spawnTrait = npc.getTraitNullable(SpawnTrait.class);
-        if (spawnTrait == null)
-            return;
+        scheduleMessage(player, getColor("&e[NPC] Wellbi: &fHi &e" + player.getName() + "&f! I notice your interested in the well that the well I have next to me..."), 0L);
 
-        spawnTrait.incrementChatCounter();
-        player.sendMessage(getColor("Chats: &c" + spawnTrait.getChatCounter()));
+        scheduleMessage(player, getColor("&e[NPC] Wellbi: &fWells are small structures craftable inside your town that can help improve the quality of life in your town!"), 60L);
 
+        scheduleMessage(player, getColor("&e[NPC] Wellbi: &fTo begin, you first need to build a well in your town. " + "Luckily, I can provide you with some help in the building process"), 120L);
 
 
-
-        scheduleMessage(player,
-                getColor("&e[NPC] Wellbi: &fHi &e" + player.getName() + "&f! I notice your interested in the well that the well I have next to me..."),
-                0L);
-
-        scheduleMessage(player,
-                getColor("&e[NPC] Wellbi: &fWells are small structures craftable inside your town that can help improve the quality of life in your town!"),
-                60L);
-
-        scheduleMessage(player, getColor("&e[NPC] Wellbi: &fTo begin, you first need to build a well in your town. " +
-                "Luckily, I can provide you with some help in the building process"),
-                120L);
-
-
-        scheduleMessage(player,
-                getColor("&e[NPC] Wellbi: &fCome back to be with the proper supplies and I can lend you one of my &cSchematic&f's!"),
-                180L);
+        scheduleMessage(player, getColor("&e[NPC] Wellbi: &fCome back to be with the proper supplies and I can lend you one of my &cSchematic&f's!"), 180L);
 
 
         scheduler.runTaskLater(pl, task -> {
@@ -221,62 +236,6 @@ public final class SpawnNPC extends WellCreature {
 
     @Override
     public void updateCreature() {
-
-    }
-
-    public static class SpawnTrait extends Trait {
-
-        @Persist(value = "chats")
-        private int chatCounter = 0;
-
-        @Persist(value = "wellsCrafted")
-        private int wellsCrafted = 0;
-
-        @Persist(value = "timesSpawnedOnLoad")
-        private int timesSpawnedOnLoad = 0;
-
-        protected SpawnTrait() {
-            super("SpawnTrait");
-        }
-
-
-        public void incrementSpawnLoadIn() {
-            this.timesSpawnedOnLoad++;
-        }
-
-        public int getTimesSpawnedOnLoad() {
-            return timesSpawnedOnLoad;
-        }
-
-        public int getChatCounter() {
-            return chatCounter;
-        }
-
-        public void incrementChatCounter() {
-            chatCounter++;
-        }
-
-        public int getWellsCrafted() {
-            return wellsCrafted;
-        }
-
-        public void craftWellBlock() {
-            wellsCrafted++;
-        }
-
-        @EventHandler
-        public void onNPCDelete(NPCRemoveEvent event) {
-            Entity entity = event.getNPC().getEntity();
-            CreatureManager cm = Wells.plugin.getCreatureManager();
-            WellCreature wc = cm.getWellCreatureFromEntity(entity);
-
-            if (wc == null)
-                return;
-            else if (wc instanceof SpawnNPC) {
-                Bukkit.broadcast(Component.text("Avoid deleting the spawnNPC, as it can cause problems with the database."));
-                cm.removeCreature(wc);
-            }
-        }
 
     }
 

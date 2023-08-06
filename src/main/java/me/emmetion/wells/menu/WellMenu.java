@@ -15,9 +15,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Range;
-import scala.PartialFunction;
-import scala.ScalaReflectionException$;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -52,13 +49,13 @@ public class WellMenu extends Menu implements AnimatedMenu {
 
         e.setCancelled(true);
 
-        int rawslot = e.getRawSlot();
+        int rawSlot = e.getRawSlot();
 
-        player.sendMessage("clicked_slot: " + rawslot);
+        player.sendMessage("clicked_slot: " + rawSlot);
 
-        if (rawslot == 13) {
+        if (rawSlot == 13) {
             player.sendMessage(getColor("You have clicked on the middle &bcauldron&r!"));
-        } else if (rawslot == 8) {
+        } else if (rawSlot == 8) {
             WellPlayer wellPlayer = this.playerMenuUtility.getWellPlayer();
             boolean new_option = wellPlayer.toggleParticles();
 
@@ -69,9 +66,9 @@ public class WellMenu extends Menu implements AnimatedMenu {
             }
 
             setMenuItems();
-        } else if (rawslot == 11) {
+        } else if (rawSlot == 11) {
             player.sendMessage(Component.text("Buff1: " + well.getBuff1().toString()));
-        } else if (rawslot == 15) {
+        } else if (rawSlot == 15) {
             player.sendMessage(Component.text("Buff2: " + well.getBuff2().toString()));
         }
     }
@@ -79,7 +76,10 @@ public class WellMenu extends Menu implements AnimatedMenu {
     @Override
     public void handleClose(InventoryCloseEvent e) {
         Player owner = playerMenuUtility.getOwner();
-        if (e.getReason().equals(InventoryCloseEvent.Reason.PLAYER)) {
+
+        InventoryCloseEvent.Reason reason = e.getReason();
+
+        if (reason.equals(InventoryCloseEvent.Reason.PLAYER)) {
             owner.sendMessage(Component.text("You have closed the well menu."));
         }
 
@@ -93,10 +93,7 @@ public class WellMenu extends Menu implements AnimatedMenu {
 
     @Override
     public void setMenuItems() {
-        for (ActiveBuff buff : this.well.getBuffs()) {
-            buff.update();
-        }
-
+        well.getBuffs().forEach(ActiveBuff::update);
 
         for (int i = 0; i < 27; i++) {
             this.inventory.setItem(i, FILLER_GLASS);
@@ -113,6 +110,7 @@ public class WellMenu extends Menu implements AnimatedMenu {
             item = Utilities.createItemStack(Material.RED_STAINED_GLASS_PANE, 1,
                     Component.text(getColor("&cCannot see Particles.")), null);
         }
+
         this.inventory.setItem(8, item);
 
 
@@ -129,6 +127,7 @@ public class WellMenu extends Menu implements AnimatedMenu {
 
         this.inventory.setItem(13, cauldron);
 
+        // set buff items
         this.inventory.setItem(11, createBuffItem(well.getBuff1(), 1));
         this.inventory.setItem(15, createBuffItem(well.getBuff2(), 2));
     }
@@ -179,6 +178,11 @@ public class WellMenu extends Menu implements AnimatedMenu {
     @Override
     public int getCurrentFrame() {
         return this.currentFrame;
+    }
+
+    @Override
+    public int updateInterval() {
+        return 2;
     }
 
     @Override

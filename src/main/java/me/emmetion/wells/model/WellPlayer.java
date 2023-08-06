@@ -1,19 +1,18 @@
 package me.emmetion.wells.model;
 
-import me.athlaeos.valhallammo.ValhallaMMO;
-import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import scala.Enumeration;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
+
+import static me.emmetion.wells.util.Utilities.getColor;
 
 public class WellPlayer {
 
 
-    private UUID playerUUID;
+    private final UUID playerUUID;
 
     private int bronzeCoins;
     private int silverCoins;
@@ -89,9 +88,11 @@ public class WellPlayer {
                 break;
         }
 
-        Player player = Bukkit.getPlayer(playerUUID);
+
+        Player player = getBukkitPlayer();
+            
         if (player != null) {
-            player.sendMessage(ChatColor.WHITE + "You have deposited a " + coinType.getWellsId() + "! (" + coinType.getExperience() + "xp)");
+            player.sendMessage(getColor("&eYou have deposited a " + coinType.getWellsId() + "! (" + coinType.getExperience() + "xp)"));
         }
     }
 
@@ -104,7 +105,8 @@ public class WellPlayer {
     }
 
     public void sendMessage(String text) {
-        Player player = Bukkit.getPlayer(playerUUID);
+        Player player = getBukkitPlayer();
+
         if (player != null)
             player.sendMessage(Component.text(text));
     }
@@ -118,18 +120,7 @@ public class WellPlayer {
         return canSeeParticles();
     }
 
-    public void displayBossBar() {
-        if (this.hideBossBar || !isOnline())
-            return;
-
-        Player player = getBukkitPlayer();
-
-        Well well;
-
-        // TODO: Create bossbar detailing time remaining on current well-buff.
-
-    }
-
+    @Nullable
     public Player getBukkitPlayer() {
         return Bukkit.getPlayer(this.playerUUID);
     }
@@ -140,6 +131,7 @@ public class WellPlayer {
             return false;
         return true;
     }
+
 
     @Override
     public boolean equals(Object obj) {

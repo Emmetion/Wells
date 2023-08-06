@@ -1,10 +1,14 @@
-package me.emmetion.wells.database;
+package me.emmetion.wells.managers;
 
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import me.emmetion.wells.config.Configuration;
+import me.emmetion.wells.database.DatabaseType;
+import me.emmetion.wells.database.EDatabase;
+import me.emmetion.wells.database.SQLDatabase;
+import me.emmetion.wells.database.YAMLDatabase;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.observer.LevelUpObserver;

@@ -18,32 +18,32 @@ import static me.emmetion.wells.util.Utilities.getComponentColor;
 
 public abstract class EDatabase {
 
-    abstract void initializeDatabase();
+    public abstract void initializeDatabase();
 
     // Well methods
-    abstract void createWell(Well well);
+    public abstract void createWell(Well well);
 
-    abstract Well getWell(String townName);
+    public abstract Well getWell(String townName);
 
-    abstract void updateWell(Well well);
+    public abstract void updateWell(Well well);
 
-    abstract void deleteWell(Well well);
+    public abstract void deleteWell(Well well);
 
     // WellPlayer methods
-    abstract void createWellPlayer(WellPlayer wellPlayer);
+    public abstract void createWellPlayer(WellPlayer wellPlayer);
 
-    abstract WellPlayer getWellPlayer(Player player);
+    public abstract WellPlayer getWellPlayer(Player player);
 
-    abstract void updateWellPlayer(WellPlayer wellPlayer);
+    public abstract void updateWellPlayer(WellPlayer wellPlayer);
 
-    abstract void deleteWellPlayer(WellPlayer wellPlayer);
+    public abstract void deleteWellPlayer(WellPlayer wellPlayer);
 
-    abstract DatabaseType databaseType();
+    public abstract DatabaseType databaseType();
 
     /**
      * Sends well placement announcement to all residents in the town.
      */
-    protected void announceWellPlacement(@NotNull Well well) {
+    public void announceWellPlacement(@NotNull Well well) {
         Town town = TownyAPI.getInstance().getTown(well.getTownName());
         assert town != null;
 
@@ -55,7 +55,7 @@ public abstract class EDatabase {
         });
     }
 
-    protected HashMap<UUID, WellPlayer> getOnlineWellPlayers() throws SQLException {
+    public HashMap<UUID, WellPlayer> getOnlineWellPlayers() throws SQLException {
         HashMap<UUID, WellPlayer> wellPlayers = new HashMap<>();
 
         Bukkit.getOnlinePlayers().stream()
@@ -69,7 +69,7 @@ public abstract class EDatabase {
         return wellPlayers;
     }
 
-    protected HashMap<String, Well> getWellsFromDatabase() {
+    public HashMap<String, Well> getWellsFromDatabase() {
         HashMap<String, Well> wells = new HashMap<>();
 
         TownyAPI.getInstance().getTowns().stream()
@@ -87,17 +87,15 @@ public abstract class EDatabase {
      * Uses updateWell(Well well) on each
      * @param wells
      */
-    protected void updateWells(@NotNull Collection<Well> wells) {
+    public void updateWells(@NotNull Collection<Well> wells) {
         wells.forEach(this::updateWell);
     }
 
-    protected void updateWellPlayers(@NotNull Collection<WellPlayer> wellPlayers) {
+    public void updateWellPlayers(@NotNull Collection<WellPlayer> wellPlayers) {
         wellPlayers.forEach(this::updateWellPlayer);
     }
 
-    enum DatabaseType {
-        MYSQL,
-        YAML
-    }
+
 
 }
+

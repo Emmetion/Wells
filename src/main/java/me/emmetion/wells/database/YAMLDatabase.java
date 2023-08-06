@@ -34,9 +34,8 @@ public final class YAMLDatabase extends EDatabase {
     }
 
     @Override
-    void initializeDatabase() {
+    public void initializeDatabase() {
         // Check if files exist.
-
 
         File wells = new File(wellsPath);
         wells.mkdirs();
@@ -46,7 +45,7 @@ public final class YAMLDatabase extends EDatabase {
     }
 
     @Override
-    void createWell(@NotNull Well well) {
+    public void createWell(@NotNull Well well) {
         String townName = well.getTownName();
         // Well file location is:
         // Wells/db/
@@ -86,7 +85,7 @@ public final class YAMLDatabase extends EDatabase {
     }
 
     @Override
-    Well getWell(@NotNull String townName) {
+    public Well getWell(@NotNull String townName) {
 
         File file = new File(wellsPath + townName + ".yml");
 
@@ -123,7 +122,7 @@ public final class YAMLDatabase extends EDatabase {
 
 
     @Override
-    void updateWell(@NotNull Well well) {
+    public void updateWell(@NotNull Well well) {
         String townName = well.getTownName();
         // Well file location is:
         // Wells/db/
@@ -161,7 +160,7 @@ public final class YAMLDatabase extends EDatabase {
     }
 
     @Override
-    void deleteWell(@NotNull Well well) {
+    public void deleteWell(@NotNull Well well) {
         File file = new File(wellsPath + well.getTownName() + ".yml");
 
         if (!file.exists())
@@ -171,7 +170,7 @@ public final class YAMLDatabase extends EDatabase {
     }
 
     @Override
-    void createWellPlayer(@NotNull WellPlayer wellPlayer) {
+    public void createWellPlayer(@NotNull WellPlayer wellPlayer) {
         UUID uuid = wellPlayer.getPlayerUUID();
 
         File file = new File(wellPlayersPath + uuid.toString() + ".yml");
@@ -183,7 +182,7 @@ public final class YAMLDatabase extends EDatabase {
     }
 
     @Override
-    WellPlayer getWellPlayer(@NotNull Player player) {
+    public WellPlayer getWellPlayer(@NotNull Player player) {
         UUID uuid = player.getUniqueId();
 
         File file = new File(wellPlayersPath + uuid.toString() + ".yml");
@@ -210,7 +209,7 @@ public final class YAMLDatabase extends EDatabase {
     }
 
     @Override
-    void updateWellPlayer(@NotNull WellPlayer wellPlayer) {
+    public void updateWellPlayer(@NotNull WellPlayer wellPlayer) {
         UUID uuid = wellPlayer.getPlayerUUID();
 
         File file = new File(wellPlayersPath + uuid.toString() + ".yml");
@@ -239,7 +238,7 @@ public final class YAMLDatabase extends EDatabase {
     }
 
     @Override
-    void deleteWellPlayer(@NotNull WellPlayer wellPlayer) {
+    public void deleteWellPlayer(@NotNull WellPlayer wellPlayer) {
         UUID uuid = wellPlayer.getPlayerUUID();
 
         File file = new File(wellPlayersPath + uuid.toString() + ".yml");
@@ -251,7 +250,7 @@ public final class YAMLDatabase extends EDatabase {
     }
 
     @Override
-    DatabaseType databaseType() {
+    public DatabaseType databaseType() {
         return DatabaseType.YAML;
     }
 }

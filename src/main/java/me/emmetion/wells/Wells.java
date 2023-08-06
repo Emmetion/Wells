@@ -6,17 +6,15 @@ import me.emmetion.wells.commands.WellCommand;
 import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.creature.SpawnNPC;
 import me.emmetion.wells.creature.WellCreature;
-import me.emmetion.wells.database.CreatureManager;
-import me.emmetion.wells.database.WellManager;
 import me.emmetion.wells.listeners.*;
+import me.emmetion.wells.managers.CreatureManager;
+import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.runnables.ActiveBuffRunnable;
 import me.emmetion.wells.runnables.NearWellRunnable;
 import me.emmetion.wells.runnables.UpdateDatabaseRunnable;
 import me.emmetion.wells.runnables.WellCreatureRunnable;
-import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +37,7 @@ public final class Wells extends JavaPlugin {
     private WellCreatureRunnable wellCreatureRunnable;
     private NearWellRunnable nearWellRunnable;
     private UpdateDatabaseRunnable updateDatabaseRunnable;
+    private ActiveBuffRunnable activeBuffRunnable;
 
 
     private WellManager wellManager;
@@ -136,9 +135,11 @@ public final class Wells extends JavaPlugin {
         pluginManager.registerEvents(new WellBuffListener(wellManager), this);
         pluginManager.registerEvents(new WellPlayerListener(wellManager), this);
         pluginManager.registerEvents(new WellCreatureListener(creatureManager), this);
+        pluginManager.registerEvents(new HologramListener(), this);
+        pluginManager.registerEvents(new SpawnNPCListeners(), this);
     }
 
-    // Runnables are different than animations in the fact they are always running while the server is online.
+    // Runnable are different from animations in the fact they are always running while the server is online.
     // Animations are endable, while here we run these and never stop them until plugin shutdown.
     private void initSchedules() {
 
@@ -151,10 +152,10 @@ public final class Wells extends JavaPlugin {
         updateDatabaseRunnable.runTaskTimer(Wells.plugin, 1, 3000);
 
         // Creates the ActiveBuffRunnable.
-        ActiveBuffRunnable activeBuffRunnable = new ActiveBuffRunnable(this);
+        activeBuffRunnable = new ActiveBuffRunnable(this);
         activeBuffRunnable.runTaskTimer(Wells.plugin, 1, 1);
 
-        // Creatres the WellCreatureRunnable
+        // Creates the WellCreatureRunnable
         wellCreatureRunnable = new WellCreatureRunnable(this, wellManager, creatureManager);
         wellCreatureRunnable.runTaskTimer(Wells.plugin, 1, 1);
     }
@@ -179,27 +180,17 @@ public final class Wells extends JavaPlugin {
     }
 
     private void handleSpawnNPCSpawning() {
-        Logger logger = getLogger();
-        Player p = Bukkit.getPlayer("Emmetion");
-        if (creatureManager.isSpawnNPCSpawned()) {
-            NPC npc = creatureManager.getSpawnNPC();
-            assert npc != null;
+        WellCreature wellCreature = creatureManager.spawnCreature(SpawnNPC.class, null);
+        if (wellCreature == null) {
+            // in the case that something went wrong while spawning it, we ignore it.
+            return;
+        }
 
-            SpawnNPC.SpawnTrait spawntrait = npc.getTraitNullable(SpawnNPC.SpawnTrait.class);
-            spawntrait.incrementSpawnLoadIn();
-            logger.info("Incremented SpawnTrait spawn-loadin-counter: " + spawntrait.getTimesSpawnedOnLoad());
-        } else {
-            // spawn the npc.
-            WellCreature wellCreature = creatureManager.spawnCreature(SpawnNPC.class, null);
-            if (wellCreature == null) {
-                // in the case that something went wrong while spawning it, we ignore it.
-                return;
-            }
+        UUID uuid = wellCreature.getUUID(); // get uuid from creature, should already be assigned in the WellCreature.
 
-            UUID uuid = wellCreature.getUUID(); // get uuid from creature, should already be assigned in the WellCreature.
-            if (uuid == null) {
-                configuration.setSpawnNPCUUID(uuid);
-            }
+        // TODO: Add checks for w
+        if (uuid == null) {
+            configuration.setSpawnNPCUUID(uuid);
         }
     }
 

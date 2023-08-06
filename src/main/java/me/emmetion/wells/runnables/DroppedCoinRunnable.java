@@ -2,7 +2,7 @@ package me.emmetion.wells.runnables;
 
 import de.tr7zw.nbtapi.NBTItem;
 import me.emmetion.wells.Wells;
-import me.emmetion.wells.database.WellManager;
+import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.model.CoinType;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
@@ -17,7 +17,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

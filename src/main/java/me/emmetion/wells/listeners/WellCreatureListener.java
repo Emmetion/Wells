@@ -2,9 +2,9 @@ package me.emmetion.wells.listeners;
 
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.creature.WellCreature;
-import me.emmetion.wells.database.CreatureManager;
 import me.emmetion.wells.events.creature.CreatureClickEvent;
 import me.emmetion.wells.events.creature.CreatureSpawnEvent;
+import me.emmetion.wells.managers.CreatureManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -13,7 +13,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -32,11 +33,12 @@ public class WellCreatureListener implements Listener {
         if (!(event.getDamager() instanceof Player)) {
             return;
         }
+
         Player player = (Player) event.getDamager();
         Entity entity = event.getEntity();
 
-
         WellCreature wc = creatureManager.getWellCreatureFromEntity(entity);
+
         if (wc == null)
             return;
 
@@ -47,10 +49,18 @@ public class WellCreatureListener implements Listener {
     }
 
     @EventHandler
-    public void rightClickListener(PlayerInteractAtEntityEvent e) {
+    public void rightClickListener(PlayerInteractEntityEvent e) {
         Entity entity = e.getRightClicked();
         Player player = e.getPlayer();
-        if (entity == null) {
+
+        // This event fires twice because of the hands that it is interacting with.
+        // In our case, we only want one event to fire, so we will check for EqipmentSlot.HAND, thatway it only files this event if the
+        // hand is equal to the Main hand slot.
+
+        // player.sendMessage(e.getHand().toString());
+
+        // Prevents duplicate events from firing.
+        if (!e.getHand().equals(EquipmentSlot.HAND)) {
             return;
         }
 
@@ -59,8 +69,6 @@ public class WellCreatureListener implements Listener {
             return;
         }
 
-
-
         CreatureClickEvent creatureClickEvent = new CreatureClickEvent(player, wc, CreatureClickEvent.ClickType.RIGHT_CLICK);
 
         // This lets the other developers access CreatureClickEvents, and I can modify values that occur inside the event.
@@ -68,7 +76,7 @@ public class WellCreatureListener implements Listener {
         wc.handleRightClick(creatureClickEvent);
     }
 
-
+    // NPCLeftClickEvent, NPCRightClickEvent are also CitizenAPI events that can be called.
 
     @EventHandler
     public void handleCreatureSpawn(CreatureSpawnEvent event) {
@@ -79,11 +87,10 @@ public class WellCreatureListener implements Listener {
         Bukkit.broadcast(Component.text("Spawned WellCreature: " + wellCreatureSimplified(creature)));
     }
 
+
     @NotNull
     private String wellCreatureSimplified(@NotNull WellCreature creature) {
         return creature.getCreatureType() + "{loc= " + creature.getLocation().toVector().toString() + "}";
     }
-
-
 
 }

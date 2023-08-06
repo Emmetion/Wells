@@ -1,6 +1,6 @@
 package me.emmetion.wells.listeners;
 
-import me.emmetion.wells.database.WellManager;
+import me.emmetion.wells.managers.WellManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

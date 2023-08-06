@@ -12,5 +12,14 @@ This project utilizes a few dependencies.
 
 Here I will describe all currently implemented, and planned features for Wells.
 
+
 ### Creatures
 - Creatures have properties that allow them to be bound to a well.
+
+### Town related quests.
+- One great feature of this plugin is the introduction to quests in proximity of town-members, making them more engaged.
+- Every 3 or so in-game days, a NPC will show up near a safe location at your saved well.
+- These quests can be coded with the Quests plugin provided in spigot, and then ported over
+- Quests operate in a group-manor, milestones are reached with shared XP.
+
+### Rewards

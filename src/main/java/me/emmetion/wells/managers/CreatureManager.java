@@ -1,12 +1,10 @@
-package me.emmetion.wells.database;
+package me.emmetion.wells.managers;
 
 import de.tr7zw.nbtapi.NBTEntity;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.creature.*;
 import me.emmetion.wells.model.Well;
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -21,7 +19,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static me.emmetion.wells.util.Utilities.getColor;
-import static me.emmetion.wells.util.Utilities.getComponentColor;
 
 public final class CreatureManager {
 
@@ -152,10 +149,7 @@ public final class CreatureManager {
                 Configuration config = Configuration.getInstance();
                 UUID uuid = config.getSpawnNPCUUID();
 
-                if (isSpawnNPCSpawned()) {
-                    Bukkit.broadcast(getComponentColor("&cNPC tried to get spawned but one already existed."));
-                    return null;
-                }
+                // SpawnNPC is configured to run checks whether there is already an NPC nearby or not.
                 wellCreature = new SpawnNPC(spawnNPCLocation);
             }
             default -> {
@@ -176,9 +170,11 @@ public final class CreatureManager {
         }
         NamespacedKey nk = new NamespacedKey(Wells.plugin, "creature-uuid");
         String creature_uuid = entity.getPersistentDataContainer().get(nk, PersistentDataType.STRING);
-//        for (NamespacedKey key : entity.getPersistentDataContainer().getKeys()) {
-//            e.sendMessage(key.asString());
-//        }
+        if (debug) {
+            for (NamespacedKey key : entity.getPersistentDataContainer().getKeys()) {
+                e.sendMessage(key.asString());
+            }
+        }
 
         if (creature_uuid == null) {
             // creature does not exist.
@@ -213,34 +209,6 @@ public final class CreatureManager {
 
     public void removeCreature(@NotNull WellCreature wellCreature) {
         removeCreature(wellCreature.getUUID());
-    }
-
-    public boolean isSpawnNPCSpawned() {
-        return (getSpawnNPC() != null);
-    }
-
-    @Nullable
-    public NPC getSpawnNPC() {
-
-        Configuration config = Configuration.getInstance();
-        Location spawnNPCLocation = config.getSpawnNPCLocation();
-
-        List<NPC> npcList = spawnNPCLocation.getNearbyEntities(1, 1, 1).stream()
-                .filter(CitizensAPI.getNPCRegistry()::isNPC)
-                .map(entity -> CitizensAPI.getNPCRegistry().getNPC(entity))
-                .toList();
-
-        if (npcList.size() == 0) {
-            return null;
-        } else {
-            for (NPC npc : npcList) {
-                if (npc.hasTrait(SpawnNPC.SpawnTrait.class))
-                    return npc;
-            }
-        }
-
-        return null;
-
     }
 
     public static UUID getUUIDFromEntity(Entity e) {
