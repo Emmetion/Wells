@@ -2,7 +2,6 @@ package me.emmetion.wells.listeners;
 
 import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.menu.Menu;
-import me.emmetion.wells.menu.WellMenu;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -23,10 +22,6 @@ public class MenuListener implements Listener {
 
         if (holder instanceof Menu menu) {
             menu.handleClick(e);
-
-            if (menu instanceof WellMenu wellMenu) {
-                // .
-            }
         }
     }
 

@@ -135,7 +135,6 @@ public final class Wells extends JavaPlugin {
         pluginManager.registerEvents(new WellBuffListener(wellManager), this);
         pluginManager.registerEvents(new WellPlayerListener(wellManager), this);
         pluginManager.registerEvents(new WellCreatureListener(creatureManager), this);
-        pluginManager.registerEvents(new HologramListener(), this);
         pluginManager.registerEvents(new SpawnNPCListeners(), this);
     }
 

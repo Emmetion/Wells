@@ -116,14 +116,9 @@ public class SpawnNPCListeners implements Listener {
 
             @Override
             public void run() {
-
                 // Ticks == 0, then spawn
-
                 world.spawnParticle(Particle.BLOCK_CRACK, anvilLoc.clone().add(0.5, 0.9, 0.5), 20, 0.05, 0.05, 0.05, 0.01, clickedBlock.getBlockData());
-
-
                 armorStand.teleport(armorStand.getLocation().clone().add(0,0.2,0));
-
 
                 if (ticks == 4) {
                     player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
