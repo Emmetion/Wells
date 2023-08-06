@@ -31,7 +31,6 @@ me\emmetion\wells\config\Configuration.class
 me\emmetion\wells\menu\WellMenu$1.class
 me\emmetion\wells\events\creature\CreatureClickEvent$ClickType.class
 me\emmetion\wells\events\buff\GreenThumbEvent.class
-me\emmetion\wells\listeners\HologramListener.class
 me\emmetion\wells\listeners\WellBuffListener.class
 me\emmetion\wells\menu\Menu.class
 me\emmetion\wells\managers\WellManager.class

@@ -19,6 +19,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Marker;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
@@ -112,7 +114,7 @@ public final class SpawnNPC extends WellCreature {
         // page1.addAction(ClickType.RIGHT, new Action("PREV_PAGE"));
         page1.addAction(ClickType.LEFT, new Action("NEXT_PAGE"));
 
-//
+//        HELPFUL DEBUG CODE.
 //        Map<ClickType, List<Action>> actions = page1.getActions();
 //        for (Map.Entry<ClickType, List<Action>> entry : actions.entrySet()) {
 //
@@ -133,9 +135,19 @@ public final class SpawnNPC extends WellCreature {
                 getColor(" &7- &c124 Oak Logs")
         ));
 
-         page2.addAction(ClickType.RIGHT, new Action("PREV_PAGE"));
+
+        HologramPage page3 = DHAPI.addHologramPage(nearbyHologram, Arrays.asList(
+                getColor("&fReinforced Cauldron"),
+                getColor(""),
+                getColor("&7Build Cost:"),
+                getColor(" &7- &f64 Iron Ingots"),
+                getColor(" &7- &c124 Oak Logs")
+        ));
+        page3.addAction(ClickType.RIGHT, new Action("PREV_PAGE"));
 //        page2.addAction(ClickType.LEFT, new Action("NEXT_PAGE"));
 //         The nearby hologram should be able to alternate between pages.
+
+
 
 
         nearbyHologram.realignLines();
@@ -146,6 +158,16 @@ public final class SpawnNPC extends WellCreature {
         // Set pages
 
         return npc.getEntity();
+    }
+
+    private String hasEnoughItemsString(@NotNull PlayerInventory inventory, @NotNull ItemStack itemStack, int amount) {
+        itemStack.setAmount(amount);
+
+        if (inventory.contains(itemStack)) {
+            return "&a&l✔";
+        } else {
+            return "&c&l✖";
+        }
     }
 
     @Override

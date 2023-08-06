@@ -30,8 +30,8 @@ import static me.emmetion.wells.util.Utilities.getColor;
 
 public class SpawnNPCListeners implements Listener {
 
-    private ConcurrentHashMap<UUID, Animation> animationList = new ConcurrentHashMap<UUID, Animation>();
-    private HashSet<UUID> confirmBuildUUID = new HashSet<>();
+    private final ConcurrentHashMap<UUID, Animation> animationList = new ConcurrentHashMap<UUID, Animation>();
+    private final HashSet<UUID> confirmBuildUUID = new HashSet<>();
 
     @EventHandler
     public void onCraftWellItem(PlayerInteractEvent event) {
@@ -45,7 +45,6 @@ public class SpawnNPCListeners implements Listener {
             return;
         }
 
-        player.sendMessage(blockFace + "");
         if (!blockFace.equals(BlockFace.UP) || !event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
             return;
         }
@@ -72,7 +71,6 @@ public class SpawnNPCListeners implements Listener {
         List<HologramLine> lines = page.getLines();
 
         if (!confirmBuildUUID.contains(player.getUniqueId())) {
-            player.sendMessage("Doesn't contain confirmBuildUUID.");
             String craftedItem = lines.get(0).getText();
 
             player.sendMessage(Component.text(getColor("&eAre you sure you want to follow through with a " + craftedItem + "&e?")));
