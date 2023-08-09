@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static me.emmetion.wells.util.Utilities.getColor;
@@ -38,15 +39,12 @@ public final class SpawnNPC extends WellCreature {
     public static final Location anvilLocation = new Location(Bukkit.getWorld("world"), 144, 68, -136);
 
     private final String npcName = "Wellbi";
-
+    private final Collection<Player> playersChatting = new ArrayList<>();
+    private final WellManager wellManager = Wells.plugin.getWellManager();
     private Marker marker;
     private NPC npc;
-
-    private final Collection<Player> playersChatting = new ArrayList<>();
-
-    private final WellManager wellManager = Wells.plugin.getWellManager();
-
     private Hologram nearbyHologram;
+    private Hologram confirmationHologram;
 
 
     public SpawnNPC(Location location) {
@@ -64,28 +62,23 @@ public final class SpawnNPC extends WellCreature {
     // Handles outside events like NPC's getting spawned.
     @Override
     public Entity handleEntitySpawn(Entity entity) {
+        Logger logger = Wells.plugin.getLogger();
 
         // We are passed information about the Marker entity that represents the position of the NPC.
-
         Marker marker = (Marker) entity;
         this.marker = marker;
 
         Location npcLocation = marker.getLocation();
 
-        Logger logger = Wells.plugin.getLogger();
 
         // Similar to CreatureManager#isSpawnNPCSpawned.
-        npcLocation.getNearbyEntities(1, 1, 1).stream()
-                .filter(e -> e.hasMetadata("NPC"))
-                .map(e -> CitizensAPI.getNPCRegistry().getNPC(e))
-                .filter(npc1 -> npc1.getName().equals(npcName))
-                .forEach(spawnNPC -> {
-                        // Verify that it's actually the SpawnNPC.
-                        // Check for SpawnTrait.
+        npcLocation.getNearbyEntities(1, 1, 1).stream().filter(e -> e.hasMetadata("NPC")).map(e -> CitizensAPI.getNPCRegistry().getNPC(e)).filter(npc1 -> npc1.getName().equals(npcName)).forEach(spawnNPC -> {
+            // Verify that it's actually the SpawnNPC.
+            // Check for SpawnTrait.
 
-                    Bukkit.broadcast(Component.text("Deleted SpawnNPC, preparing to spawn a new one."));
-                    spawnNPC.destroy();
-                });
+            Bukkit.broadcast(Component.text("Deleted SpawnNPC, preparing to spawn a new one."));
+            spawnNPC.destroy();
+        });
 
         npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, npcName, npcLocation);
         // Add traits.
@@ -100,19 +93,46 @@ public final class SpawnNPC extends WellCreature {
         // The hologram will help guide the NPC into knowing which building they want to build.
 
 
-        Location loc = npc.getEntity().getLocation().clone().add(0, 3, 3);
+        Location loc = npc.getEntity().getLocation().clone().add(1.3, 3, 3);
 
         nearbyHologram = DHAPI.createHologram("SpawnNPCHologram", loc, false);
 
         HologramPage page1 = nearbyHologram.getPage(0);
-        DHAPI.setHologramLines(nearbyHologram, Arrays.asList(
-                "&cSchematic Crafting Station",
-                "&7Here you can craft &cSchematic&7's that can be used",
-                "&7inside your town claim!"
-        ));
+        DHAPI.setHologramLines(nearbyHologram, Arrays.asList("&cSchematic Station", "", "&fHere you can build &cschematics &7to", "&7place inside your town claim!"));
 
         // page1.addAction(ClickType.RIGHT, new Action("PREV_PAGE"));
         page1.addAction(ClickType.LEFT, new Action("NEXT_PAGE"));
+
+        HologramPage page2 = DHAPI.addHologramPage(nearbyHologram, Arrays.asList(getColor("&bWell Schematic"), getColor(""), getColor("Materials Required:"), getColor(" &7- &c1 Reinforced Cauldron"), getColor(" &7- &c124 Oak Logs")));
+
+        page2.addAction(ClickType.LEFT, new Action("NEXT_PAGE"));
+        page2.addAction(ClickType.RIGHT, new Action("PREV_PAGE"));
+
+
+        HologramPage page3 = DHAPI.addHologramPage(nearbyHologram, Arrays.asList(getColor("&fReinforced Cauldron"), getColor(""), getColor("&7Build Cost:"), getColor(" &7- &f64 Iron Ingots")));
+        
+        page3.addAction(ClickType.RIGHT, new Action("PREV_PAGE"));
+//        page2.addAction(ClickType.LEFT, new Action("NEXT_PAGE"));
+//         The nearby hologram should be able to alternate between pages.
+
+        nearbyHologram.realignLines();
+        nearbyHologram.setLocation(loc);
+        nearbyHologram.showAll();
+        nearbyHologram.updateAll();
+
+        // Confirmation hologram setup./
+
+        Location confirmationLoc = anvilLocation.clone().add(0.5, 1.2, 0.5);
+
+        confirmationHologram = DHAPI.createHologram("SpawnNPCConfirmation", confirmationLoc, false, List.of(getColor(
+                "&eBuild?")));
+        confirmationHologram.addPage().setLine(0, "&eClick again to confirm.");
+        confirmationHologram.setDefaultVisibleState(true);
+
+
+        return npc.getEntity();
+    }
+
 
 //        HELPFUL DEBUG CODE.
 //        Map<ClickType, List<Action>> actions = page1.getActions();
@@ -127,40 +147,9 @@ public final class SpawnNPC extends WellCreature {
 //        if (b)
 //            Bukkit.broadcastMessage(getColor("page 1 has actions!"));
 
-        HologramPage page2 = DHAPI.addHologramPage(nearbyHologram, Arrays.asList(
-                getColor("&bWell Schematic"),
-                getColor(""),
-                getColor("Materials Required:"),
-                getColor(" &7- &c1 Reinforced Cauldron"),
-                getColor(" &7- &c124 Oak Logs")
-        ));
 
-
-        HologramPage page3 = DHAPI.addHologramPage(nearbyHologram, Arrays.asList(
-                getColor("&fReinforced Cauldron"),
-                getColor(""),
-                getColor("&7Build Cost:"),
-                getColor(" &7- &f64 Iron Ingots"),
-                getColor(" &7- &c124 Oak Logs")
-        ));
-        page3.addAction(ClickType.RIGHT, new Action("PREV_PAGE"));
-//        page2.addAction(ClickType.LEFT, new Action("NEXT_PAGE"));
-//         The nearby hologram should be able to alternate between pages.
-
-
-
-
-        nearbyHologram.realignLines();
-        nearbyHologram.setLocation(loc);
-        nearbyHologram.showAll();
-        nearbyHologram.updateAll();
-
-        // Set pages
-
-        return npc.getEntity();
-    }
-
-    private String hasEnoughItemsString(@NotNull PlayerInventory inventory, @NotNull ItemStack itemStack, int amount) {
+    private String hasEnoughItemsString(@NotNull Player player, @NotNull ItemStack itemStack, int amount) {
+        PlayerInventory inventory = player.getInventory();
         itemStack.setAmount(amount);
 
         if (inventory.contains(itemStack)) {
@@ -176,8 +165,8 @@ public final class SpawnNPC extends WellCreature {
             marker.remove();
         npc.destroy();
 
-
         nearbyHologram.destroy();
+        confirmationHologram.destroy();
         // Effectively removes the marker at the spawnNPC's location, then repeats this process over again when the plugin launches.
     }
 
@@ -232,7 +221,6 @@ public final class SpawnNPC extends WellCreature {
 
         scheduleMessage(player, getColor("&e[NPC] Wellbi: &fTo begin, you first need to build a well in your town. " + "Luckily, I can provide you with some help in the building process"), 120L);
 
-
         scheduleMessage(player, getColor("&e[NPC] Wellbi: &fCome back to be with the proper supplies and I can lend you one of my &cSchematic&f's!"), 180L);
 
 
@@ -243,7 +231,7 @@ public final class SpawnNPC extends WellCreature {
         }, 180L);
     }
 
-    private void scheduleMessage(@NotNull Player player, @NotNull String message, @NotNull long delay) {
+    private void scheduleMessage(@NotNull Player player, @NotNull String message, long delay) {
         BukkitScheduler scheduler = Bukkit.getScheduler();
 
         scheduler.runTaskLater(Wells.plugin, () -> {

@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -68,8 +69,10 @@ public class WellMenu extends Menu implements AnimatedMenu {
             setMenuItems();
         } else if (rawSlot == 11) {
             player.sendMessage(Component.text("Buff1: " + well.getBuff1().toString()));
+            player.playSound(player.getLocation(), Sound.BLOCK_LAVA_POP, 1, 1);
         } else if (rawSlot == 15) {
             player.sendMessage(Component.text("Buff2: " + well.getBuff2().toString()));
+            player.playSound(player.getLocation(), Sound.BLOCK_LAVA_POP, 1, 1);
         }
     }
 

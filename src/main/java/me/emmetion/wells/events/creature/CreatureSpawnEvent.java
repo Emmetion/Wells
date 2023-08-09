@@ -20,12 +20,13 @@ public final class CreatureSpawnEvent extends CreatureEvent {
     }
 
     private void handle() {
+        Logger logger = Wells.plugin.getLogger();
         if (getWellCreature() == null) {
-            System.out.println("Spawned WelLCreature is Null in CreatureSpawnEvent.");
+            logger.info(() -> "Spawned WellCreature was null in CreatureSpawnEvent.");
+            // System.out.println("Spawned WelLCreature is Null in CreatureSpawnEvent.");
             return;
         }
-        Logger logger = Wells.plugin.getLogger();
-        System.out.println("Spawned WellCreature : " + getWellCreature().getCreatureType() + " [" + getWellCreature().getUUID() + "]");
+        // System.out.println("Spawned WellCreature : " + getWellCreature().getCreatureType() + " [" + getWellCreature().getUUID() + "]");
         logger.info("Spawned WellCreature : " + getWellCreature().getCreatureType() + " [" + getWellCreature().getUUID() + "]");
     }
 
