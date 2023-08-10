@@ -4,6 +4,7 @@ import de.tr7zw.nbtapi.NBTEntity;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.creature.*;
+import me.emmetion.wells.events.creature.CreatureKillEvent;
 import me.emmetion.wells.model.Well;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -40,7 +41,8 @@ public final class CreatureManager {
     public void handleFrameUpdate() {
         Player e = Bukkit.getPlayer("Emmetion");
         if (e != null) {
-            e.sendActionBar(getColor("Creatures: " + wellCreatureMap.size()));
+            e.sendActionBar(Component.text(getColor("Creatures: &c" + wellCreatureMap.size())));
+
         }
 
         List<WellCreature> creatures = new ArrayList<>(); // store dead creatures, handle afterward.
@@ -202,6 +204,9 @@ public final class CreatureManager {
         WellCreature wellCreature = this.wellCreatureMap.get(uuid);
         if (wellCreature == null)
             return;
+
+        CreatureKillEvent killEvent = new CreatureKillEvent(wellCreature);
+        killEvent.callEvent();
 
         removeFromMaps(uuid);
     }

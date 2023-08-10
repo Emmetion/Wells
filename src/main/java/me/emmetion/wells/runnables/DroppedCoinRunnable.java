@@ -21,27 +21,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class DroppedCoinRunnable extends BukkitRunnable {
+public final class DroppedCoinRunnable extends BukkitRunnable {
 
-    private Wells wells;
-    private Item item;
-    private CoinType coinType;
-    private WellPlayer wplayer;
-    private WellManager wellManager;
+    private final Wells wells;
+    private final Item item;
+    private final CoinType coinType;
+    private final WellPlayer wellPlayer;
+    private final WellManager wellManager;
 
     private Map<Player, Boolean> playersOnCooldown;
 
     private boolean isComplete;
 
 
-    public DroppedCoinRunnable(Wells wells, Item item, WellPlayer wplayer, WellManager wellManager,
+    public DroppedCoinRunnable(Wells wells, Item item, WellPlayer wellPlayer, WellManager wellManager,
                                Map<Player, Boolean> playersOnCooldown) {
         this.wells = wells;
         this.item = item;
         NBTItem nbt = new NBTItem(item.getItemStack());
         String wells_id = nbt.getString("wells_id");
+
         this.coinType = CoinType.getCoinTypeFromWellsID(wells_id);
-        this.wplayer = wplayer;
+        this.wellPlayer = wellPlayer;
         this.wellManager = wellManager;
         this.playersOnCooldown = playersOnCooldown;
 
@@ -60,12 +61,12 @@ public class DroppedCoinRunnable extends BukkitRunnable {
             return;
         }
 
-        if (!wplayer.isOnline()) {
+        if (!wellPlayer.isOnline()) {
             this.cancel();
             return;
         }
 
-        Player player = Bukkit.getPlayer(wplayer.getPlayerUUID());
+        Player player = Bukkit.getPlayer(wellPlayer.getPlayerUUID());
 
         if (item == null || item.isDead()) {
             this.cancel();

@@ -1,5 +1,6 @@
 package me.emmetion.wells.creature;
 
+import me.emmetion.wells.Wells;
 import me.emmetion.wells.anim.PixiePunchAnimation;
 import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.events.creature.CreatureClickEvent;
@@ -61,7 +62,7 @@ public final class Pixie extends WellCreature implements ParticleMob, Movable, W
 
         armorStand.setInvisible(true);
         armorStand.setSmall(true);
-        armorStand.setInvulnerable(true);
+        armorStand.setInvulnerable(false);
         armorStand.setCustomName("..."); // Temporarily sets name to '...'. This then gets updated to the pixie's name on the next frame.
         armorStand.setCustomNameVisible(true);
 
@@ -76,7 +77,7 @@ public final class Pixie extends WellCreature implements ParticleMob, Movable, W
             return;
         // removes the entity in-game. This will change to be updated with NPC's, should maybe make it overridable.
         this.getEntity().remove();
-        // Wells.plugin.getCreatureManager().removeCreature(this);
+        Wells.plugin.getCreatureManager().removeCreature(this);
     }
 
     @Override
@@ -85,6 +86,8 @@ public final class Pixie extends WellCreature implements ParticleMob, Movable, W
         Player player = event.getPlayer();
 
         handle(entity, player);
+
+        kill();
     }
 
     @Override
@@ -93,6 +96,8 @@ public final class Pixie extends WellCreature implements ParticleMob, Movable, W
         Player player = event.getPlayer();
 
         handle(entity, player);
+
+        kill();
     }
 
     // Helper method.
@@ -115,19 +120,20 @@ public final class Pixie extends WellCreature implements ParticleMob, Movable, W
 
     @Override
     public void updateCreature() {
+        Entity entity = getEntity();
         // This if-statement is called only once.
         if (pixieType.equals(PixieType.NONE)) {
             calculateRarity();
             updateName();
         }
 
-        if (this.getEntity() == null) {
+        if (entity == null) {
             return;
         }
 
         // Disables fire effect is present.
-        if (this.getEntity().isVisualFire())
-            this.getEntity().setVisualFire(false);
+        if (entity.isVisualFire())
+            entity.setVisualFire(false);
     }
 
     @Override
@@ -138,15 +144,16 @@ public final class Pixie extends WellCreature implements ParticleMob, Movable, W
     @Override
     public void move() {
         World world = getLocation().getWorld();
+        int currentFrame = getFrame();
         // Spawn a particle at the Pixie's location.
         world.spawnParticle(particle(), getLocation().clone().add(0, 0.3, 0), 2, 0.1, 0.1, 0.1, pixieType.getDustOptions());
 
         // If the pixie has been moving upwards/downwards for 20ticks, it will swap directions.
-        if (getFrame() % 20 == 0) { // Flip between up and down movements.
+        if (currentFrame % 20 == 0) { // Flip between up and down movements.
             this.upwards = !this.upwards;
         }
 
-        if (getFrame() % 5 == 0) // only moves every 5 ticks.
+        if (currentFrame % 5 == 0) // only moves every 5 ticks.
             return;
 
         // Here we handle movement for upwards/downwards cases.

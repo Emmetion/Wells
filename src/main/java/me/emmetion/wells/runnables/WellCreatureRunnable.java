@@ -5,11 +5,11 @@ import me.emmetion.wells.managers.CreatureManager;
 import me.emmetion.wells.managers.WellManager;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class WellCreatureRunnable extends BukkitRunnable {
+public final class WellCreatureRunnable extends BukkitRunnable {
 
-    private Wells plugin;
-    private WellManager wellManager;
-    private CreatureManager creatureManager;
+    private final Wells plugin;
+    private final WellManager wellManager;
+    private final CreatureManager creatureManager;
 
     public WellCreatureRunnable(Wells plugin, WellManager wellManager, CreatureManager creatureManager) {
         this.plugin = plugin;

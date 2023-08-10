@@ -24,7 +24,7 @@ public class CropFarmAnimation extends Animation {
 
     private Material cropType;
 
-    private Collection<Bat> bats = new ArrayList<>();
+    private final Collection<Bat> bats = new ArrayList<>();
 
     public CropFarmAnimation(Player farmer, Block crop) {
         this.farmer = farmer;

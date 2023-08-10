@@ -5,9 +5,9 @@ import me.emmetion.wells.model.ActiveBuff;
 import me.emmetion.wells.model.Well;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class ActiveBuffRunnable extends BukkitRunnable {
+public final class ActiveBuffRunnable extends BukkitRunnable {
 
-    private Wells plugin;
+    private final Wells plugin;
 
     public ActiveBuffRunnable(Wells wells) {
         this.plugin = wells;

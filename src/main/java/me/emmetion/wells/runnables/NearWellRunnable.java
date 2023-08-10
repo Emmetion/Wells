@@ -16,8 +16,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class NearWellRunnable extends BukkitRunnable {
-    public WellManager wellManager;
+public final class NearWellRunnable extends BukkitRunnable {
+    public final WellManager wellManager;
 
     private final HashMap<Player, String> playersNearWell = new HashMap<>();
     private final HashMap<Player, Integer> nearWellMessageCooldown = new HashMap<>();

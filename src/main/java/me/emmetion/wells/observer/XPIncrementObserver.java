@@ -1,6 +1,7 @@
 package me.emmetion.wells.observer;
 
 import com.palmergames.bukkit.towny.TownyAPI;
+import me.emmetion.wells.model.CoinType;
 import me.emmetion.wells.model.Well;
 
 public class XPIncrementObserver implements Observer {
@@ -15,5 +16,6 @@ public class XPIncrementObserver implements Observer {
     @Override
     public void update() {
         // we don't handle for XPIncrement yet.
+        well.depositCoin(CoinType.BRONZE_COIN);
     }
 }

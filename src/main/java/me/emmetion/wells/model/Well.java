@@ -40,8 +40,8 @@ public class Well {
     // Storable in the MySQL server.
     private final HashMap<UUID, Integer> contributions = new HashMap<>();
 
-    public String townName;
-    public Location position;
+    private String townName;
+    private Location position;
     private Location hologramLocation;
 
     private int well_level;
@@ -306,9 +306,20 @@ public class Well {
         notifyObservers();
     }
 
-    public void depositCoin(CoinType coinType) {
-        if (coinType == null)
-            return;
+    public void depositCoin(@NotNull CoinType coinType) {
+        switch (coinType) {
+            case LEVEL_UP_COIN:
+
+                break;
+            case TIME_BONUS:
+
+                break;
+            case GOLD_COIN:
+            case SILVER_COIN:
+            case BRONZE_COIN:
+                nearbyPlayers
+                break;
+        }
 
         if (coinType.equals(CoinType.LEVEL_UP_COIN)) {
             incrementLevel();

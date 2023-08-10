@@ -1,18 +1,20 @@
 package me.emmetion.wells.observer;
 
+import com.palmergames.adventure.text.Component;
 import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import com.sk89q.worldedit.util.formatting.component.TextComponentProducer;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.model.Well;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -25,6 +27,7 @@ public class LevelUpObserver implements Observer {
 
     public LevelUpObserver(Well well) {
         well.attachObserver(this);
+        //
         this.well = well;
     }
 
@@ -34,8 +37,18 @@ public class LevelUpObserver implements Observer {
 
         well.updateHologram();
 
-        System.out.println("HELLO WORLD!");
-        server.sendMessage(Component.text("IncrementObserver called."));
+
+        String townname = well.getTownName();
+        List<String> levelUpMessages = Configuration.getInstance().getWellLevelUp();
+
+        Town town = TownyAPI.getInstance().getTown(townname);
+        town.getResidents().stream()
+                .filter(Resident::isOnline)
+                .forEach(resident -> {
+                    for (String levelUpMessage : levelUpMessages) {
+                        resident.sendMessage(Component.text(getColor(levelUpMessage))); // Need to use townyapi component version.
+                    }
+                });
     }
 
     public void announceLevelUp() {

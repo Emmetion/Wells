@@ -119,11 +119,12 @@ public class SpawnNPCListeners implements Listener {
 
         ArmorStand armorStand;
 
-        armorStand = (ArmorStand) world.spawnEntity(clickedBlock.getLocation().clone().add(0.5,-1,0.5), EntityType.ARMOR_STAND);
+        armorStand = (ArmorStand) world.spawnEntity(clickedBlock.getLocation().clone().add(0.5,0.1,0.5), EntityType.ARMOR_STAND);
         armorStand.setGravity(false);
-        armorStand.setInvisible(true);
+        armorStand.setInvisible(false);
         armorStand.setInvulnerable(true);
-        armorStand.setItem(EquipmentSlot.HEAD, new ItemStack(Material.CAULDRON));
+        armorStand.setSmall(true);
+        armorStand.setItem(EquipmentSlot.HEAD, new ItemStack(Material.CRAFTING_TABLE));
 //        armorStand.setRightArmPose(EulerAngle.ZERO);
 //        armorStand.setRightArmRotations(Rotations.ZERO);
 
@@ -141,10 +142,15 @@ public class SpawnNPCListeners implements Listener {
             public void run() {
                 // Ticks == 0, then spawn
                 world.spawnParticle(Particle.BLOCK_CRACK, anvilLoc.clone().add(0.5, 0.9, 0.5), 5, 0.05, 0.05, 0.05, 0.01, clickedBlock.getBlockData());
-                armorStand.teleport(armorStand.getLocation().clone().add(0,0.05,0));
 
+                armorStand.teleport(armorStand.getLocation().clone().add(0,0.05,0));
+                armorStand.setArrowsInBody(ticks);
+
+                armorStand.setRotation(ticks * 10, 0);
+
+                // Sounds every tick.
                 if (ticks < 16) {
-                    float pitch = (ticks * (0.03f) + .1f);
+                    float pitch = (ticks * (0.03f) + .5f);
                     player.sendMessage(Component.text("pitch: " + pitch));
                     player.playSound(armorStand.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, pitch);
                 }
@@ -159,6 +165,8 @@ public class SpawnNPCListeners implements Listener {
 
                     Bukkit.getScheduler().runTaskLater(Wells.plugin, (task) -> {
                         craftingCooldown.remove(player.getUniqueId());
+
+                        player.sendMessage(getColor("&bYou can craft again!"));
                     }, 60); // 3second cooldown between crafting items.
 
 

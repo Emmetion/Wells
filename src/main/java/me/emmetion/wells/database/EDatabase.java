@@ -18,6 +18,7 @@ import static me.emmetion.wells.util.Utilities.getComponentColor;
 
 public abstract class EDatabase {
 
+
     public abstract void initializeDatabase();
 
     // Well methods

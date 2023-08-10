@@ -3,6 +3,7 @@ package me.emmetion.wells.listeners;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.anim.CropFarmAnimation;
+import me.emmetion.wells.creature.SpawnNPC;
 import me.emmetion.wells.events.buff.GreenThumbEvent;
 import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.model.Well;
@@ -72,6 +73,15 @@ public class WellBuffListener implements Listener {
 
         CropFarmAnimation animation = new CropFarmAnimation(player, block);
         animation.start();
+    }
+
+    @EventHandler
+    public void anvilBreakEvent(BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        Block block = event.getBlock();
+        if (block.getLocation().equals(SpawnNPC.anvilLocation)) {
+            event.setCancelled(true);
+        }
     }
 
 }

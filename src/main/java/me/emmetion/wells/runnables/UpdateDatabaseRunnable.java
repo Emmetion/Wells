@@ -3,7 +3,7 @@ package me.emmetion.wells.runnables;
 import me.emmetion.wells.managers.WellManager;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class UpdateDatabaseRunnable extends BukkitRunnable {
+public final class UpdateDatabaseRunnable extends BukkitRunnable {
 
     private final WellManager manager;
 

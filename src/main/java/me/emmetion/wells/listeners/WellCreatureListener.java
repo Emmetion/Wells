@@ -37,10 +37,14 @@ public class WellCreatureListener implements Listener {
         Player player = (Player) event.getDamager();
         Entity entity = event.getEntity();
 
+        player.sendMessage("Clicked " + entity.getType());
+
         WellCreature wc = creatureManager.getWellCreatureFromEntity(entity);
 
         if (wc == null)
             return;
+
+        player.sendMessage("Clicked " + wc.getCreatureType());
 
         CreatureClickEvent creatureClickEvent = new CreatureClickEvent(player, wc, CreatureClickEvent.ClickType.LEFT_CLICK);
 
