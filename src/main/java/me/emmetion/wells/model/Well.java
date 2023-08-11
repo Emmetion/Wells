@@ -188,6 +188,8 @@ public class Well {
         else
             hologram = DHAPI.getHologram(this.getTownName());
 
+        assert hologram != null;
+
         hologram.setLocation(hologramLocation);
         hologram.realignLines();
 

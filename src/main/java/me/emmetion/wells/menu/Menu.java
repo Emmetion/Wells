@@ -33,6 +33,10 @@ public abstract class Menu implements InventoryHolder, Listener {
 
     public abstract int getSlots();
 
+    /**
+     * This title is automatically converts color codes upon instantiation.
+     * @return
+     */
     public abstract String getTitle();
 
     @EventHandler
@@ -54,26 +58,24 @@ public abstract class Menu implements InventoryHolder, Listener {
 
         playerMenuUtility.getOwner().openInventory(inventory);
 
-        // does this work? well find out.
+        // Handle animated menu's
+        // Essentially starting a bukkit task, and ending it when Menu#setClosed() is called
         if (!(this instanceof AnimatedMenu)) {
-            //TODO: remvoe this debug message
-            playerMenuUtility.getWellPlayer().getBukkitPlayer().sendMessage("Not an animated menu.");
             return;
         }
+        AnimatedMenu animatedMenu = (AnimatedMenu) menu;
 
         // Handle AnimatedMenu's update methods.
         Bukkit.getScheduler().runTaskTimer(wells, bukkitTask -> {
-            AnimatedMenu animatedMenu = (AnimatedMenu) menu;
             Player player = menu.playerMenuUtility.getOwner();
             if (isClosed) {
-                player.sendMessage("Animated task has been cancelled.");
+                player.sendMessage("[DEBUG]: ANIMATION TASK CANCELLED");
                 bukkitTask.cancel();
                 return;
             }
 
-            player.sendMessage("Animation task called.");
             animatedMenu.update();
-        }, 20L, 20L);
+        }, 0, animatedMenu.updateInterval());
     }
 
     public void setClosed() {

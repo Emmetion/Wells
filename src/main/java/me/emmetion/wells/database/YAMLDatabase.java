@@ -19,7 +19,6 @@ public final class YAMLDatabase extends EDatabase {
 
     private final Wells wells;
 
-
     public YAMLDatabase() {
         super();
 
@@ -35,7 +34,7 @@ public final class YAMLDatabase extends EDatabase {
 
     @Override
     public void initializeDatabase() {
-        // Check if files exist.
+        // Creates directories to each database folder.
 
         File wells = new File(wellsPath);
         wells.mkdirs();

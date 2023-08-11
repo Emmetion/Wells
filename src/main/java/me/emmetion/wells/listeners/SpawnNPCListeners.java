@@ -145,12 +145,13 @@ public class SpawnNPCListeners implements Listener {
 
                 armorStand.teleport(armorStand.getLocation().clone().add(0,0.05,0));
                 armorStand.setArrowsInBody(ticks);
-
-                armorStand.setRotation(ticks * 10, 0);
+                float raw = (float) (ticks > 4 ? ticks: .3 * ticks) * 30;
+                player.sendMessage("raw: " + raw);
+                armorStand.setRotation(raw, 0);
 
                 // Sounds every tick.
                 if (ticks < 16) {
-                    float pitch = (ticks * (0.03f) + .5f);
+                    float pitch = (ticks * (0.07f) + .5f);
                     player.sendMessage(Component.text("pitch: " + pitch));
                     player.playSound(armorStand.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, pitch);
                 }

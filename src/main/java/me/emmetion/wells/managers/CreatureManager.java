@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static me.emmetion.wells.util.Utilities.getColor;
@@ -165,43 +166,43 @@ public final class CreatureManager {
         return wellCreature;
     }
 
-    public WellCreature getWellCreatureFromEntity(Entity entity) {
-        Player e = Bukkit.getPlayer("Emmetion");
-        if (entity == null) {
-            return null;
-        }
-        NamespacedKey nk = new NamespacedKey(Wells.plugin, "creature-uuid");
-        String creature_uuid = entity.getPersistentDataContainer().get(nk, PersistentDataType.STRING);
+    public WellCreature getWellCreatureFromEntity(@NotNull Entity entity) {
+        NamespacedKey namespacedKey = new NamespacedKey(Wells.plugin, "creature-uuid");
+
+        String creatureUUID = entity.getPersistentDataContainer().get(namespacedKey, PersistentDataType.STRING);
         if (debug) {
+            // Prints all NamespacedKey's at the entity.
             for (NamespacedKey key : entity.getPersistentDataContainer().getKeys()) {
+                Player e = Bukkit.getPlayer("Emmetion");
                 e.sendMessage(key.asString());
             }
         }
 
-        if (creature_uuid == null) {
+        if (creatureUUID == null) {
             // creature does not exist.
             return null;
         }
 
 
-        UUID uuid = UUID.fromString(creature_uuid);
+        UUID uuid = UUID.fromString(creatureUUID);
         if (debug) {
             // TODO: REMOVE-DEBUG
             // send debug message
+            Player e = Bukkit.getPlayer("Emmetion");
             e.sendMessage(uuid.toString());
         }
         return wellCreatureMap.get(uuid);
     }
 
     public CreatureType getCreatureTypeFromEntity(Entity e) {
-        if (this.getWellCreatureFromEntity(e) == null)
+        if (getWellCreatureFromEntity(e) == null)
             return null;
 
         return this.getWellCreatureFromEntity(e).getCreatureType();
     }
 
     private void removeCreature(@NotNull UUID uuid) {
-        WellCreature wellCreature = this.wellCreatureMap.get(uuid);
+        WellCreature wellCreature = wellCreatureMap.get(uuid);
         if (wellCreature == null)
             return;
 

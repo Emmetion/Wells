@@ -9,6 +9,9 @@ import me.emmetion.wells.Wells;
 import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.events.creature.CreatureClickEvent;
 import me.emmetion.wells.managers.WellManager;
+import me.emmetion.wells.menu.PlayerMenuUtility;
+import me.emmetion.wells.menu.SpawnNPCMenu;
+import me.emmetion.wells.model.WellPlayer;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.LookClose;
@@ -195,17 +198,25 @@ public final class SpawnNPC extends WellCreature {
         npc.setAlwaysUseNameHologram(false);
 
         Player clicker = event.getPlayer();
-        if (wellManager.wellExistsForPlayer(clicker)) {
-            clicker.sendMessage(getColor("&eYour town already has a well, try building something else."));
-            return;
-        }
+//        if (wellManager.wellExistsForPlayer(clicker)) {
+//            clicker.sendMessage(getColor("&eYour town already has a well, try building something else."));
+//            return;
+//        }
 
         if (playersChatting.contains(clicker)) {
             clicker.sendActionBar(getComponentColor("&cYou are already chatting with this npc."));
             return;
         }
 
-        executeChat(clicker);
+
+        WellPlayer wellPlayer = wellManager.getWellPlayer(clicker);
+        if (wellPlayer == null) {
+            Logger logger = Wells.plugin.getLogger();
+            logger.info("WellPlayer should not be null here. (SpawnNPC:215)");
+        }
+        SpawnNPCMenu spawnNPCMenu = new SpawnNPCMenu(Wells.plugin, new PlayerMenuUtility(clicker, wellPlayer), this);
+        spawnNPCMenu.open();
+//        executeChat(clicker);
     }
 
 

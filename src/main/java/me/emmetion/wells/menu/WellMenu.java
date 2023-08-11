@@ -27,7 +27,6 @@ public class WellMenu extends Menu implements AnimatedMenu {
     private final Well well;
 
     private int currentFrame = 1;
-    private final int currentPage = 1;
 
     public WellMenu(Wells wells, Well well, PlayerMenuUtility utility) {
         super(wells, utility);
@@ -96,7 +95,7 @@ public class WellMenu extends Menu implements AnimatedMenu {
 
     @Override
     public void setMenuItems() {
-        well.getBuffs().forEach(ActiveBuff::update);
+//        well.getBuffs().forEach(ActiveBuff::update);
 
         for (int i = 0; i < 27; i++) {
             this.inventory.setItem(i, FILLER_GLASS);
@@ -204,6 +203,8 @@ public class WellMenu extends Menu implements AnimatedMenu {
         }
 
         this.currentFrame += 1;
+
+        playerMenuUtility.sendMessage(Component.text("Menu is open and animating.®"));
     }
 
 }
