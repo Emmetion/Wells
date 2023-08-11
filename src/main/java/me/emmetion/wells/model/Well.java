@@ -308,36 +308,19 @@ public class Well {
 
     public void depositCoin(@NotNull CoinType coinType) {
         switch (coinType) {
-            case LEVEL_UP_COIN:
-
-                break;
-            case TIME_BONUS:
-
-                break;
-            case GOLD_COIN:
-            case SILVER_COIN:
-            case BRONZE_COIN:
-                nearbyPlayers
-                break;
+            case LEVEL_UP_COIN -> {
+                incrementLevel();
+                this.experience = 0;
+                this.experienceRequired = 100 + (well_level * 5);
+                updateHologram();
+            }
+            case TIME_BONUS -> getBuffs().forEach(ActiveBuff::addTwentySeconds);
+            case GOLD_COIN, SILVER_COIN, BRONZE_COIN -> {
+                this.animation.enqueueDepositedCoinType(coinType); // adds coindrop information to nearwellanimation.
+                depositXP(coinType.getExperience());
+                updateHologram();
+            }
         }
-
-        if (coinType.equals(CoinType.LEVEL_UP_COIN)) {
-            incrementLevel();
-            this.experience = 0;
-            this.experienceRequired = 100 + (well_level * 5);
-            updateHologram();
-            return;
-        } else if (coinType == CoinType.TIME_BONUS) {
-            // TODO: check if this works.
-            // Add 20 seconds to each ActiveBuff (in theory)
-            getBuffs().forEach(ActiveBuff::addTwentySeconds);
-        }
-
-        this.animation.enqueueDepositedCoinType(coinType);
-        depositXP(coinType.getExperience());
-
-
-        updateHologram(); // updates hologram.
     }
 
     public int getWellLevel() {

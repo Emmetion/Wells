@@ -12,6 +12,8 @@
             <list>
               <option value="clean" />
               <option value="package" />
+              <option value="-T" />
+              <option value="16" />
             </list>
           </option>
           <option name="pomFileName" />

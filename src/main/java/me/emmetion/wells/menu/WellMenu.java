@@ -165,11 +165,17 @@ public class WellMenu extends Menu implements AnimatedMenu {
         switch (buffType) {
             case RESISTANCE, GREEN_THUMB -> {
                 itemMeta.displayName(Component.text(getColor("&a" + StringUtils.capitalize(buffType.getBuffID().toLowerCase()) + " Buff. &e(&ccrop_type&e)")));
-                itemMeta.lore(Arrays.asList(Component.text(getColor("&7Duration Left: " + durLeft)), Component.text(getColor("Level: "))));
+                itemMeta.lore(Arrays.asList(
+                        Component.text(getColor("&7Duration Left: " + durLeft)),
+                        Component.text(getColor("Level: ")))
+                );
             }
             case NONE -> {
                 itemMeta.displayName(Component.text("Empty Buff..."));
-                itemMeta.lore(Arrays.asList(Component.text(ChatColor.GRAY + "You have no buff in this slot!"), Component.text(ChatColor.GRAY + "Deposit " + ChatColor.GOLD + "Gold Coins" + ChatColor.GRAY + " for a chance to get a buff!")));
+                itemMeta.lore(Arrays.asList(
+                        Component.text(getColor("You have no buff in this slot!")),
+                        Component.text(getColor("&7Deposit &6Gold Coins &7 for a chance to get a buff!")))
+                );
             }
             default -> itemMeta.displayName(Component.text("Unknown buff... '" + buffID + "'"));
         }

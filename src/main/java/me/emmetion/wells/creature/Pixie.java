@@ -62,7 +62,7 @@ public final class Pixie extends WellCreature implements ParticleMob, Movable, W
 
         armorStand.setInvisible(true);
         armorStand.setSmall(true);
-        armorStand.setInvulnerable(false);
+        armorStand.setInvulnerable(false); // This needs to be false in order for Entity
         armorStand.setCustomName("..."); // Temporarily sets name to '...'. This then gets updated to the pixie's name on the next frame.
         armorStand.setCustomNameVisible(true);
 
