@@ -6,6 +6,7 @@ import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.entity.Bat;
@@ -13,6 +14,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
@@ -61,26 +63,47 @@ public class NearWellAnimation extends Animation {
 
     }
 
+    private final Material[] materialList = {
+            Material.OAK_BOAT,
+            Material.DIAMOND_BLOCK,
+            Material.CHISELED_POLISHED_BLACKSTONE,
+            Material.DEEPSLATE
+    };
+
 
     @Override
     public void run() {
 
         World world = center.getWorld();
 
-        double y_radius = 0.7;
+        double y_radius = 6;
 
         double x1 = center.getX() + radius * Math.cos(angle);
-        double y1 = center.getY() + (y_radius * Math.sin(angle));
+        double y1 = center.getY() + (y_radius * random.nextDouble());
         double z1 = center.getZ() + radius * Math.sin(angle);
 
         Location location1 = new Location(world, x1, y1, z1);
 
         // Calculate the position for the second particle
         double x2 = center.getX() + radius * Math.cos(angle + Math.PI);
-        double y2 = center.getY() + (y_radius * Math.sin(angle + Math.PI)); // (y_radius * Math.sin(angle + Math.PI));
+        double y2 = center.getY() + (y_radius * random.nextDouble()); // (y_radius * Math.sin(angle + Math.PI));
         double z2 = center.getZ() + radius * Math.sin(angle + Math.PI);
 
         Location location2 = new Location(world, x2, y2, z2);
+
+        if (getItem1() != null) {
+            ItemDisplay item1 = getItem1();
+
+
+            item1.teleport(location1);
+
+            item1.setItemStack(new ItemStack(materialList[random.nextInt(materialList.length - 1)]));
+        }
+        if (getItem2() != null) {
+            ItemDisplay item2 = getItem2();
+
+            item2.teleport(location2);
+        }
 
         // Spawn the particles at the calculated positions
 

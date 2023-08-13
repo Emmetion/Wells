@@ -10,7 +10,6 @@ import me.emmetion.wells.model.CoinType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -260,20 +259,29 @@ public class Utilities {
 
 
 
-    public static ItemStack createItemStack(Material material, int amount, @Nullable Component displayname, @Nullable List<Component> lore) {
+    public static ItemStack createItemStack(@NotNull Material material,
+                                            int amount,
+                                            @Nullable Component displayName,
+                                            @Nullable List<Component> lore) {
         ItemStack item = new ItemStack(material, amount);
         ItemMeta im = item.getItemMeta();
-        if (displayname != null)
-            im.displayName(displayname);
+        if (displayName != null)
+            im.displayName(displayName);
         if (lore != null)
             im.lore(lore);
         item.setItemMeta(im);
         return item;
     }
 
-    public static ItemStack createItemStack(Material material, @Nullable Component displayname, @Nullable List<Component> lore) {
-        return createItemStack(material, 1, displayname, lore);
+    public static ItemStack createItemStack(@NotNull Material material,
+                                            @Nullable Component displayName,
+                                            @Nullable List<Component> lore) {
+        return createItemStack(material, 1, displayName, lore);
     }
 
+    public static ItemStack createItemStack(@NotNull Material material,
+                                            @NotNull Component displayName) {
+        return createItemStack(material, 1, displayName, null);
+    }
 
 }

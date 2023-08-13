@@ -22,8 +22,8 @@ public final class NearWellRunnable extends BukkitRunnable {
     private final HashMap<Player, String> playersNearWell = new HashMap<>();
     private final HashMap<Player, Integer> nearWellMessageCooldown = new HashMap<>();
 
-    public NearWellRunnable(WellManager manager) {
-        wellManager = manager;
+    public NearWellRunnable(WellManager wellManager) {
+        this.wellManager = wellManager;
     }
 
 
@@ -32,6 +32,8 @@ public final class NearWellRunnable extends BukkitRunnable {
         // Temporarily stores current nearby well players.
         // Later iterated over when removing non-nearby players.
         List<Player> currentWellPlayers = new ArrayList<>();
+
+        double startTime = System.nanoTime();
 
         for (Well w : wellManager.getWells()) {
             Location location = w.getLocation();
@@ -130,12 +132,21 @@ public final class NearWellRunnable extends BukkitRunnable {
                 playersNearWell.remove(p);
             }
         }
+
+        double endTime = System.nanoTime();
+        double msBetween = endTime - startTime;
+        // Currently, this algorithm runs at about ~10,000ns every tick.
+        // This operation could be further
+//        Player emmetion = Bukkit.getPlayer("Emmetion");
+//        if (emmetion != null) {
+//            emmetion.sendMessage("msBetween: " + msBetween + "ns");
+//        }
     }
 
     /**
      * This method creates a well hologram provided at the given well's
      * location.
-     *
+     * <p> <link href="https://google.com">
      * This will not create a new well hologram if one already exists with that name.
      *
      * @param well Well where you want the hologram loaded.

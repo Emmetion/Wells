@@ -30,7 +30,9 @@ public class WellMenu extends Menu implements AnimatedMenu {
 
     public WellMenu(Wells wells, Well well, PlayerMenuUtility utility) {
         super(wells, utility);
+
         this.well = well;
+
     }
 
     @Override
@@ -189,7 +191,12 @@ public class WellMenu extends Menu implements AnimatedMenu {
     }
 
     @Override
-    public int updateInterval() {
+    public int runnableDelay() {
+        return 0;
+    }
+
+    @Override
+    public int runnablePeriod() {
         return 2;
     }
 

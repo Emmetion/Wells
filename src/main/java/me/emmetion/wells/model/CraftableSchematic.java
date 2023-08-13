@@ -8,15 +8,26 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Craftable are objects that represent items that can be crafted in-game.
+ * <p>
+ *
+ */
 public class CraftableSchematic {
 
     private final String name;
     private final List<SMaterial> schematicMateiralList;
 
-    public CraftableSchematic(String name, List<SMaterial> materialsRequired) {
+    private final ItemStack resultingItem;
+
+    public CraftableSchematic(String name, List<SMaterial> materialsRequired, ItemStack resultingItem) {
         this.name = name;
         this.schematicMateiralList = materialsRequired;
+
+        this.resultingItem = resultingItem;
     }
+
+    // Helper Methods.
 
     public List<String> createHologramMaterialList() {
         List<String> itemsRequired = this.schematicMateiralList.stream()
@@ -28,6 +39,10 @@ public class CraftableSchematic {
                     return "&b" + smaterial.getRepresentativeItemStack().getItemMeta().displayName();
                 }).toList();
         return itemsRequired;
+    }
+
+    public List<String> createMaterialList() {
+
     }
 
 

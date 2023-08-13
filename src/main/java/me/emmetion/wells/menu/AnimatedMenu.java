@@ -8,8 +8,10 @@ public interface AnimatedMenu {
     // Frames are counted
     int getCurrentFrame();
 
+    int runnableDelay();
+
     // The interval (in server-ticks) of how long each frame should be between updates.
-    int updateInterval();
+    int runnablePeriod();
 
     // A void method to update the menu.
     void update();

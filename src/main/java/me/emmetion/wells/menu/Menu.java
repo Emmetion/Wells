@@ -54,7 +54,6 @@ public abstract class Menu implements InventoryHolder, Listener {
 
         inventory = Bukkit.createInventory(this, getSlots(), Component.text(Utilities.getColor(getTitle())));
         Menu menu = this;
-        this.setMenuItems();
 
         playerMenuUtility.getOwner().openInventory(inventory);
 
@@ -75,7 +74,7 @@ public abstract class Menu implements InventoryHolder, Listener {
             }
 
             animatedMenu.update();
-        }, 0, animatedMenu.updateInterval());
+        }, animatedMenu.runnableDelay(), animatedMenu.runnablePeriod());
     }
 
     public void setClosed() {

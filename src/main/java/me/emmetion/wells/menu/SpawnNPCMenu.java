@@ -4,11 +4,11 @@ package me.emmetion.wells.menu;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.creature.SpawnNPC;
 import me.emmetion.wells.model.CraftableSchematic;
+import me.emmetion.wells.model.SMaterial;
+import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -17,27 +17,28 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static me.emmetion.wells.util.Utilities.getColor;
 
-public class SpawnNPCMenu extends Menu implements Pageable, AnimatedMenu {
-
-    // The current page of the player viewing.
-    private int currentPage = 0;
+public class SpawnNPCMenu extends PaginatedMenu implements AnimatedMenu {
 
     private int currentFrame = 0;
 
     private final List<CraftableSchematic> schematics = new ArrayList<>();
-    private final List<Inventory> pages = new ArrayList<>();
     private final SpawnNPC spawnNPC;
 
     public SpawnNPCMenu(Wells wells, PlayerMenuUtility utility, SpawnNPC spawnNPC) {
         super(wells, utility);
 
         this.spawnNPC = spawnNPC;
-        this.currentPage = 0;
+
+        schematics.add(new CraftableSchematic("", Arrays.asList(
+                new SMaterial(Material.CAULDRON, 1),
+
+        )));
     }
 
     @Override
@@ -50,7 +51,7 @@ public class SpawnNPCMenu extends Menu implements Pageable, AnimatedMenu {
         return "&bWellbi";
     }
 
-    private final Material[] colorList = {
+    private final Material[] materialList = {
         Material.BLACK_STAINED_GLASS_PANE,
         Material.GRAY_STAINED_GLASS_PANE,
         Material.GREEN_STAINED_GLASS_PANE,
@@ -80,16 +81,18 @@ public class SpawnNPCMenu extends Menu implements Pageable, AnimatedMenu {
         InventoryAction action = e.getAction();
 
         if (cursor != null) {
-            cursor.setType(colorList[random.nextInt(colorList.length)]);
+            cursor.setType(materialList[random.nextInt(materialList.length)]);
         }
 
         // Handle each slowtype of
         switch (rawSlot) {
             case 11 -> {
-                previousPage();
+                // execute displaying previous schematic.
+
             }
             case 15 -> {
-                nextPage();
+                // execute displying previous schematic.
+
             }
             default -> {
                 // e.setCancelled(true);
@@ -125,40 +128,17 @@ public class SpawnNPCMenu extends Menu implements Pageable, AnimatedMenu {
         inventory.setItem(15, nextPage);
     }
 
-    @Override
-    public void nextPage() {
-        if (currentPage == this.pages.size()) {
-            Player player = playerMenuUtility.getWellPlayer().getBukkitPlayer();
-            player.sendMessage(Component.text(getColor("No next page.")));
-            return;
+    private void openPage(int schematicIndex) {
+        if (schematicIndex < 0 || schematicIndex > schematics.size()) {
+            throw new IllegalArgumentException("Out of bounds page index provided.");
         }
+        super.pageIndex = schematicIndex;
 
-        this.currentPage += 1;
+        CraftableSchematic schem = schematics.get(super.pageIndex);
 
-        openPage(currentPage);
-    }
+        schem.getDisplayItem();
 
-    @Override
-    public void previousPage() {
-        if (currentPage == 0) {
-            Player player = playerMenuUtility.getWellPlayer().getBukkitPlayer();
-            player.sendMessage(Component.text(getColor("Cannot go back a page. ")));
-        }
-        this.currentPage -= 1;
-    }
-
-    @Override
-    public void addPage(int pageNum, Inventory inventory) {
-        pages.add(inventory);
-    }
-
-
-    private void openPage(int pageIndex) {
-        if (pageIndex < 0 || pageIndex > pages.size()) {
-            throw new IllegalArgumentException("out of bounds page index provided.");
-        }
-
-        this.open();
+        Utilities.createItemStack(Material.)
 
     }
 
@@ -168,9 +148,13 @@ public class SpawnNPCMenu extends Menu implements Pageable, AnimatedMenu {
         return this.currentFrame;
     }
 
-    //
     @Override
-    public int updateInterval() {
+    public int runnableDelay() {
+        return 0;
+    }
+
+    @Override
+    public int runnablePeriod() {
         return 0;
     }
 
@@ -184,6 +168,13 @@ public class SpawnNPCMenu extends Menu implements Pageable, AnimatedMenu {
         if (cursor == null)
             return;
 
-        cursor.setType(colorList[random.nextInt(colorList.length)]);
+        cursor.setType(materialList[random.nextInt(materialList.length)]);
     }
+
+
+
+    public void updateSchematicToIndex() {
+
+    }
+
 }

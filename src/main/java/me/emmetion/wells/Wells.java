@@ -144,7 +144,7 @@ public final class Wells extends JavaPlugin {
 
         // Locates nearby well players.
         nearWellRunnable = new NearWellRunnable(wellManager);
-        nearWellRunnable.runTaskTimer(Wells.plugin, 1, 1);
+        nearWellRunnable.runTaskTimer(Wells.plugin, 1, 5);
 
         // Updates the wells database every 5 minutes.
         updateDatabaseRunnable = new UpdateDatabaseRunnable(wellManager);
@@ -152,7 +152,7 @@ public final class Wells extends JavaPlugin {
 
         // Creates the ActiveBuffRunnable.
         activeBuffRunnable = new ActiveBuffRunnable(this);
-        activeBuffRunnable.runTaskTimer(Wells.plugin, 1, 1);
+        activeBuffRunnable.runTaskTimer(Wells.plugin, 1, 5);
 
         // Creates the WellCreatureRunnable
         wellCreatureRunnable = new WellCreatureRunnable(this, wellManager, creatureManager);
