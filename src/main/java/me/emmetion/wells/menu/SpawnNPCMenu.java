@@ -3,9 +3,7 @@ package me.emmetion.wells.menu;
 
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.creature.SpawnNPC;
-import me.emmetion.wells.model.CraftableSchematic;
-import me.emmetion.wells.model.SMaterial;
-import me.emmetion.wells.util.Utilities;
+import me.emmetion.wells.model.CraftableWellItem;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -17,7 +15,6 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -27,18 +24,32 @@ public class SpawnNPCMenu extends PaginatedMenu implements AnimatedMenu {
 
     private int currentFrame = 0;
 
-    private final List<CraftableSchematic> schematics = new ArrayList<>();
+    private final List<CraftableWellItem> schematics = new ArrayList<>();
     private final SpawnNPC spawnNPC;
+
+    private final Material[] materialList = {
+            Material.BLACK_STAINED_GLASS_PANE,
+            Material.GRAY_STAINED_GLASS_PANE,
+            Material.GREEN_STAINED_GLASS_PANE,
+            Material.BLUE_STAINED_GLASS_PANE,
+            Material.ORANGE_STAINED_GLASS_PANE,
+            Material.CYAN_STAINED_GLASS_PANE,
+            Material.BROWN_STAINED_GLASS_PANE,
+            Material.MAGENTA_STAINED_GLASS_PANE,
+            Material.RED_STAINED_GLASS_PANE,
+            Material.BEACON,
+    };
+
 
     public SpawnNPCMenu(Wells wells, PlayerMenuUtility utility, SpawnNPC spawnNPC) {
         super(wells, utility);
 
         this.spawnNPC = spawnNPC;
 
-        schematics.add(new CraftableSchematic("", Arrays.asList(
-                new SMaterial(Material.CAULDRON, 1),
-
-        )));
+//        schematics.add(new CraftableWellItem("", Arrays.asList(
+//                new SMaterial(Material.CAULDRON, 1),
+//
+//        )));
     }
 
     @Override
@@ -50,19 +61,6 @@ public class SpawnNPCMenu extends PaginatedMenu implements AnimatedMenu {
     public String getTitle() {
         return "&bWellbi";
     }
-
-    private final Material[] materialList = {
-        Material.BLACK_STAINED_GLASS_PANE,
-        Material.GRAY_STAINED_GLASS_PANE,
-        Material.GREEN_STAINED_GLASS_PANE,
-        Material.BLUE_STAINED_GLASS_PANE,
-        Material.ORANGE_STAINED_GLASS_PANE,
-        Material.CYAN_STAINED_GLASS_PANE,
-        Material.BROWN_STAINED_GLASS_PANE,
-        Material.MAGENTA_STAINED_GLASS_PANE,
-        Material.RED_STAINED_GLASS_PANE,
-        Material.BEACON,
-    };
 
     private final ThreadLocalRandom random = ThreadLocalRandom.current();
 
@@ -134,11 +132,10 @@ public class SpawnNPCMenu extends PaginatedMenu implements AnimatedMenu {
         }
         super.pageIndex = schematicIndex;
 
-        CraftableSchematic schem = schematics.get(super.pageIndex);
+        CraftableWellItem schem = schematics.get(super.pageIndex);
+//        schem.createHologramMaterialList(
 
-        schem.getDisplayItem();
 
-        Utilities.createItemStack(Material.)
 
     }
 

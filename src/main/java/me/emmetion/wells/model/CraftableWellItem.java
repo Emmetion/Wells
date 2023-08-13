@@ -1,6 +1,7 @@
 package me.emmetion.wells.model;
 
 import me.emmetion.wells.util.Utilities;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -9,18 +10,16 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Craftable are objects that represent items that can be crafted in-game.
- * <p>
- *
+ * CraftableWellItem
  */
-public class CraftableSchematic {
+public class CraftableWellItem {
 
     private final String name;
     private final List<SMaterial> schematicMateiralList;
 
     private final ItemStack resultingItem;
 
-    public CraftableSchematic(String name, List<SMaterial> materialsRequired, ItemStack resultingItem) {
+    public CraftableWellItem(String name, List<SMaterial> materialsRequired, ItemStack resultingItem) {
         this.name = name;
         this.schematicMateiralList = materialsRequired;
 
@@ -41,12 +40,24 @@ public class CraftableSchematic {
         return itemsRequired;
     }
 
-    public List<String> createMaterialList() {
-
+    public List<Component> createMaterialComponent(CraftableWellItem wellItem) {
+        return Arrays.asList(
+                Component.text(wellItem.name),
+                Component.text(wellItem.resultingItem.toString())
+        );
     }
 
+    public ItemStack createMenuItemStack() {
+        ItemStack item = new ItemStack(resultingItem.getType());
 
+        item.lore(Arrays.asList(
+                Component.text(""),
+                Component.text(""),
+                Component.text("")
+        ));
 
+        return item;
+    }
 }
 
 class SMaterial {

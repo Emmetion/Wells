@@ -1,8 +1,7 @@
 package me.emmetion.wells.config;
 
-import com.sk89q.worldedit.history.changeset.ArrayListHistory;
 import me.emmetion.wells.Wells;
-import me.emmetion.wells.model.CraftableSchematic;
+import me.emmetion.wells.model.CraftableWellItem;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -13,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Configuration {
 
@@ -36,7 +34,7 @@ public class Configuration {
     private String password = "";
     private String url = "";
 
-    private List<CraftableSchematic> craftableSchematics = new ArrayList<>();
+    private List<CraftableWellItem> craftableSchematics = new ArrayList<>();
 
     private List<String> wellLevelUp = null;
 
