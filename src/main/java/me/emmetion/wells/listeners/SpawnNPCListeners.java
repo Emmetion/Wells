@@ -8,7 +8,7 @@ import eu.decentsoftware.holograms.event.HologramClickEvent;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.anim.Animation;
 import me.emmetion.wells.anim.AnimationSettings;
-import me.emmetion.wells.creature.SpawnNPC;
+import me.emmetion.wells.creature.creatures.SpawnNPC;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;

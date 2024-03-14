@@ -5,13 +5,21 @@ package me.emmetion.wells.menu;
  */
 public interface AnimatedMenu {
 
-    // Frames are counted
-    int getCurrentFrame();
+    // Constants
+    int DEFAULT_DELAY = 0; // No delay.
+    int DEFAULT_PERIOD = 2; // Updating every 2 ticks.
 
-    int runnableDelay();
+    default int runnableDelay() {
+        return DEFAULT_DELAY;
+    }
 
     // The interval (in server-ticks) of how long each frame should be between updates.
-    int runnablePeriod();
+    default int runnablePeriod() {
+        return DEFAULT_PERIOD;
+    }
+
+    // Frames are counted
+    int getCurrentFrame();
 
     // A void method to update the menu.
     void update();

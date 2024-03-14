@@ -2,10 +2,12 @@ package me.emmetion.wells.menu;
 
 
 import me.emmetion.wells.Wells;
+import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,6 +17,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public abstract class Menu implements InventoryHolder, Listener {
 
@@ -35,13 +39,21 @@ public abstract class Menu implements InventoryHolder, Listener {
 
     /**
      * This title is automatically converts color codes upon instantiation.
-     * @return
+     * @return Title of the menu.
      */
     public abstract String getTitle();
 
+    /**
+     * Handles any inventory click for the given menu.
+     * @param e The InventoryClickEvent called from Bukkit.
+     */
     @EventHandler
     public abstract void handleClick(InventoryClickEvent e);
 
+    /**
+     * Handles any inventory close for the given menu.
+     * @param e The InventoryCloseEvent called from Bukkit.
+     */
     @EventHandler
     public abstract void handleClose(InventoryCloseEvent e);
 
@@ -54,7 +66,7 @@ public abstract class Menu implements InventoryHolder, Listener {
 
         inventory = Bukkit.createInventory(this, getSlots(), Component.text(Utilities.getColor(getTitle())));
         Menu menu = this;
-
+        menu.setMenuItems();
         playerMenuUtility.getOwner().openInventory(inventory);
 
         // Handle animated menu's
@@ -67,6 +79,7 @@ public abstract class Menu implements InventoryHolder, Listener {
         // Handle AnimatedMenu's update methods.
         Bukkit.getScheduler().runTaskTimer(wells, bukkitTask -> {
             Player player = menu.playerMenuUtility.getOwner();
+            WellManager manager = Wells.plugin.getWellManager();
             if (isClosed) {
                 player.sendMessage("[DEBUG]: ANIMATION TASK CANCELLED");
                 bukkitTask.cancel();
@@ -88,6 +101,10 @@ public abstract class Menu implements InventoryHolder, Listener {
     @Override
     public @NotNull Inventory getInventory() {
         return inventory;
+    }
+
+    public List<HumanEntity> getViewers() {
+        return this.inventory.getViewers();
     }
 
 }

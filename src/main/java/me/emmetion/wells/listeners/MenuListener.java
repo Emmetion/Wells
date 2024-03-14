@@ -1,6 +1,5 @@
 package me.emmetion.wells.listeners;
 
-import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.menu.Menu;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,12 +8,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.InventoryHolder;
 
 public class MenuListener implements Listener {
-
-    private final WellManager manager;
-
-    public MenuListener(WellManager wellManager) {
-        this.manager = wellManager;
-    }
 
     @EventHandler
     public void onMenuClick(InventoryClickEvent e) {
@@ -34,7 +27,5 @@ public class MenuListener implements Listener {
             menu.handleClose(e);
         }
     }
-
-
 
 }

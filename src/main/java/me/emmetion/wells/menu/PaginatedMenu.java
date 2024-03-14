@@ -23,8 +23,15 @@ public abstract class PaginatedMenu extends Menu {
         return this.pageIndex;
     }
 
+    public void nextPage() {
+        pageIndex += 1;
+        super.open();
+    }
 
-
-
+    public void prevPage() {
+        if (pageIndex == 0) return;
+        pageIndex -= 1;
+        super.open();
+    }
 
 }

@@ -1,9 +1,11 @@
-package me.emmetion.wells.menu;
+package me.emmetion.wells.menu.menus;
 
 
 import me.emmetion.wells.Wells;
-import me.emmetion.wells.creature.SpawnNPC;
-import me.emmetion.wells.model.CraftableWellItem;
+import me.emmetion.wells.creature.creatures.SpawnNPC;
+import me.emmetion.wells.menu.AnimatedMenu;
+import me.emmetion.wells.menu.PaginatedMenu;
+import me.emmetion.wells.menu.PlayerMenuUtility;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -14,8 +16,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static me.emmetion.wells.util.Utilities.getColor;
@@ -24,7 +24,6 @@ public class SpawnNPCMenu extends PaginatedMenu implements AnimatedMenu {
 
     private int currentFrame = 0;
 
-    private final List<CraftableWellItem> schematics = new ArrayList<>();
     private final SpawnNPC spawnNPC;
 
     private final Material[] materialList = {
@@ -59,7 +58,7 @@ public class SpawnNPCMenu extends PaginatedMenu implements AnimatedMenu {
 
     @Override
     public String getTitle() {
-        return "&bWellbi";
+        return "&bWellbi Menu";
     }
 
     private final ThreadLocalRandom random = ThreadLocalRandom.current();
@@ -82,7 +81,8 @@ public class SpawnNPCMenu extends PaginatedMenu implements AnimatedMenu {
             cursor.setType(materialList[random.nextInt(materialList.length)]);
         }
 
-        // Handle each slowtype of
+
+        // Handle each slot type of
         switch (rawSlot) {
             case 11 -> {
                 // execute displaying previous schematic.
@@ -90,7 +90,6 @@ public class SpawnNPCMenu extends PaginatedMenu implements AnimatedMenu {
             }
             case 15 -> {
                 // execute displying previous schematic.
-
             }
             default -> {
                 // e.setCancelled(true);
@@ -126,18 +125,6 @@ public class SpawnNPCMenu extends PaginatedMenu implements AnimatedMenu {
         inventory.setItem(15, nextPage);
     }
 
-    private void openPage(int schematicIndex) {
-        if (schematicIndex < 0 || schematicIndex > schematics.size()) {
-            throw new IllegalArgumentException("Out of bounds page index provided.");
-        }
-        super.pageIndex = schematicIndex;
-
-        CraftableWellItem schem = schematics.get(super.pageIndex);
-//        schem.createHologramMaterialList(
-
-
-
-    }
 
 
     @Override
@@ -154,7 +141,7 @@ public class SpawnNPCMenu extends PaginatedMenu implements AnimatedMenu {
     public int runnablePeriod() {
         return 0;
     }
-
+    //
     @Override
     public void update() {
         if (this.playerMenuUtility.getOwner() == null)

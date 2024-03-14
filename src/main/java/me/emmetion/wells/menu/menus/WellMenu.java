@@ -1,6 +1,9 @@
-package me.emmetion.wells.menu;
+package me.emmetion.wells.menu.menus;
 
 import me.emmetion.wells.Wells;
+import me.emmetion.wells.menu.AnimatedMenu;
+import me.emmetion.wells.menu.Menu;
+import me.emmetion.wells.menu.PlayerMenuUtility;
 import me.emmetion.wells.model.ActiveBuff;
 import me.emmetion.wells.model.BuffType;
 import me.emmetion.wells.model.Well;
@@ -30,9 +33,7 @@ public class WellMenu extends Menu implements AnimatedMenu {
 
     public WellMenu(Wells wells, Well well, PlayerMenuUtility utility) {
         super(wells, utility);
-
         this.well = well;
-
     }
 
     @Override
@@ -97,12 +98,6 @@ public class WellMenu extends Menu implements AnimatedMenu {
 
     @Override
     public void setMenuItems() {
-//        well.getBuffs().forEach(ActiveBuff::update);
-
-        for (int i = 0; i < 27; i++) {
-            this.inventory.setItem(i, FILLER_GLASS);
-        }
-
         boolean see = this.playerMenuUtility.getWellPlayer().canSeeParticles();
 
         ItemStack item;
@@ -117,8 +112,6 @@ public class WellMenu extends Menu implements AnimatedMenu {
 
         this.inventory.setItem(8, item);
 
-
-
         ItemStack cauldron = Utilities.createItemStack(Material.CAULDRON,
                 Component.text(ChatColor.DARK_GREEN + well.getWellName()),
                 Arrays.asList(
@@ -132,11 +125,13 @@ public class WellMenu extends Menu implements AnimatedMenu {
         this.inventory.setItem(13, cauldron);
 
         // set buff items
-        this.inventory.setItem(11, createBuffItem(well.getBuff1(), 1));
-        this.inventory.setItem(15, createBuffItem(well.getBuff2(), 2));
+        this.inventory.setItem(11, createBuffItem(well.getBuff1()));
+        this.inventory.setItem(15, createBuffItem(well.getBuff2()));
+        // Why would these items not appear immediately when opening the menu?
+        //
     }
 
-    public ItemStack createBuffItem(ActiveBuff buff, int id) {
+    public ItemStack createBuffItem(ActiveBuff buff) {
         String buffID = buff.getBuffID();
         BuffType buffType = buff.getBuffType();
 
@@ -146,7 +141,7 @@ public class WellMenu extends Menu implements AnimatedMenu {
         String durLeft;
 
         if (duration.isZero() || duration.isNegative()) {
-            woolColor = Material.RED_WOOL;
+            woolColor = Material.WHITE_WOOL;
             durLeft = "&c" + timeRemaining;
         }
         else if (duration.isPositive()) {
@@ -190,28 +185,53 @@ public class WellMenu extends Menu implements AnimatedMenu {
         return this.currentFrame;
     }
 
-    @Override
-    public int runnableDelay() {
-        return 0;
-    }
+    // Slots AROUND the cauldron. These should start with 1, 2, 3.
+    private final int[] cauldronOneSlots = new int[] {1, 2, 3, 12, 21, 20, 19, 10};
 
-    @Override
-    public int runnablePeriod() {
-        return 2;
-    }
+    // Slots AROUND the cauldron. These should start with 5, 6, 7.
+    private final int[] cauldronTwoSlots = new int[] {5, 6, 7, 16, 25, 24, 23, 14};
 
     @Override
     public void update() {
 
-        // Every 5 ticks, we perform our update and then continue.
-        if (currentFrame % 2 == 0) {
-            inventory.setItem(11, createBuffItem(well.getBuff1(), 1));
-            inventory.setItem(15, createBuffItem(well.getBuff2(), 2));
+        // Fill screen with grey glass panes.
+        ItemStack[] screen = defaultScreen();
+
+        // Every 10 ticks, we perform our update and then continue.
+        int serverTicks = this.currentFrame % 10;
+        if (serverTicks == 0) {
+            screen[11] = createBuffItem(well.getBuff1());
+            screen[15] = createBuffItem(well.getBuff2());
+        } else {
+            screen[11] = null;
+            screen[15] = null;
+        }
+
+        int frame = this.currentFrame % 8; // Move box's around the block.
+        // Loop around the cauldron placing glass pane for animation.
+        screen[cauldronOneSlots[frame]] = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
+        screen[cauldronTwoSlots[frame]] = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
+        //
+
+        screen[13] = null; // Ignore cauldron at center of page.
+        screen[8] = null; // Ignore the item in the Top right of the screen.
+        for (int i = 0; i < 27; i++) {
+            if (screen[i] == null) {
+                // Won't update this slot on the screen. It's handled independently.
+                continue;
+            }
+            this.inventory.setItem(i, screen[i]);
         }
 
         this.currentFrame += 1;
+    }
 
-        playerMenuUtility.sendMessage(Component.text("Menu is open and animating.®"));
+    private ItemStack[] defaultScreen() {
+        ItemStack[] contents = new ItemStack[27];
+        for (int i = 0; i < 27; i++) {
+            contents[i] = (FILLER_GLASS);
+        }
+        return contents;
     }
 
 }
