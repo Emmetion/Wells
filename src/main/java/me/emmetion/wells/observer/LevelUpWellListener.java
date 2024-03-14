@@ -4,28 +4,23 @@ import com.palmergames.adventure.text.Component;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
-import com.sk89q.worldedit.util.formatting.component.TextComponentProducer;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.model.Well;
-import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static me.emmetion.wells.util.Utilities.getColor;
 
-public class LevelUpObserver implements Observer {
+public class LevelUpWellListener implements WellListener {
 
     private final Well well;
 
-    public LevelUpObserver(Well well) {
+    public LevelUpWellListener(Well well) {
         well.attachObserver(this);
         //
         this.well = well;
@@ -42,6 +37,11 @@ public class LevelUpObserver implements Observer {
         List<String> levelUpMessages = Configuration.getInstance().getWellLevelUp();
 
         Town town = TownyAPI.getInstance().getTown(townname);
+        if (town == null) {
+            Logger logger = Wells.plugin.getLogger();
+            logger.info("Failed to send messages.well.level-up-announcement");
+            return;
+        }
         town.getResidents().stream()
                 .filter(Resident::isOnline)
                 .forEach(resident -> {

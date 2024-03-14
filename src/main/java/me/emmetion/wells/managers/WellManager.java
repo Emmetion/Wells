@@ -4,6 +4,7 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
+import eu.decentsoftware.holograms.api.DHAPI;
 import me.emmetion.wells.config.Configuration;
 import me.emmetion.wells.database.DatabaseType;
 import me.emmetion.wells.database.EDatabase;
@@ -11,8 +12,8 @@ import me.emmetion.wells.database.SQLDatabase;
 import me.emmetion.wells.database.YAMLDatabase;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
-import me.emmetion.wells.observer.LevelUpObserver;
-import me.emmetion.wells.observer.XPIncrementObserver;
+import me.emmetion.wells.observer.LevelUpWellListener;
+import me.emmetion.wells.observer.XPIncrementWellListener;
 import me.emmetion.wells.util.Utilities;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -47,8 +48,8 @@ public final class WellManager {
     private final HashSet<Location> wellCache = new HashSet<>();
 
     // Observers
-    private final List<LevelUpObserver> levelupObservers = new ArrayList<>();
-    private final List<XPIncrementObserver> xpincrementObservers = new ArrayList<>();
+    private final List<LevelUpWellListener> levelupObservers = new ArrayList<>();
+    private final List<XPIncrementWellListener> xpincrementObservers = new ArrayList<>();
 
     private HashMap<UUID, WellPlayer> wellPlayerHashMap = new HashMap<>();
 
@@ -88,10 +89,9 @@ public final class WellManager {
             for (Well well : wellHashMap.values()) {
                 Location position = well.getLocation();
                 this.wellCache.add(position);
-                LevelUpObserver observer = new LevelUpObserver(well);
+                LevelUpWellListener observer = new LevelUpWellListener(well);
                 levelupObservers.add(observer);
-
-                XPIncrementObserver obsv2 = new XPIncrementObserver(well);
+                XPIncrementWellListener obsv2 = new XPIncrementWellListener(well);
                 xpincrementObservers.add(obsv2);
             }
 
@@ -123,8 +123,11 @@ public final class WellManager {
                 return false;
             }
 
-            if (wellExistsByTownName(town.getName())) // if well exists, return.
+            if (wellExistsByTownName(town.getName()))  {
+                // if well exists, return.
+                townMember.sendMessage(getColor("&cYour town already has a well!"));
                 return false;
+            }
 
             // Check for water blocks.
             if (!Utilities.blockRequirement(wellPosition, Material.WATER, 5)) // requires 5 waterblocks in the highlighted particle area
@@ -137,12 +140,15 @@ public final class WellManager {
             this.wellHashMap.put(newWell.getTownName(), newWell);
 
             this.database.createWell(newWell); // puts it into mysql server.
+
             this.saveAllWells(); // saves all wells.
 
             townMember.sendMessage(getColor("&aSuccessfully created your town well!"));
 
             return true;
         }
+        // print reason
+        townMember.sendMessage(getColor("&cYou cannot place a well in a town you are not part of!"));
 
         return false;
     }
@@ -161,6 +167,8 @@ public final class WellManager {
 
         this.wellHashMap.remove(well.getTownName());
         this.wellCache.remove(well.getLocation());
+        well.getNearWellAnimation().end();
+        DHAPI.getHologram(well.getTownName()).delete();
 
         this.database.deleteWell(well);
     }
@@ -174,6 +182,11 @@ public final class WellManager {
     public Well getWellByTownName(@NotNull String townName) {
         return wellHashMap.get(townName);
     }
+
+    public Well getWellByTown(@NotNull Town town) {
+        return wellHashMap.get(town.getName());
+    }
+
 
     public Well getWellByWellName(@NotNull String wellName) {
         if (wellName.length() <= 7) // there must be a minimum of 7 characters in the well's name for it to be valid.
@@ -233,6 +246,7 @@ public final class WellManager {
      * @param location
      */
     public boolean isWell(@NotNull Location location) {
+        Utilities.sendDebugMessage("Checking for well at location: " + location.toString());
         if (wellCache.size() == 0)
             return false;
         else
@@ -307,6 +321,12 @@ public final class WellManager {
 
     public void loadWellPlayer(@NotNull Player player) {
         WellPlayer wellPlayer = this.database.getWellPlayer(player);
+        if (wellPlayer == null) {
+            System.out.println("Created a new WellPlayer for player " + player.getName());
+            WellPlayer newPlayer = new WellPlayer(player.getUniqueId(), 0, 0, 0, 0, 0);
+            this.database.createWellPlayer(newPlayer);
+        }
+
         this.wellPlayerHashMap.put(wellPlayer.getPlayerUUID(), wellPlayer);
         if (debug)
             player.sendMessage("☢ Got well player for load.");

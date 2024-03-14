@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public final class CreatureClickEvent extends CreatureEvent{
+public final class CreatureClickEvent extends CreatureEvent {
 
     private static final HandlerList handlers = new HandlerList();
 

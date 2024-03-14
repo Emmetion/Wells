@@ -5,6 +5,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static me.emmetion.wells.util.Utilities.getColor;
@@ -13,6 +15,8 @@ public class WellPlayer {
 
 
     private final UUID playerUUID;
+
+    private Map<String, Integer> cropsHarvested = new HashMap<>();
 
     private int bronzeCoins;
     private int silverCoins;
@@ -95,6 +99,7 @@ public class WellPlayer {
             player.sendMessage(getColor("&eYou have deposited a " + coinType.getWellsId() + "! (" + coinType.getExperience() + "xp)"));
         }
     }
+
 
     public void setHideParticles(boolean hide) {
         this.hideParticles = hide;

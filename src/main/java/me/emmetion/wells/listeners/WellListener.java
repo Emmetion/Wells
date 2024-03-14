@@ -6,16 +6,14 @@ import me.emmetion.wells.Wells;
 import me.emmetion.wells.events.CoinTossEvent;
 import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.menu.PlayerMenuUtility;
-import me.emmetion.wells.menu.WellMenu;
+import me.emmetion.wells.menu.menus.WellMenu;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import me.emmetion.wells.runnables.DroppedCoinRunnable;
 import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -45,7 +43,6 @@ public class WellListener implements Listener {
 
     /**
      * WellPlace event. Listens for a BlockPlaceEvent, then checks for item in hand.
-     *
      * @param event
      */
     @EventHandler
@@ -67,10 +64,20 @@ public class WellListener implements Listener {
         }
 
         Town town = TownyAPI.getInstance().getTown(event.getPlayer());
+        if (town == null) {
+            player.sendMessage(getColor("&cYou cannot make a well if you're not part of a town!"));
+            event.setCancelled(true);
+            // player is not part of a town
+            return;
+        }
         String townName = town.getName();
 
-        if (!blockAgainst.getType().equals(Material.CAULDRON)) {
+        if (!blockAgainst.getType().equals(Material.CAULDRON) && !blockAgainst.getType().equals(Material.WATER_CAULDRON)) {
+            Material type = blockAgainst.getType();
+
             player.sendMessage(getColor("&cNot a valid well position! Read item description."));
+            player.sendMessage("Reached here");
+            player.sendMessage("Block type: " + type);
             event.setCancelled(true);
             return;
         }
@@ -168,6 +175,11 @@ public class WellListener implements Listener {
 
         if (!manager.isWell(blockLocation))
             return;
+
+        Location interactionPoint = e.getInteractionPoint();
+        player.sendMessage("You have clicked on a well block at " + interactionPoint.toString());
+        World world = interactionPoint.getWorld();
+        world.spawnParticle(Particle.CRIT, interactionPoint, 3);
 
         Well well = manager.getWellFromLocation(blockLocation);
         if (well == null)
