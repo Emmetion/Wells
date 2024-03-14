@@ -50,6 +50,7 @@ public abstract class WellCreature {
         this.entity = spawn();
     }
 
+
     public abstract CreatureType getCreatureType();
 
     @NotNull
@@ -70,8 +71,6 @@ public abstract class WellCreature {
 
         // This entity will transform into an NPC entity if the creature type was PLAYER.
         entity = handleEntitySpawn(entity);
-
-
 
         CreatureSpawnEvent spawnEvent = new CreatureSpawnEvent(this, CUSTOM);
         spawnEvent.callEvent();

@@ -1,8 +1,9 @@
-package me.emmetion.wells.creature;
+package me.emmetion.wells.creature.creatures;
 
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.anim.PixiePunchAnimation;
 import me.emmetion.wells.config.Configuration;
+import me.emmetion.wells.creature.*;
 import me.emmetion.wells.events.creature.CreatureClickEvent;
 import me.emmetion.wells.model.Well;
 import org.bukkit.Color;
@@ -16,12 +17,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static me.emmetion.wells.util.Utilities.getColor;
 
 public final class Pixie extends WellCreature implements ParticleMob, Movable, WellBound {
-
-    private final Random random = new Random();
 
     private Well well;
 
@@ -37,6 +37,7 @@ public final class Pixie extends WellCreature implements ParticleMob, Movable, W
         this.well = well;
 
         // Determines location of Pixie.
+        Random random = ThreadLocalRandom.current();
         int angle = random.nextInt(360) + 1;
 
         Location hl = getLocation();
@@ -58,12 +59,13 @@ public final class Pixie extends WellCreature implements ParticleMob, Movable, W
 
     @Override
     public Entity handleEntitySpawn(Entity entity) {
-        ArmorStand armorStand = (ArmorStand) entity;
+        if (!(entity instanceof ArmorStand armorStand)) {
+            return null;
+        }
 
         armorStand.setInvisible(true);
         armorStand.setSmall(true);
         armorStand.setInvulnerable(false); // This needs to be false in order for Entity
-        armorStand.setCustomName("..."); // Temporarily sets name to '...'. This then gets updated to the pixie's name on the next frame.
         armorStand.setCustomNameVisible(true);
 
         armorStand.getPersistentDataContainer().set(Configuration.creatureUUIDKey, PersistentDataType.STRING, this.getUUID().toString());

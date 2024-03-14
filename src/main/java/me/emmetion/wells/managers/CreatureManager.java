@@ -2,10 +2,14 @@ package me.emmetion.wells.managers;
 
 import de.tr7zw.nbtapi.NBTEntity;
 import me.emmetion.wells.Wells;
-import me.emmetion.wells.config.Configuration;
-import me.emmetion.wells.creature.*;
+import me.emmetion.wells.creature.CreatureType;
+import me.emmetion.wells.creature.Movable;
+import me.emmetion.wells.creature.WellBound;
+import me.emmetion.wells.creature.WellCreature;
+import me.emmetion.wells.creature.factories.CreatureFactory;
 import me.emmetion.wells.events.creature.CreatureKillEvent;
 import me.emmetion.wells.model.Well;
+import me.emmetion.wells.util.Utilities;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -17,8 +21,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import static me.emmetion.wells.util.Utilities.getColor;
 
@@ -50,16 +52,17 @@ public final class CreatureManager {
 
         for (WellCreature wc : wellCreatureMap.values()) {
             if (wc.isKilled()) {
+                Utilities.sendDebugMessage("Creature is killed.");
+                creatures.add(wc); // Will be deleted after other entities are updated.
                 continue;
             }
-            if (wc == null)
-                continue;
-            if (wc instanceof Movable) { // if creature can move, it executes the movement method on it.
-                Movable movable = (Movable) wc;
+            if (wc instanceof Movable movable) { // if creature can move, it executes the movement method on it.
                 movable.move();
             }
             wc.updateCreature();
             wc.incrementFrame();
+            Utilities.sendDebugMessage("Updating Creature: " + wc.getEntity().getType());
+
         }
 
         // remove creatures that were newly marked killed.
@@ -79,9 +82,10 @@ public final class CreatureManager {
         }
 
         // maps UUID's to WellCreature, then collects them as a List.
-        List<WellCreature> creatures = this.wellsWithCreatures.get(well).stream().map(uuid -> this.wellCreatureMap.get(uuid)).collect(Collectors.toList());
+        return wellsWithCreatures.get(well).stream()
+                .map(wellCreatureMap::get)
+                .toList();
 
-        return creatures;
     }
 
     public Collection<Well> getWellsWithCreatures() {
@@ -111,6 +115,11 @@ public final class CreatureManager {
         this.wellsWithCreatures.put(well, uuids);
     }
 
+    /**
+     * Removes a well create from maps storing information about them/
+     * Called after a creature is killed.
+     * @param uuid UUID of the creature to remove.
+     */
     private void removeFromMaps(UUID uuid) {
 
         WellCreature wellCreature = this.wellCreatureMap.get(uuid);
@@ -129,43 +138,26 @@ public final class CreatureManager {
         }
     }
 
-    public WellCreature spawnCreature(@NotNull Class<? extends WellCreature> creature, @Nullable Well well) {
-        CreatureType type = CreatureType.getFromClazz(creature);
-        WellCreature wellCreature = null;
+    /**
+     * Spawns a creature in the world.
+     * @param creatureFactory Factory class to create the creature.
+     * @param well The well to bind the creature to.
+     * @return
+     */
+    public WellCreature spawnCreature(CreatureFactory creatureFactory, @Nullable Well well, @Nullable Location location) {
+        WellCreature creature = creatureFactory.createCreature(well, location);
 
-        Objects.requireNonNull(type);
+        addToMaps(creature, well); // add to manager maps.
 
 
-
-        switch (type) {
-            case PIXIE -> {
-                if (well == null) {
-                    Bukkit.broadcast(Component.text("Well cannot be null when spawning a creature in!"));
-                    Bukkit.broadcast(Component.text("A creature must be bounded by a well, otherwise we have no " + "anchor for it's spawning location."));
-                    break;
-                }
-                wellCreature = new Pixie(well, well.getHologramLocation());
-            }
-            // We do not perform any checks on whether a spawn in
-            case SPAWN_NPC -> {
-                Location spawnNPCLocation = Configuration.getInstance().getSpawnNPCLocation();
-                Configuration config = Configuration.getInstance();
-                UUID uuid = config.getSpawnNPCUUID();
-
-                // SpawnNPC is configured to run checks whether there is already an NPC nearby or not.
-                wellCreature = new SpawnNPC(spawnNPCLocation);
-            }
-            default -> {
-
-            }
-        }
-
-        // add to manager maps.
-        addToMaps(wellCreature, well);
-
-        return wellCreature;
+        return creature;
     }
 
+    /**
+     * Get WellCreature from an entity in the world.
+     * @param entity Entity to get the WellCreature from.
+     * @return WellCreature
+     */
     public WellCreature getWellCreatureFromEntity(@NotNull Entity entity) {
         NamespacedKey namespacedKey = new NamespacedKey(Wells.plugin, "creature-uuid");
 
@@ -239,6 +231,9 @@ public final class CreatureManager {
         });
 
         for (UUID uuid : creatureUUIDs) {
+            if (uuid == null) {
+                continue;
+            }
             this.wellCreatureMap.remove(uuid);
         }
     }

@@ -1,4 +1,4 @@
-package me.emmetion.wells.creature;
+package me.emmetion.wells.creature.creatures;
 
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.actions.Action;
@@ -7,10 +7,12 @@ import eu.decentsoftware.holograms.api.holograms.Hologram;
 import eu.decentsoftware.holograms.api.holograms.HologramPage;
 import me.emmetion.wells.Wells;
 import me.emmetion.wells.config.Configuration;
+import me.emmetion.wells.creature.CreatureType;
+import me.emmetion.wells.creature.WellCreature;
 import me.emmetion.wells.events.creature.CreatureClickEvent;
 import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.menu.PlayerMenuUtility;
-import me.emmetion.wells.menu.SpawnNPCMenu;
+import me.emmetion.wells.menu.menus.SpawnNPCMenu;
 import me.emmetion.wells.model.WellPlayer;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
@@ -42,12 +44,14 @@ public final class SpawnNPC extends WellCreature {
     public static final Location anvilLocation = new Location(Bukkit.getWorld("world"), 144, 68, -136);
 
     private final String npcName = "Wellbi";
+
     private final Collection<Player> playersChatting = new ArrayList<>();
     private final WellManager wellManager = Wells.plugin.getWellManager();
-    private Marker marker;
-    private NPC npc;
-    private Hologram nearbyHologram;
-    private Hologram confirmationHologram;
+
+    private Marker marker; // Invisible entity that represents the location of the NPC.
+    private NPC npc; // The Citizens NPC entity.
+    private Hologram nearbyHologram; // The hologram that displays information about the NPC.
+    private Hologram confirmationHologram; //
 
 
     public SpawnNPC(Location location) {
@@ -87,7 +91,7 @@ public final class SpawnNPC extends WellCreature {
         // Add traits.
 
         npc.addTrait(new LookClose());
-
+        npc.spawn(npcLocation);
         Entity npcEntity = npc.getEntity();
         npcEntity.getPersistentDataContainer().set(Configuration.creatureUUIDKey, PersistentDataType.STRING, this.getUUID().toString());
 
@@ -106,13 +110,20 @@ public final class SpawnNPC extends WellCreature {
         // page1.addAction(ClickType.RIGHT, new Action("PREV_PAGE"));
         page1.addAction(ClickType.LEFT, new Action("NEXT_PAGE"));
 
-        HologramPage page2 = DHAPI.addHologramPage(nearbyHologram, Arrays.asList(getColor("&bWell Schematic"), getColor(""), getColor("Materials Required:"), getColor(" &7- &c1 Reinforced Cauldron"), getColor(" &7- &c124 Oak Logs")));
+        HologramPage page2 = DHAPI.addHologramPage(nearbyHologram, Arrays.asList(getColor("&bWell Schematic"), "", getColor("Materials Required:"), getColor(" &7- &c1 Reinforced Cauldron"), getColor(" &7- &c124 Oak Logs")));
 
         page2.addAction(ClickType.LEFT, new Action("NEXT_PAGE"));
         page2.addAction(ClickType.RIGHT, new Action("PREV_PAGE"));
 
 
-        HologramPage page3 = DHAPI.addHologramPage(nearbyHologram, Arrays.asList(getColor("&fReinforced Cauldron"), getColor(""), getColor("&7Build Cost:"), getColor(" &7- &f64 Iron Ingots")));
+        HologramPage page3 = DHAPI.addHologramPage(nearbyHologram,
+                Arrays.asList(
+                        getColor("&fReinforced Cauldron"),
+                        "",
+                        getColor("&7Build Cost:"),
+                        getColor(" &7- &f64 Iron Ingots")
+                )
+        );
         
         page3.addAction(ClickType.RIGHT, new Action("PREV_PAGE"));
 //        page2.addAction(ClickType.LEFT, new Action("NEXT_PAGE"));
@@ -122,6 +133,7 @@ public final class SpawnNPC extends WellCreature {
         nearbyHologram.setLocation(loc);
         nearbyHologram.showAll();
         nearbyHologram.updateAll();
+
 
         // Confirmation hologram setup./
 
@@ -218,7 +230,6 @@ public final class SpawnNPC extends WellCreature {
         spawnNPCMenu.open();
 //        executeChat(clicker);
     }
-
 
     private void executeChat(Player player) {
         this.playersChatting.add(player);

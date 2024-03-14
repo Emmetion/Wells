@@ -1,12 +1,11 @@
 package me.emmetion.wells.anim;
 
-import me.emmetion.wells.creature.Pixie;
+import me.emmetion.wells.creature.creatures.Pixie;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Marker;
 import org.bukkit.entity.Player;
 
 public class PixiePunchAnimation extends Animation {
@@ -22,7 +21,7 @@ public class PixiePunchAnimation extends Animation {
         this.pixie = pixie;
         this.player = player;
 
-        // Create hologram displaying xp.
+        // Create hologram displaying gained xp.
         Location loc = pixie.getLocation().clone();
         loc = loc.offset(0.5,0.1,0.5).toLocation(loc.getWorld());
         armorStand = loc.getWorld().spawn(loc, ArmorStand.class);
@@ -39,7 +38,7 @@ public class PixiePunchAnimation extends Animation {
 
     @Override
     public void run() {
-        if (ticks >= 30) { // delete hologram, end task
+        if (ticks >= 30) { // delete xp hologram, end task
             if (!armorStand.isDead())
                 armorStand.remove();
             armorStand.getLocation().getWorld().spawnParticle(Particle.FIREWORKS_SPARK,
@@ -53,6 +52,6 @@ public class PixiePunchAnimation extends Animation {
 
     @Override
     public AnimationSettings getAnimationSettings() {
-        return new AnimationSettings("Pixie Punch Animation", 1, 1);
+        return new AnimationSettings("Pixie Punch Animation", 0, 0);
     }
 }
