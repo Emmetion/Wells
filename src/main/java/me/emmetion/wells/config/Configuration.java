@@ -1,7 +1,6 @@
 package me.emmetion.wells.config;
 
 import me.emmetion.wells.Wells;
-import me.emmetion.wells.model.CraftableWellItem;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -11,7 +10,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static me.emmetion.wells.util.Utilities.getColor;
 
 public class Configuration {
 
@@ -34,9 +37,8 @@ public class Configuration {
     private String password = "";
     private String url = "";
 
-    private List<CraftableWellItem> craftableSchematics = new ArrayList<>();
-
     private List<String> wellLevelUp = null;
+    private List<String> helpMessage = null;
 
     private Configuration(Wells plugin) {
         this.wells = plugin;
@@ -75,6 +77,7 @@ public class Configuration {
         System.out.println("uuidString = " + uuidString);
 
         wellLevelUp = yamlConfig.getStringList("messages.well.level-up-announcement");
+        helpMessage = yamlConfig.getStringList("messages.help");
     }
 
     public static Configuration getInstance() {
@@ -83,6 +86,7 @@ public class Configuration {
         }
         return configuration;
     }
+
 
     public void saveConfigFile() {
         File configFile = new File(wells.getDataFolder(), "config.yml");
@@ -114,6 +118,13 @@ public class Configuration {
 
     public List<String> getWellLevelUp() {
         return this.wellLevelUp;
+    }
+
+    public List<String> getHelpMessage() {
+        if (helpMessage.isEmpty()) {
+            System.out.println("Error: Help message was empty!");
+        }
+        return getColor(helpMessage);
     }
 
     public boolean hasSpawnNPCUUID() {
@@ -152,13 +163,6 @@ public class Configuration {
             System.out.println("Failed to save configuration file.");
             e.printStackTrace();
         }
-
-    }
-
-
-    private void addCraftableSchematic(Map<?, ?> map) {
-
-        yamlConfig.getMapList("craftableschematics");
 
     }
 
