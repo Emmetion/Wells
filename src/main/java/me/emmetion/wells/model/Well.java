@@ -12,7 +12,7 @@ import eu.decentsoftware.holograms.api.holograms.HologramPage;
 import me.emmetion.wells.anim.Animation;
 import me.emmetion.wells.anim.AnimationSettings;
 import me.emmetion.wells.anim.NearWellAnimation;
-import me.emmetion.wells.observer.Observer;
+import me.emmetion.wells.observer.WellListener;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
@@ -32,7 +32,7 @@ import static me.emmetion.wells.util.Utilities.getColor;
 
 public class Well {
 
-    private final List<Observer> observers = new ArrayList<>();
+    private final List<WellListener> wellListeners = new ArrayList<>();
 
     private final List<WellPlayer> nearbyPlayers = new ArrayList<>();
 
@@ -46,7 +46,6 @@ public class Well {
 
     private int well_level;
     private int experience;
-
     private int experienceRequired; // this is calculated upon initialization, and then later used when we deposit coins.
 
     private ActiveBuff buff1;
@@ -56,6 +55,7 @@ public class Well {
     private boolean isBoosted;
     private Timestamp boost_end;
 
+    // Local animation for well.
     private NearWellAnimation animation;
 
     public Well(String townName, Location position, Location hologramLocation, int well_level, int experience, String buff1_id, Timestamp buff1_end, String buff2_id, Timestamp buff2_end, String buff3_id, Timestamp buff3_end, boolean isBoosted, Timestamp boost_end) {
@@ -65,17 +65,17 @@ public class Well {
         this.well_level = well_level;
         this.experience = experience;
         // Converts saved database BUFF_ID string into real ActiveBuff class.
-        if (buff1_id.equalsIgnoreCase("NONE")) {
+        if (buff1_id == null || buff1_id.equalsIgnoreCase("NONE")) {
             this.buff1 = ActiveBuff.defaultActiveBuff();
         } else {
             this.buff1 = new ActiveBuff(BuffType.valueOf(buff1_id), buff1_end);
         }
-        if (buff2_id.equalsIgnoreCase("NONE")) {
+        if (buff2_id == null || buff2_id.equalsIgnoreCase("NONE")) {
             this.buff2 = ActiveBuff.defaultActiveBuff();
         } else {
             this.buff2 = new ActiveBuff(BuffType.valueOf(buff1_id), buff2_end);
         }
-        if (buff3_id.equalsIgnoreCase("NONE")) {
+        if (buff3_id == null || buff3_id.equalsIgnoreCase("NONE")) {
             this.buff3 = ActiveBuff.defaultActiveBuff();
         } else {
             this.buff3 = new ActiveBuff(BuffType.valueOf(buff1_id), buff3_end);
@@ -87,6 +87,9 @@ public class Well {
         // calculate experience needed for next level.
         this.experienceRequired = 100 + (well_level * 5); // increments experience needed by 5 every level.
 
+        this.hologramLocation = position.clone().add(.5, 2, .5);
+        this.updateHologram();
+
         this.animation = new NearWellAnimation(this);
         this.animation.start();
     }
@@ -94,12 +97,19 @@ public class Well {
     public Well(String townName, Location location) {
         this(townName, location, location, 0, 0, "NONE", null, "NONE", null, "NONE", null, false, null);
 
+        this.hologramLocation = location.clone().add(.5, 2, .5);
+        this.updateHologram();
+
         this.animation = new NearWellAnimation(this);
         this.animation.start();
+
+
     }
 
     public void handleAllBuffUpdate() {
-        this.getActiveBuffs().stream().filter(ActiveBuff::isNone).forEach(buff -> buff.update());
+        this.getActiveBuffs().stream()
+                .filter(ActiveBuff::isNone)
+                .forEach(ActiveBuff::update);
     }
 
     public String getTownName() {
@@ -114,8 +124,13 @@ public class Well {
         this.townName = townName;
     }
 
+    /**
+     * Returns a copy of the location of the well.
+     * This is to prevent the case where we accidentally set the location of the well to a different block.
+     * @return Location of Well.
+     */
     public Location getLocation() {
-        return position;
+        return position.clone();
     }
 
     public int getExperience() {
@@ -142,9 +157,9 @@ public class Well {
         return animation;
     }
 
-    public void setLocation(Location position) {
-        this.position = position;
-    }
+//    public void setLocation(Location position) {
+//        this.position = position;
+//    }
 
     public boolean hasBuff1() {
         return !buff1.isNone();
@@ -198,7 +213,7 @@ public class Well {
 
 
         HologramPage page1 = hologram.getPage(0);
-        page1.addAction(ClickType.RIGHT, new Action(ActionType.MESSAGE, "Hello!"));
+        page1.addAction(ClickType.RIGHT, new Action(ActionType.COMMAND, "/wells well " + this.getTownName() + " info"));
 
 
 
@@ -305,7 +320,7 @@ public class Well {
             experience = experience + xp;
             // coin won't increase level.
         }
-        notifyObservers();
+//        notifyObservers();
     }
 
     public void depositCoin(@NotNull CoinType coinType) {
@@ -325,21 +340,37 @@ public class Well {
         }
     }
 
+    /**
+     * Returns -1 if no slot is available.
+     * @return
+     */
+    public int getAvailableSlot() {
+        if (this.buff1.isNone()) {
+            return 1;
+        } else if (this.buff2.isNone()) {
+            return 2;
+        } else if (this.buff3.isNone()) {
+            return 3;
+        } else {
+            return -1;
+        }
+    }
+
     public int getWellLevel() {
         return this.well_level;
     }
 
-    public void attachObserver(Observer attached) {
-        observers.add(attached);
+    public void attachObserver(WellListener attached) {
+        wellListeners.add(attached);
     }
 
-    public void detachObserver(Observer detach) {
-        observers.remove(detach);
+    public void detachObserver(WellListener detach) {
+        wellListeners.remove(detach);
     }
 
     public void notifyObservers() {
-        for (Observer observer : observers) {
-            observer.update();
+        for (WellListener wellListener : wellListeners) {
+            wellListener.update();
         }
     }
 
@@ -387,18 +418,14 @@ public class Well {
     }
 
     public void removeNearbyPlayer(@NotNull WellPlayer wellPlayer) {
-        if (this.nearbyPlayers.contains(wellPlayer))
-            this.nearbyPlayers.remove(wellPlayer);
+        this.nearbyPlayers.remove(wellPlayer);
     }
 
     public boolean containsNearbyPlayer(@NotNull Player player) {
-        if (player == null) {
-            return false;
-        } else {
-            player.getUniqueId();
-        }
-
-        return this.nearbyPlayers.stream().map(WellPlayer::getPlayerUUID).toList().contains(player.getUniqueId());
+        return this.nearbyPlayers.stream()
+                .map(WellPlayer::getPlayerUUID)
+                .toList()
+                .contains(player.getUniqueId());
     }
 
     public void resetLevel() {
@@ -477,6 +504,6 @@ public class Well {
 
     @Override
     public String toString() {
-        return "Well{" + "observers=" + observers + ", townName='" + townName + '\'' + ", position=" + position + ", hologramPosition=" + hologramLocation + ", well_level=" + well_level + ", experience=" + experience + ", buff1=" + buff1 + ", buff2=" + buff2 + ", buff3=" + buff3 + '}';
+        return "Well{" + "observers=" + wellListeners + ", townName='" + townName + '\'' + ", position=" + position + ", hologramPosition=" + hologramLocation + ", well_level=" + well_level + ", experience=" + experience + ", buff1=" + buff1 + ", buff2=" + buff2 + ", buff3=" + buff3 + '}';
     }
 }
