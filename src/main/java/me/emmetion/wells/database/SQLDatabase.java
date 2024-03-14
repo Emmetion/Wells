@@ -59,7 +59,8 @@ public final class SQLDatabase extends EDatabase {
                     " worldname varchar(36)," +
                     " buff1_id varchar(36), buff1_endtimestamp timestamp," +
                     " buff2_id varchar(36), buff2_endtimestamp timestamp," +
-                    " buff3_id varchar(36), buff3_endtimestamp timestamp)";
+                    " buff3_id varchar(36), buff3_endtimestamp timestamp," +
+                    " is_boosted boolean, boost_end timestamp)";
 
             wells.execute(wellsSQL);
             wells.close();
@@ -76,11 +77,11 @@ public final class SQLDatabase extends EDatabase {
 
             // Create well_creatures table
             Statement well_creatures = getConnection().createStatement();
-            String wellcreaturesSQL = "CREATE TABLE IF NOT EXISTS well_creatures (" +
-                    "uuid varchar(36) primary key," +
-                    "type varchar(36))";
+            String wellCreaturesSQL = "CREATE TABLE IF NOT EXISTS well_creatures (" +
+                    "uuid VARCHAR(36) PRIMARY KEY," +
+                    "TYPE VARCHAR(36))";
 
-            well_creatures.execute(wellcreaturesSQL);
+            well_creatures.execute(wellCreaturesSQL);
             well_creatures.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -95,16 +96,16 @@ public final class SQLDatabase extends EDatabase {
     @Override
     public void createWell(@NotNull Well well) {
         try {
-            announceWellPlacement(well);
 
             PreparedStatement statement = getConnection()
                     .prepareStatement("INSERT INTO wells(townname, well_level, experience, xcor, ycor, zcor, xholocor, yholocor, zholocor, worldname, buff1_id, buff1_endtimestamp, buff2_id, buff2_endtimestamp, buff3_id, buff3_endtimestamp, is_boosted, boost_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             prepareWellStatement(well, statement);
-            statement.setBoolean(16, well.isBoosted());
-            statement.setTimestamp(16, well.getBoostEnd());
+            statement.setBoolean(17, well.isBoosted());
+            statement.setTimestamp(18, well.getBoostEnd());
 
             try {
                 statement.executeUpdate();
+                announceWellPlacement(well); // Send messages to town members.
             } catch (SQLIntegrityConstraintViolationException e) {
                 System.out.println("Duplicate entry for well! Ignored.");
             }
@@ -126,9 +127,7 @@ public final class SQLDatabase extends EDatabase {
             statement.setString(1, townName);
 
             ResultSet set = statement.executeQuery();
-
-
-
+            
             if(set.next()){
 
                 Well well = new Well(
@@ -297,6 +296,7 @@ public final class SQLDatabase extends EDatabase {
 
             ResultSet set = statement.executeQuery();
 
+
             WellPlayer wellPlayer;
 
             if (set.next()) {
@@ -306,11 +306,14 @@ public final class SQLDatabase extends EDatabase {
 
                 return wellPlayer;
 
+            } else {
+                statement.close();
+                // The player does not have an account.
+                // To comply with java streams, I will create the account here to ensure this returns a WellPlayer everytime.
+                WellPlayer newPlayer = new WellPlayer(uuid, 0, 0, 0, 0, 0);
+                this.createWellPlayer(newPlayer);
+                return newPlayer;
             }
-
-            statement.close();
-
-            return null;
         } catch (SQLException e) {
             e.printStackTrace();
         }

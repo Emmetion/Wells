@@ -55,8 +55,6 @@ public final class YAMLDatabase extends EDatabase {
             return;
         }
 
-        file.mkdirs();
-
         try {
             file.createNewFile();
 
@@ -101,13 +99,14 @@ public final class YAMLDatabase extends EDatabase {
                 yml.getInt("well.experience"),
                 // Buffs
                 yml.getString("well.buff1.id"),
-                (Timestamp) yml.get("well.buff1.endtimestamp", Timestamp.class),
+                yml.getObject("well.buff1.endtimestamp", Timestamp.class),
                 yml.getString("well.buff2.id"),
-                (Timestamp) yml.get("well.buff2.endtimestamp", Timestamp.class),
+                yml.getObject("well.buff2.endtimestamp", Timestamp.class),
                 yml.getString("well.buff3.id"),
-                (Timestamp) yml.get("well.buff3.endtimestamp", Timestamp.class),
+                yml.getObject("well.buff3.endtimestamp", Timestamp.class),
                 yml.getBoolean("well.isboosted"),
-                (Timestamp) yml.get("well.boost_end", Timestamp.class)
+                null
+//                yml.getObject("well.boost_end", Timestamp.class)
         );
 
 
@@ -186,8 +185,12 @@ public final class YAMLDatabase extends EDatabase {
 
         File file = new File(wellPlayersPath + uuid.toString() + ".yml");
 
-        if (!file.exists())
-            return null;
+        if (!file.exists()) {
+            // If it doesn't exist, we will make a new account for that user
+            WellPlayer newPlayer = new WellPlayer(uuid, 0, 0, 0, 0, 0);
+            this.createWellPlayer(newPlayer);
+            return newPlayer;
+        }
 
         YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
 

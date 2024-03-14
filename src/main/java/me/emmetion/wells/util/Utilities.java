@@ -5,7 +5,6 @@ import com.palmergames.bukkit.towny.object.TownBlock;
 import de.tr7zw.nbtapi.NBTBlock;
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTItem;
-import de.tr7zw.nbtapi.NBTType;
 import me.emmetion.wells.model.CoinType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -18,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,21 +115,17 @@ public class Utilities {
      * @param wellBlock
      * @return
      */
-    public static boolean isWellBlockItem(ItemStack wellBlock) {
-        if (wellBlock == null) {
-            return false;
-        }
-
+    public static boolean isWellBlockItem(@NotNull ItemStack wellBlock) {
         NBTItem item = new NBTItem(wellBlock);
 
-        NBTType wellsId1 = item.getType("wells_id");
-
-
-        if (!item.getType("wells_id").equals(NBTType.NBTTagString)) {
-            // not a wells_id
+        if (!item.hasCustomNbtData()) {
             return false;
         }
-
+        if (!item.hasTag("wells_id")) {
+            // Doesn't contain wells_id.
+            return false;
+        }
+        //
         String wellsId = item.getString("wells_id");
 
         if (wellsId == null) {
@@ -169,11 +165,7 @@ public class Utilities {
      * @param count - stack size
      * @return
      */
-    public static ItemStack createWellBlockItem(int count) {
-        if (count < 1 && count > 64) {
-            System.out.println("Attempted to create Well Block with invalid stack count.");
-            return null;
-        }
+    public static ItemStack createWellBlockItem(@Range(from = 1, to = 64) int count) {
         ItemStack well = new ItemStack(Material.CAULDRON);
         well.setAmount(count);
         ItemMeta itemmeta = well.getItemMeta();
@@ -186,9 +178,8 @@ public class Utilities {
 
         NBTItem nbtItem = new NBTItem(well);
         nbtItem.setString("wells_id", "WELL_BLOCK");
-        ItemStack item = nbtItem.getItem();
 
-        return item;
+        return nbtItem.getItem();
     }
 
     /**
@@ -196,17 +187,16 @@ public class Utilities {
      * @param itemStack
      * @return
      */
-    public static boolean isCoin(ItemStack itemStack) {
-        if (itemStack == null)
-            return false;
-
+    public static boolean isCoin(@NotNull ItemStack itemStack) {
         NBTItem item = new NBTItem(itemStack);
 
-        if (item.hasKey("wells_id")) {
-            List<String> coin_ids = Arrays.stream(CoinType.values())
-                    .map(v -> v.getWellsId())
-                    .collect(Collectors.toList());
-            return coin_ids.contains(item.getString("wells_id"));
+        if (item.hasTag("wells_id")) { // Does wells_id exist on the itemstack?
+            String coinType = item.getString("wells_id"); // wells_id contains cointype.
+
+            List<String> coinIds = Arrays.stream(CoinType.values())
+                    .map(CoinType::getWellsId)
+                    .toList();
+            return coinIds.contains(coinType);
         }
 
         return false;
@@ -282,6 +272,19 @@ public class Utilities {
     public static ItemStack createItemStack(@NotNull Material material,
                                             @NotNull Component displayName) {
         return createItemStack(material, 1, displayName, null);
+    }
+
+
+    /**
+     * Sends a debug message to the player Emmetion.
+     * @param message
+     */
+    public static void sendDebugMessage(@NotNull String message) {
+        Player player = Bukkit.getPlayer("Emmetion");
+
+        if (player.isOp()) {
+            player.sendMessage(Component.text(getColor("&c&lDEBUG: &f" + message)));
+        }
     }
 
 }

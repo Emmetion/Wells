@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 import static me.emmetion.wells.util.Utilities.getComponentColor;
@@ -76,6 +77,7 @@ public abstract class EDatabase {
         TownyAPI.getInstance().getTowns().stream()
                 .map(Town::getName)
                 .map(this::getWell)
+                .filter(Objects::nonNull) // Remove null wells from list.
                 .forEach(well -> {
                     wells.put(well.getTownName(), well);
                 });
