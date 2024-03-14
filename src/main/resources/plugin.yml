@@ -1,7 +1,12 @@
 name: Wells
 version: '${project.version}'
 main: me.emmetion.wells.Wells
-api-version: 1.19
+api-version: 1.20
+author: Emmetion
+description: "A plugin that allows players to create wells and level them up to gain rewards."
+
+
+depend: [Citizens, NBTAPI, DecentHolograms]
 
 commands:
   wells:

@@ -6,13 +6,13 @@
 
     <groupId>me.emmetion</groupId>
     <artifactId>Wells</artifactId>
-    <version>1.0-BETA</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>Wells</name>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>18</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -20,8 +20,16 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.1</version>
+                <configuration>
+                    <outputDirectory>/Users/emmet/server/Towny1.20/plugins</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.11.0</version>
                 <configuration>
                     <source>18</source>
                     <target>18</target>
@@ -30,7 +38,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -40,35 +48,16 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib</outputDirectory>
                             <finalName>${project.name}-1.0.0</finalName>
+                            <relocations>
+                                <relocation>
+                                    <pattern>de.tr7zw.nbtapi.utils</pattern>
+                                    <shadedPattern>com.example.util.nbtapi</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-antrun-plugin</artifactId>-->
-<!--                <version>3.0.0</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>ftp-upload</id>-->
-<!--                        <phase>deploy</phase>-->
-<!--                        <configuration>-->
-<!--                            <target>-->
-<!--                                <echo>Uploading JAR to FTP server...</echo>-->
-<!--                                <ftp action="send" server="mario.bloom.host" userid="emmetion.0330a88d"-->
-<!--                                     password="Wormbox64$$$">-->
-<!--                                    <fileset dir="target">-->
-<!--                                        <include name="your-artifact.jar" />-->
-<!--                                    </fileset>-->
-<!--                                </ftp>-->
-<!--                            </target>-->
-<!--                        </configuration>-->
-<!--                        <goals>-->
-<!--                            <goal>run</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
         </plugins>
         <resources>
             <resource>
@@ -136,7 +125,8 @@
         <dependency>
             <groupId>de.tr7zw</groupId>
             <artifactId>item-nbt-api-plugin</artifactId>
-            <version>2.11.3</version>
+            <version>2.12.2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.decentsoftware-eu</groupId>

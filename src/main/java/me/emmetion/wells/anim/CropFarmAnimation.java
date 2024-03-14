@@ -5,24 +5,26 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Bat;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Marker;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class CropFarmAnimation extends Animation {
 
-    private Player farmer;
-    private Block cropBlock;
+
+    private final ThreadLocalRandom random = ThreadLocalRandom.current();
+    private final Player farmer;
+    private final Block cropBlock;
     private int frame;
 
-    private Material cropType;
+    private final Material cropType;
 
-    private final Collection<Bat> bats = new ArrayList<>();
+    private final Collection<Marker> markers = new ArrayList<>();
 
     public CropFarmAnimation(Player farmer, Block crop) {
         this.farmer = farmer;
@@ -31,16 +33,16 @@ public class CropFarmAnimation extends Animation {
 
         this.cropType = cropBlock.getType();
 
-        createBats();
+        createMarkets();
     }
 
 
     @Override
     public void run() {
-        for (Bat b : bats) {
-            Location location = b.getLocation();
+        for (Marker marker : markers) {
+            Location location = marker.getLocation();
             World world = location.getWorld();
-            world.spawnParticle(Particle.FIREWORKS_SPARK, location, 1, 0, 0, 0, 0);
+            world.spawnParticle(Particle.VILLAGER_HAPPY, location, 1, .5, 0, .5, 0);
         }
         if (this.frame == 25) {
             killBats();
@@ -50,26 +52,19 @@ public class CropFarmAnimation extends Animation {
         frame++;
     }
 
-    private void createBats() {
-        Random r = new Random();
+    private void createMarkets() {
 
         for (int i = 0; i < 2; i++) {
             World world = this.cropBlock.getLocation().getWorld();
             Location location = this.cropBlock.getLocation();
-            Bat bat = world.spawn(location, Bat.class);
-            bat.setTargetLocation(this.cropBlock.getLocation().add(
-                    0,
-                    r.nextFloat() * 4,
-                    0
-            ));
-            bat.setInvisible(true);
+            Marker marker  = world.spawn(location, Marker.class);
 
-            bats.add(bat);
+            markers.add(marker);
         }
     }
 
     private void killBats() {
-        for (Entity bat : bats) {
+        for (Entity bat : markers) {
             Location location = bat.getLocation();
             World world = location.getWorld();
             world.dropItemNaturally(location, new ItemStack(cropType));

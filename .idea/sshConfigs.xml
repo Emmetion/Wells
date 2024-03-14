@@ -2,7 +2,7 @@
 <project version="4">
   <component name="SshConfigs">
     <configs>
-      <sshConfig authType="PASSWORD" connectionConfig="{&quot;serverAliveInterval&quot;:300}" host="mario.bloom.host" id="da834411-6bcd-446a-b05d-078960f43938" port="2022" customName="Azurius [Towny Dev]" nameFormat="CUSTOM" username="emmetion.0330a88d" useOpenSSHConfig="true">
+      <sshConfig authType="PASSWORD" connectionConfig="{&quot;serverAliveInterval&quot;:300}" host="potomac.bloom.host" id="da834411-6bcd-446a-b05d-078960f43938" port="2022" customName="Azurius [Towny Dev]" nameFormat="CUSTOM" username="emmetion.9e66e56f" useOpenSSHConfig="true">
         <option name="customName" value="Azurius [Towny Dev]" />
       </sshConfig>
     </configs>

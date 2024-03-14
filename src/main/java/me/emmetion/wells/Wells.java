@@ -3,9 +3,10 @@ package me.emmetion.wells;
 import com.palmergames.bukkit.towny.TownyAPI;
 import eu.decentsoftware.holograms.api.DHAPI;
 import me.emmetion.wells.commands.WellCommand;
+import me.emmetion.wells.commands.WellCompleter;
 import me.emmetion.wells.config.Configuration;
-import me.emmetion.wells.creature.SpawnNPC;
 import me.emmetion.wells.creature.WellCreature;
+import me.emmetion.wells.creature.factories.SpawnNPCFactory;
 import me.emmetion.wells.listeners.*;
 import me.emmetion.wells.managers.CreatureManager;
 import me.emmetion.wells.managers.WellManager;
@@ -14,13 +15,14 @@ import me.emmetion.wells.runnables.ActiveBuffRunnable;
 import me.emmetion.wells.runnables.NearWellRunnable;
 import me.emmetion.wells.runnables.UpdateDatabaseRunnable;
 import me.emmetion.wells.runnables.WellCreatureRunnable;
+import me.emmetion.wells.util.Utilities;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,12 +41,9 @@ public final class Wells extends JavaPlugin {
     private UpdateDatabaseRunnable updateDatabaseRunnable;
     private ActiveBuffRunnable activeBuffRunnable;
 
-
     private WellManager wellManager;
 
     private CreatureManager creatureManager;
-
-
 
     @Override
     public void onEnable() {
@@ -72,7 +71,6 @@ public final class Wells extends JavaPlugin {
         wellManager = new WellManager();
         if (!wellManager.isConnected()) {
             logger.info("Failed to connect to " + wellManager.getDatabaseType() + ", disabling Wells.");
-            System.out.println("Failed connection to the wellmanager.");
             this.setEnabled(false);
             return;
         }
@@ -83,9 +81,8 @@ public final class Wells extends JavaPlugin {
         initWellHolograms();
 
         // Prints into chat.
-        Bukkit.broadcastMessage(getColor("&c&lReload! &fWell's has been reloaded!"));
-
-        handleSpawnNPCSpawning();
+        Bukkit.broadcast(Component.text(getColor("&c&lReload! &fWell's has been reloaded!")));
+//        Bukkit.getScheduler().runTaskLater(this, this::handleSpawnNPCSpawning, 40);
     }
 
     @Override
@@ -97,8 +94,6 @@ public final class Wells extends JavaPlugin {
         try {
             if (this.wellManager != null)
                 this.wellManager.close();
-
-
             // We assign the wellManager to null, preventing any other edits of the WellManager until the plugin is loaded again.
             this.wellManager = null;
         } catch (SQLException e) {
@@ -123,15 +118,16 @@ public final class Wells extends JavaPlugin {
     // Helper methods for startup/shutdown.
 
     private void initCommands() {
-        this.getCommand("wells").setExecutor(new WellCommand(wellManager, creatureManager));
-        System.out.println("Commands have been successfully enabled.");
+        WellCommand cmd = new WellCommand(wellManager, creatureManager);
+        this.getCommand("wells").setExecutor(cmd);
+        this.getCommand("wells").setTabCompleter(new WellCompleter());
     }
 
     private void initListeners() {
         PluginManager pluginManager = Bukkit.getPluginManager();
 
+        pluginManager.registerEvents(new MenuListener(), this);
         pluginManager.registerEvents(new WellListener(wellManager), this);
-        pluginManager.registerEvents(new MenuListener(wellManager), this);
         pluginManager.registerEvents(new WellBuffListener(wellManager), this);
         pluginManager.registerEvents(new WellPlayerListener(wellManager), this);
         pluginManager.registerEvents(new WellCreatureListener(creatureManager), this);
@@ -144,19 +140,19 @@ public final class Wells extends JavaPlugin {
 
         // Locates nearby well players.
         nearWellRunnable = new NearWellRunnable(wellManager);
-        nearWellRunnable.runTaskTimer(Wells.plugin, 1, 5);
+        nearWellRunnable.runTaskTimer(Wells.plugin, 0, 5);
 
         // Updates the wells database every 5 minutes.
         updateDatabaseRunnable = new UpdateDatabaseRunnable(wellManager);
-        updateDatabaseRunnable.runTaskTimer(Wells.plugin, 1, 3000);
+        updateDatabaseRunnable.runTaskTimer(Wells.plugin, 0, 3000);
 
         // Creates the ActiveBuffRunnable.
         activeBuffRunnable = new ActiveBuffRunnable(this);
-        activeBuffRunnable.runTaskTimer(Wells.plugin, 1, 5);
+        activeBuffRunnable.runTaskTimer(Wells.plugin, 0, 5);
 
         // Creates the WellCreatureRunnable
         wellCreatureRunnable = new WellCreatureRunnable(this, wellManager, creatureManager);
-        wellCreatureRunnable.runTaskTimer(Wells.plugin, 1, 1);
+        wellCreatureRunnable.runTaskTimer(Wells.plugin, 0, 1);
     }
 
     // W
@@ -171,7 +167,7 @@ public final class Wells extends JavaPlugin {
         if (this.wellManager == null)
             return;
 
-        this.wellManager.getWells().stream().forEach(well -> DHAPI.removeHologram(well.getWellName()));
+        this.wellManager.getWells().forEach(well -> DHAPI.removeHologram(well.getWellName()));
     }
 
     private void deleteCreatures() {
@@ -179,18 +175,14 @@ public final class Wells extends JavaPlugin {
     }
 
     private void handleSpawnNPCSpawning() {
-        WellCreature wellCreature = creatureManager.spawnCreature(SpawnNPC.class, null);
+        WellCreature wellCreature = creatureManager.spawnCreature(new SpawnNPCFactory(creatureManager), null, Configuration.getInstance().getSpawnNPCLocation());
         if (wellCreature == null) {
-            // in the case that something went wrong while spawning it, we ignore it.
-            return;
+            Utilities.sendDebugMessage("Failed to spawn SpawnNPC.");
         }
+    }
 
-        UUID uuid = wellCreature.getUUID(); // get uuid from creature, should already be assigned in the WellCreature.
-
-        // TODO: Add checks for w
-        if (uuid == null) {
-            configuration.setSpawnNPCUUID(uuid);
-        }
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
 

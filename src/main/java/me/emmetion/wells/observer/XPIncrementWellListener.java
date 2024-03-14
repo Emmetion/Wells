@@ -4,12 +4,12 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import me.emmetion.wells.model.CoinType;
 import me.emmetion.wells.model.Well;
 
-public class XPIncrementObserver implements Observer {
+public class XPIncrementWellListener implements WellListener {
 
     private final TownyAPI townyAPI = TownyAPI.getInstance();
     private final Well well;
 
-    public XPIncrementObserver(Well well) {
+    public XPIncrementWellListener(Well well) {
         this.well = well;
     }
 

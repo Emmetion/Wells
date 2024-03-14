@@ -87,7 +87,7 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.ow2.asm:asm-commons:9.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.ow2.asm:asm-tree:9.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.palmergames.bukkit.towny:towny:0.99.0.0" level="project" />
-    <orderEntry type="library" name="Maven: de.tr7zw:item-nbt-api-plugin:2.11.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: de.tr7zw:item-nbt-api-plugin:2.12.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.decentsoftware-eu:decentholograms:2.8.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.bstats:bstats-bukkit:3.0.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.bstats:bstats-base:3.0.0" level="project" />

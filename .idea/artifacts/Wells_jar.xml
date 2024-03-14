@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Wells:jar">
+    <output-path>$USER_HOME$/server/Towny1.20/plugins</output-path>
+    <root id="archive" name="Wells.jar">
+      <element id="module-output" name="Wells" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/ValhallaMMO_1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

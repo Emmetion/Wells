@@ -3,10 +3,9 @@ package me.emmetion.wells.model;
 import org.bukkit.Particle;
 
 import java.sql.Timestamp;
-import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class ActiveBuff {
 
@@ -18,8 +17,13 @@ public class ActiveBuff {
         this.endDate = endDate;
     }
 
+    public ActiveBuff(BuffType buffType, LocalDateTime endTime) {
+        this.buffType = buffType;
+        this.endDate = Timestamp.valueOf(endTime);
+    }
+
     public static ActiveBuff defaultActiveBuff() {
-        return new ActiveBuff(BuffType.NONE, null);
+        return new ActiveBuff(BuffType.NONE, LocalDateTime.now());
     }
 
     public String getBuffID() {
@@ -52,7 +56,7 @@ public class ActiveBuff {
      * This will update a buff's information about being ended.
      */
     public void update() {
-        if (this.buffType == null || this.buffType.equals(BuffType.NONE)) {
+        if (emptyBuff()) {
             return;
         }
 
@@ -62,7 +66,7 @@ public class ActiveBuff {
     }
 
     public void addTwentySeconds() {
-        if (this.buffType == null || this.buffType.equals(BuffType.NONE)) {
+        if (emptyBuff()) {
             return;
         }
         Timestamp now = new Timestamp(System.currentTimeMillis());
@@ -120,8 +124,13 @@ public class ActiveBuff {
         return duration.isNegative() || duration.isZero();
     }
 
+    private boolean emptyBuff() {
+        return this.buffType == null || this.buffType.equals(BuffType.NONE) || this.endDate == null || this.endDate.toInstant().isBefore(Instant.now());
+    }
+
     @Override
     public String toString() {
         return "ActiveBuff{" + "buffType=" + buffType + ", endDate=" + endDate + '}';
     }
+
 }

@@ -2,14 +2,12 @@ package me.emmetion.wells.runnables;
 
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
-import me.emmetion.wells.Wells;
 import me.emmetion.wells.anim.NearWellAnimation;
 import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.model.Well;
 import me.emmetion.wells.model.WellPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -68,12 +66,6 @@ public final class NearWellRunnable extends BukkitRunnable {
                 hologram.setShowPlayer(p); // displays the well hologram to the player.
 
                 NearWellAnimation nearWellAnimation = w.getNearWellAnimation();
-                ItemDisplay item1 = nearWellAnimation.getItem1();
-                ItemDisplay item2 = nearWellAnimation.getItem2();
-
-                p.showEntity(Wells.plugin, item1);
-                p.showEntity(Wells.plugin, item2);
-
                 //
 
                 if (nearWellMessageCooldown.containsKey(p)) {
@@ -104,24 +96,14 @@ public final class NearWellRunnable extends BukkitRunnable {
                 Well w = wellManager.getWellByWellName(wellName);
                 NearWellAnimation anim = w.getNearWellAnimation();
 
-                ItemDisplay item1 = anim.getItem1();
-                ItemDisplay item2 = anim.getItem2();
-
-                p.hideEntity(Wells.plugin, item1);
-                p.hideEntity(Wells.plugin, item2);
-
                 Hologram h = DHAPI.getHologram(w.getTownName());
+                if (h == null) {
+                    h = createWellHologram(w);
+                }
 
-                assert h != null;
-
-                h.removeShowPlayer(p);
-
-
+                h.removeShowPlayer(p); // Hides the hologram from the player.
 
                 Well wellByWellName = wellManager.getWellByWellName(wellName);
-
-
-
                 wellByWellName.removeNearbyPlayer(wp);
 
                 h.hide(p);

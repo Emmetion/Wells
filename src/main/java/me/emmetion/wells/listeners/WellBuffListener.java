@@ -3,7 +3,7 @@ package me.emmetion.wells.listeners;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import me.emmetion.wells.anim.CropFarmAnimation;
-import me.emmetion.wells.creature.SpawnNPC;
+import me.emmetion.wells.creature.creatures.SpawnNPC;
 import me.emmetion.wells.events.buff.GreenThumbEvent;
 import me.emmetion.wells.managers.WellManager;
 import me.emmetion.wells.model.Well;
@@ -68,7 +68,7 @@ public class WellBuffListener implements Listener {
         // Handle randomness farming crops.
 
         // Call event for API.
-        GreenThumbEvent greenThumbEvent = new GreenThumbEvent(wellPlayer);
+        GreenThumbEvent greenThumbEvent = new GreenThumbEvent(wellPlayer, block);
         greenThumbEvent.callEvent();
 
         CropFarmAnimation animation = new CropFarmAnimation(player, block);

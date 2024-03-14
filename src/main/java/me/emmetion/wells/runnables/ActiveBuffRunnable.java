@@ -14,7 +14,9 @@ public final class ActiveBuffRunnable extends BukkitRunnable {
     }
 
 
-    // This operation will become
+    /**
+     * This loop is called every tick. It updates all the active buffs in the server.
+     */
     @Override
     public void run() {
         for (Well well : this.plugin.getWellManager().getWells()) {
@@ -22,6 +24,7 @@ public final class ActiveBuffRunnable extends BukkitRunnable {
                 if (activeBuff == null) {
                     continue;
                 }
+
                 activeBuff.update();
             }
         }

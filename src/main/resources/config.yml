@@ -27,3 +27,8 @@ messages:
       - ""
       - "      &e&lLevel Up! &f Your &bWell&f is now level &e&n{well_level} &f→ &e&n{well_level}&f!"
       - ""
+  help:
+    - " &b/wells help &f- Displays this page."
+    - " &b/wells give <ITEM> <AMOUNT>&f- Gives an item to a player."
+    - " &b/wells create &f- Creates a well for the player."
+    - " &b/wells delete &f- Deletes the well for a players town."

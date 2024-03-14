@@ -6,14 +6,7 @@
       <paths name="Azurius [Towny Dev]">
         <serverdata>
           <mappings>
-            <mapping deploy="/plugins" local="$PROJECT_DIR$/target/lib/" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="towny_dev">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/plugins" local="$USER_HOME$/server/Towny1.20/plugins" web="/" />
           </mappings>
         </serverdata>
       </paths>

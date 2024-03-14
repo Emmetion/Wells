@@ -14,6 +14,7 @@
               <option value="package" />
               <option value="-T" />
               <option value="16" />
+              <option value="-DoutputDirectory=$USER_HOME$/server/Towny1.20/plugins" />
             </list>
           </option>
           <option name="pomFileName" />
